@@ -20,3 +20,6 @@ Each template provides a Helm chart that makes deployment quick and easy. Each t
     latest-stable-version: <name of folder under /versions>
     docs: link to docs
 
+
+To learn about Control Plane visit [https://controlplane.com]()
+
