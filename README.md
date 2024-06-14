@@ -14,11 +14,11 @@ Each template provides a Helm chart that makes deployment quick and easy. Each t
 ### Schema for config.yaml
 
 
-    slug: name-goes-here
+    name: name-goes-here
     date-published: YYYY-MM-DD
     description: long description that explains the benefits of the templated artifact.
-    latest-stable-version: <name of folder under /versions>
-    docs: link to docs
+    latest: <name of folder under /versions>
+    
 
 
 To learn about Control Plane visit [https://controlplane.com]()

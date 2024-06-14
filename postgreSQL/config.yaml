@@ -1,5 +1,4 @@
-slug: postgreSQL
+name: postgreSQL
 date-published: 2024-06-14
 description: Single region postgreSQL cluster
-latest-stable-version: 1.0
-docs: https://github.com/controlplane-com/templates/blob/main/postgreSQL/versions/1.0/instructions/main.html
+latest: 1.0
