@@ -4,7 +4,7 @@
 Templates are used by Control Plane users to quickly deploy applications such as databases, queues, and even stateless apps.
 
 ### How templates works
-Each template provides a Helm chart that makes deployment quick and easy. Each templates has metadata in its root folder, describing the template. The following are the components of the template root folder:
+Each template provides a Helm chart that makes deployment quick and easy. Each templates has metadata in its root folder, describing the template. The following are required components within each template folder:
 
 - icon.jpg (512p x 512p)
 - config.yaml
