@@ -1,3 +1,5 @@
+# DEPRECATED
+
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -6,6 +8,7 @@ image:
   tag: 1.27.0
 
 nameOverride: nginx
+newWorkloadName: newworkloadfornginx
 
 proxyWorkload:
   name: nginx

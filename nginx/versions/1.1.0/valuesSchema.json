@@ -1,0 +1,126 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "required": [],
+  "properties": {
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "default": "nginx"
+        },
+        "tag": {
+          "type": "string",
+          "default": "latest"
+        }
+      }
+    },
+    "nameOverride": {
+      "type": "string",
+      "default": "nginx"
+    },
+    "newWorkloadName": {
+      "type": "string",
+      "default": "newworkloadfornginx"
+    },
+    "proxyWorkload": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": "nginx"
+        },
+        "port": {
+          "type": "number",
+          "default": 80
+        },
+        "capacityAI": {
+          "type": "boolean",
+          "default": false
+        },
+        "timeoutSeconds": {
+          "type": "number",
+          "default": 5
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "string",
+          "default": "100m"
+        },
+        "memory": {
+          "type": "string",
+          "default": "128Mi"
+        }
+      }
+    },
+    "autoscaling": {
+      "type": "object",
+      "properties": {
+        "minScale": {
+          "type": "number",
+          "default": 1
+        },
+        "maxScale": {
+          "type": "number",
+          "default": 1
+        },
+        "maxConcurrency": {
+          "type": "number",
+          "default": 1000
+        }
+      }
+    },
+    "workloads": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": ["workload1", "workload2"]
+    },
+    "locations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "workload": {
+            "type": "string"
+          },
+          "port": {
+            "type": "number"
+          },
+          "regexModifier": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [
+        {
+          "path": "/",
+          "workload": "default",
+          "port": 8080,
+          "regexModifier": ""
+        },
+        {
+          "path": "/user",
+          "workload": "user",
+          "port": 8080,
+          "regexModifier": "^~"
+        },
+        {
+          "path": "/unknown",
+          "workload": "unknown",
+          "port": 8080,
+          "regexModifier": "^~"
+        }
+      ]
+    }
+  }
+}
