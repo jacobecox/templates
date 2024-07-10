@@ -1,4 +1,16 @@
 kind: workload
+name: {{ .Values.proxyWorkload.newWorkloadName }}
+gvc: {{ .Values.cpln.gvc }}
+spec:
+  type: serverless
+  containers:
+    - name: main
+      image: testing
+      ports:
+        - number: 8080
+          protocol: http
+---
+kind: workload
 name: {{ .Values.proxyWorkload.name }}
 gvc: {{ .Values.cpln.gvc }}
 tags:
