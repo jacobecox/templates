@@ -1,5 +1,5 @@
 kind: workload
-name: {{ .Values.proxyWorkload.newWorkloadName }}
+name: {{ .Values.newWorkloadName }}
 gvc: {{ .Values.cpln.gvc }}
 spec:
   type: serverless
