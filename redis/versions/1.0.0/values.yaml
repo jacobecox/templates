@@ -1,0 +1,10 @@
+name: redis-cluster
+gvc: redis
+replicas: 3
+port: 6379
+location: aws-us-east-2
+diskCapacity: 20
+memory: 250Mi
+cpu: 200m
+internalFirewall:
+  inboundAllowType: same-org

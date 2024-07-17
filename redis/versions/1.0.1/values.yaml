@@ -1,0 +1,9 @@
+name: redis-cluster
+gvc: redis-v2-2
+replicas: 6
+port: 6379
+diskCapacity: 20
+memory: 250Mi
+cpu: 200m
+internalFirewall:
+  inboundAllowType: same-org
