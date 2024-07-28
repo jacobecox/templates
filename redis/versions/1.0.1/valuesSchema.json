@@ -35,9 +35,12 @@
       "default": "200m"
     },
     "internalFirewall": {
-      "inboundAllowType": {
-        "type": "string",
-        "default": "same-org"
+      "type": "object",
+      "properties": {
+        "inboundAllowType": {
+          "type": "string",
+          "default": "same-org"
+        }
       }
     }
   }
