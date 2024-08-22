@@ -1,6 +1,0 @@
-apiVersion: v2
-name: redis
-description: A Redis helm chart for Control Plane
-type: application
-version: 1.0.0
-appVersion: "7.2"

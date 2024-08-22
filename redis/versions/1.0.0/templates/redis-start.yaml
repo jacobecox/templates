@@ -1,6 +1,6 @@
 kind: secret
-name: {{ .Values.name }}-start
-description: {{ .Values.name }} start script
+name: {{ .Values.redis.name }}-start
+description: {{ .Values.redis.name }} start script
 tags: {}
 type: opaque
 data:

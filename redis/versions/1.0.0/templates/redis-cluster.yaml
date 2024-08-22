@@ -1,44 +1,44 @@
-# kind: gvc
-# name: {{ .Values.gvc }}
-# description: {{ .Values.name }}
-# tags: {}
-# spec:
-#   staticPlacement:
-#     locationLinks:
-#       - //location/{{ .Values.location }}
-# ---
+kind: gvc
+name: {{ .Values.redis.gvc }}
+description: {{ .Values.redis.name }}
+tags: {}
+spec:
+  staticPlacement:
+    locationLinks:
+      - //location/{{ .Values.redis.location }}
+---
 kind: identity
-name: {{ .Values.name }}-identity
-gvc: {{ .Values.gvc }}
-description: {{ .Values.name }}
+name: {{ .Values.redis.name }}-identity
+gvc: {{ .Values.redis.gvc }}
+description: {{ .Values.redis.name }}
 ---
 kind: policy
-name: {{ .Values.name }}
+name: {{ .Values.redis.name }}
 tags: {}
 origin: default
 bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.gvc }}/identity/{{ .Values.name }}-identity
+      - //gvc/{{ .Values.redis.gvc }}/identity/{{ .Values.redis.name }}-identity
 targetKind: secret
 targetLinks:
-  - //secret/{{ .Values.name }}-default-config
-  - //secret/{{ .Values.name }}-start
+  - //secret/{{ .Values.redis.name }}-default-config
+  - //secret/{{ .Values.redis.name }}-start
 ---
 kind: volumeset
-name: {{ .Values.name }}
-gvc: {{ .Values.gvc }}
-description: {{ .Values.name }}
+name: {{ .Values.redis.name }}
+gvc: {{ .Values.redis.gvc }}
+description: {{ .Values.redis.name }}
 spec:
   fileSystemType: ext4
   initialCapacity: 20
   performanceClass: general-purpose-ssd
 ---
 kind: workload
-name: {{ .Values.name }}
-gvc: {{ .Values.gvc }}
-description: {{ .Values.name }}
+name: {{ .Values.redis.name }}
+gvc: {{ .Values.redis.gvc }}
+description: {{ .Values.redis.name }}
 spec:
   type: stateful
   containers:
@@ -47,15 +47,15 @@ spec:
         - '-c'
         - /scripts/redis-start.sh
       command: /bin/sh
-      cpu: {{ .Values.cpu }}
+      cpu: {{ .Values.redis.cpu }}
       env:
         - name: NUM_SHARDS
           value: '3'
         - name: CUSTOM_NUM_NODES
-          value: '{{ .Values.replicas }}'
+          value: '{{ .Values.redis.replicas }}'
         - name: CUSTOM_REDIS_PORT
-          value: '{{ .Values.port }}'
-      image: docker.io/redis:7.2
+          value: '{{ .Values.redis.port }}'
+      image: {{ .Values.image.repository }}
       livenessProbe:
         exec:
           command:
@@ -79,33 +79,33 @@ spec:
         successThreshold: 1
         timeoutSeconds: 4
       inheritEnv: false
-      memory: {{ .Values.memory }}
+      memory: {{ .Values.redis.memory }}
       ports:
-        - number: {{ .Values.port }}
+        - number: {{ .Values.redis.port }}
           protocol: tcp
         - number: 16379
           protocol: tcp
       volumes:
         - path: /data
           recoveryPolicy: retain
-          uri: 'cpln://volumeset/{{ .Values.name }}'
+          uri: 'cpln://volumeset/{{ .Values.redis.name }}'
         - path: /scripts/redis-start.sh
           recoveryPolicy: retain
-          uri: 'cpln://secret/{{ .Values.name }}-start'
+          uri: 'cpln://secret/{{ .Values.redis.name }}-start'
         - path: /usr/local/etc/redis/redis-default.conf
           recoveryPolicy: retain
-          uri: 'cpln://secret/{{ .Values.name }}-default-config'
+          uri: 'cpln://secret/{{ .Values.redis.name }}-default-config'
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
-      maxScale: {{ .Values.replicas }}
+      maxScale: {{ .Values.redis.replicas }}
       metric: disabled
-      minScale: {{ .Values.replicas }}
+      minScale: {{ .Values.redis.replicas }}
       scaleToZeroDelay: 300
       target: 100
     capacityAI: false
     debug: false
-    suspend: true
+    suspend: false
     timeoutSeconds: 5
   firewallConfig:
     external:
@@ -115,22 +115,10 @@ spec:
       outboundAllowHostname: []
       outboundAllowPort: []
     internal:
-      inboundAllowType: {{ .Values.internalFirewall.inboundAllowType }}
+      inboundAllowType: {{ .Values.redis.firewallConfig.internal.inboundAllowType }}
       inboundAllowWorkload: []
-  identityLink: //identity/{{ .Values.name }}-identity
-  localOptions: 
-    - location: //location/{{ .Values.location }}
-      autoscaling:
-        maxConcurrency: 0
-        maxScale: {{ .Values.replicas }}
-        metric: disabled
-        minScale: {{ .Values.replicas }}
-        scaleToZeroDelay: 300
-        target: 100
-      capacityAI: false
-      debug: false
-      suspend: false
-      timeoutSeconds: 5
+  identityLink: //identity/{{ .Values.redis.name }}-identity
+  localOptions: []
   rolloutOptions:
     maxSurgeReplicas: 25%
     maxUnavailableReplicas: '1'
