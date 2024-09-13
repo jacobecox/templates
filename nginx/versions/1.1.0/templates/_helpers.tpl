@@ -1,10 +1,16 @@
 {{/*
-Expand the name of the chart.
+Proxy Workload Name
 */}}
 {{- define "nginx.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" .Release.Name .Values.proxyWorkload.name }}
 {{- end }}
 
+{{/*
+Secret Name for Nginx Configuration
+*/}}
+{{- define "nginx.secretName" -}}
+{{- printf "%s-conf" (include "nginx.name" .) }}
+{{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
@@ -29,8 +35,6 @@ app.cpln.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "nginx.selectorLabels" -}}
-app.cpln.io/name: {{ include "nginx.name" . }}
+app.cpln.io/name: {{ .Release.Name }}
 app.cpln.io/instance: {{ .Release.Name }}
 {{- end }}
-
-

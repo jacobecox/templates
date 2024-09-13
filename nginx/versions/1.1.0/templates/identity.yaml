@@ -1,0 +1,4 @@
+kind: identity
+name: {{ include "nginx.name" . }}
+gvc: {{ .Values.cpln.gvc }}
+description: Identity for the workload "nginx" used to grant access to the nginx-conf secret

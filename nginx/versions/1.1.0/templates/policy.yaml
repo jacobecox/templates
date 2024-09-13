@@ -1,0 +1,11 @@
+kind: policy
+name: {{ include "nginx.name" . }}
+description: Allow the workload to use the secret envoy-config
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ include "nginx.name" . }}
+targetKind: secret
+targetLinks:
+  - //secret/{{ include "nginx.secretName" . }}

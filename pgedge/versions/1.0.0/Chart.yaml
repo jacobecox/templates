@@ -4,3 +4,13 @@ description: A pgEdge helm chart for Control Plane
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
+annotations:
+  requiresGvc: false
+  files: 
+    nginxConf: 
+      type: single
+      description: Nginx Configuration File
+      default: _nginxConf.tpl
+    customProp: multi
+      type: single
+      description: Nginx Configuration File

@@ -28,9 +28,9 @@ data:
 
 {{- range .Values.locations }}
         location {{ .regexModifier }} {{ .path }} {
-          proxy_pass http://{{ .workload }}.{{ $.Values.gvc }}.cpln.local:{{ .port }};
+          proxy_pass http://{{ .workload }}.{{ $.Values.cpln.gvc }}.cpln.local:{{ .port }};
           proxy_http_version 1.1;
-          proxy_set_header Host {{ .workload }}.{{ $.Values.gvc }}.cpln.local;
+          proxy_set_header Host {{ .workload }}.{{ $.Values.cpln.gvc }}.cpln.local;
           proxy_intercept_errors on;
           error_page 500 502 503 504 /fail;
         }
