@@ -1,44 +1,34 @@
-kind: gvc
-name: {{ .Values.redis.gvc }}
-description: {{ .Values.redis.name }}
-tags: {}
-spec:
-  staticPlacement:
-    locationLinks:
-      - //location/{{ .Values.redis.location }}
----
 kind: identity
-name: {{ .Values.redis.name }}-identity
-gvc: {{ .Values.redis.gvc }}
-description: {{ .Values.redis.name }}
+name: {{ .Release.Name }}-identity
+gvc: {{ .Values.cpln.gvc }}
+description: {{ .Release.Name }}
 ---
 kind: policy
-name: {{ .Values.redis.name }}
-tags: {}
+name: {{ .Release.Name }}-policy
 origin: default
 bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.redis.gvc }}/identity/{{ .Values.redis.name }}-identity
+      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Release.Name }}-identity
 targetKind: secret
 targetLinks:
-  - //secret/{{ .Values.redis.name }}-default-config
-  - //secret/{{ .Values.redis.name }}-start
+  - //secret/{{ .Release.Name }}-default-config
+  - //secret/{{ .Release.Name }}-start
 ---
 kind: volumeset
-name: {{ .Values.redis.name }}
-gvc: {{ .Values.redis.gvc }}
-description: {{ .Values.redis.name }}
+name: {{ .Release.Name }}-volumeset
+gvc: {{ .Values.cpln.gvc }}
+description: {{ .Release.Name }}
 spec:
   fileSystemType: ext4
   initialCapacity: 20
   performanceClass: general-purpose-ssd
 ---
 kind: workload
-name: {{ .Values.redis.name }}
-gvc: {{ .Values.redis.gvc }}
-description: {{ .Values.redis.name }}
+name: {{ .Release.Name }}
+gvc: {{ .Values.cpln.gvc }}
+description: {{ .Release.Name }}
 spec:
   type: stateful
   containers:
@@ -47,26 +37,15 @@ spec:
         - '-c'
         - /scripts/redis-start.sh
       command: /bin/sh
-      cpu: {{ .Values.redis.cpu }}
+      cpu: {{ .Values.cpu }}
       env:
         - name: NUM_SHARDS
           value: '3'
         - name: CUSTOM_NUM_NODES
-          value: '{{ .Values.redis.replicas }}'
+          value: '{{ .Values.replicas }}'
         - name: CUSTOM_REDIS_PORT
-          value: '{{ .Values.redis.port }}'
-      image: {{ .Values.image.repository }}
-      livenessProbe:
-        exec:
-          command:
-            - /bin/bash
-            - '-c'
-            - redis-cli ping
-        failureThreshold: 10
-        initialDelaySeconds: 25
-        periodSeconds: 5
-        successThreshold: 1
-        timeoutSeconds: 4
+          value: '{{ .Values.port }}'
+      image: docker.io/redis:7.2
       readinessProbe:
         exec:
           command:
@@ -79,28 +58,28 @@ spec:
         successThreshold: 1
         timeoutSeconds: 4
       inheritEnv: false
-      memory: {{ .Values.redis.memory }}
+      memory: {{ .Values.memory }}
       ports:
-        - number: {{ .Values.redis.port }}
+        - number: {{ .Values.port }}
           protocol: tcp
         - number: 16379
           protocol: tcp
       volumes:
         - path: /data
           recoveryPolicy: retain
-          uri: 'cpln://volumeset/{{ .Values.redis.name }}'
+          uri: 'cpln://volumeset/{{ .Release.Name }}-volumeset'
         - path: /scripts/redis-start.sh
           recoveryPolicy: retain
-          uri: 'cpln://secret/{{ .Values.redis.name }}-start'
+          uri: 'cpln://secret/{{ .Release.Name }}-start'
         - path: /usr/local/etc/redis/redis-default.conf
           recoveryPolicy: retain
-          uri: 'cpln://secret/{{ .Values.redis.name }}-default-config'
+          uri: 'cpln://secret/{{ .Release.Name }}-default-config'
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
-      maxScale: {{ .Values.redis.replicas }}
+      maxScale: {{ .Values.replicas }}
       metric: disabled
-      minScale: {{ .Values.redis.replicas }}
+      minScale: {{ .Values.replicas }}
       scaleToZeroDelay: 300
       target: 100
     capacityAI: false
@@ -115,10 +94,9 @@ spec:
       outboundAllowHostname: []
       outboundAllowPort: []
     internal:
-      inboundAllowType: {{ .Values.redis.firewallConfig.internal.inboundAllowType }}
+      inboundAllowType: {{ .Values.firewallConfig.internal.inboundAllowType }}
       inboundAllowWorkload: []
-  identityLink: //identity/{{ .Values.redis.name }}-identity
-  localOptions: []
+  identityLink: //identity/{{ .Release.Name }}-identity
   rolloutOptions:
     maxSurgeReplicas: 25%
     maxUnavailableReplicas: '1'

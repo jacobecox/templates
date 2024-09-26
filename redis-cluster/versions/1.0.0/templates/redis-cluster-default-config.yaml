@@ -1,6 +1,6 @@
 kind: secret
-name: {{ .Values.redis.name }}-default-config
-description: {{ .Values.redis.name }} default config
+name: {{ .Release.Name }}-default-config
+description: {{ .Release.Name }} default config
 type: opaque
 data:
   encoding: plain
@@ -9,4 +9,4 @@ data:
     cluster-config-file nodes.conf
     cluster-node-timeout 5000
     appendonly yes
-    port {{ .Values.redis.port }}
+    port {{ .Values.port }}
