@@ -1,9 +1,0 @@
-kind: secret
-name: {{ .Release.Name }}-start
-description: {{ .Release.Name }} start script
-tags: {}
-type: opaque
-data:
-  encoding: plain
-  payload: >
-{{ .Files.Get "scripts/redis-start.sh" | indent 4 }}
