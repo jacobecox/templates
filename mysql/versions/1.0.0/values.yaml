@@ -1,0 +1,19 @@
+resources:
+  cpu: 300m
+  memory: 700Mi
+
+timeoutSeconds: 15
+
+config:
+  db: db
+  rootPassword: root-pw
+  user: user
+  password: pw
+
+enablePhpMyAdmin: true
+
+# This template works best with a single location
+# It will use the first location of the gvc by default
+# Uncomment below to override the location to be used
+
+# location: aws-eu-central-1
