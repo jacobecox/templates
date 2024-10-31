@@ -1,0 +1,5 @@
+kind: identity
+name: {{ include "wp.name" . }}
+gvc: {{ .Values.cpln.gvc }}
+tags:
+  {{- include "wp.tags" . | nindent 4 }}

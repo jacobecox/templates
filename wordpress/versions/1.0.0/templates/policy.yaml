@@ -1,0 +1,12 @@
+kind: policy
+name: {{ include "wp.name" . }}
+tags:
+  {{- include "wp.tags" . | nindent 4 }}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ include "wp.name" . }}
+targetKind: secret
+targetLinks:
+  - //secret/{{ include "wp.secretName" . }}

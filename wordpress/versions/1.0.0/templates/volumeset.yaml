@@ -1,0 +1,9 @@
+kind: volumeset
+name: {{ include "wp.name" . }}
+gvc: {{ .Values.cpln.gvc }}
+tags:
+  {{- include "wp.tags" . | nindent 4 }}
+spec:
+  fileSystemType: ext4
+  initialCapacity: 20
+  performanceClass: general-purpose-ssd

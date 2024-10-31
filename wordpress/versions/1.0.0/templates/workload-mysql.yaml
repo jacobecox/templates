@@ -1,26 +1,26 @@
 kind: workload
-name: {{ include "mysql.name" . }}
+name: {{ include "wp.name" . }}-mysql
 gvc: {{ .Values.cpln.gvc }}
 tags:
-  {{- include "mysql.tags" . | nindent 2 }}
+  {{- include "wp.tags" . | nindent 2 }}
 spec:
   type: stateful
-  identityLink: //identity/{{ include "mysql.name" . }}
+  identityLink: //identity/{{ include "wp.name" . }}
   containers:
-    - name: mysql
+    - name: wp
       env:
         - name: MYSQL_DATABASE
-          value: 'cpln://secret/{{ include "mysql.secretName" . }}.MYSQL_DATABASE'
-        - name: MYSQL_PASSWORD
-          value: 'cpln://secret/{{ include "mysql.secretName" . }}.MYSQL_PASSWORD'
+          value: 'cpln://secret/{{ include "wp.secretName" . }}.MYSQL_DATABASE'
         - name: MYSQL_ROOT_PASSWORD
-          value: 'cpln://secret/{{ include "mysql.secretName" . }}.MYSQL_ROOT_PASSWORD'
+          value: 'cpln://secret/{{ include "wp.secretName" . }}.MYSQL_ROOT_PASSWORD'
+        - name: MYSQL_PASSWORD
+          value: 'cpln://secret/{{ include "wp.secretName" . }}.MYSQL_PASSWORD'
         - name: MYSQL_USER
-          value: 'cpln://secret/{{ include "mysql.secretName" . }}.MYSQL_USER'
+          value: 'cpln://secret/{{ include "wp.secretName" . }}.MYSQL_USER'
       image: 'mysql:9'
       inheritEnv: false
-      cpu: {{ .Values.resources.cpu }}
-      memory: {{ .Values.resources.memory }}
+      cpu: {{ .Values.dbResources.cpu }}
+      memory: {{ .Values.dbResources.memory }}
       ports:
         - number: 3306
           protocol: tcp
@@ -49,7 +49,7 @@ spec:
       volumes:
         - path: /var/lib/mysql
           recoveryPolicy: retain
-          uri: 'cpln://volumeset/{{ include "mysql.name" . }}'
+          uri: 'cpln://volumeset/{{ include "wp.name" . }}'
   defaultOptions:
     autoscaling:
       metric: disabled
