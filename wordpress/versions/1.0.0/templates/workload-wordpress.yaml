@@ -4,19 +4,19 @@ gvc: {{ .Values.cpln.gvc }}
 tags:
   {{- include "wp.tags" . | nindent 2 }}
 spec:
-  type: stateful
+  type: serverless
   identityLink: //identity/{{ include "wp.name" . }}
   containers:
     - name: wp
-      args:
-        - '--ignore-db-dir=lost+found'
       env:
         - name: WORDPRESS_DB_HOST
           value: '{{ include "wp.name" . }}-mysql.{{ .Values.cpln.gvc }}.cpln.local'
+        # - name: WORDPRESS_DB_USER
+        #   value: 'cpln://secret/{{ include "wp.secretName" . }}.MYSQL_USER'
         - name: WORDPRESS_DB_USER
-          value: 'cpln://secret/{{ include "wp.secretName" . }}.MYSQL_USER'
+          value: 'root'
         - name: WORDPRESS_DB_PASSWORD
-          value: 'cpln://secret/{{ include "wp.secretName" . }}.MYSQL_PASSWORD'
+          value: 'cpln://secret/{{ include "wp.secretName" . }}.MYSQL_ROOT_PASSWORD'
         - name: WORDPRESS_TABLE_PREFIX
           value: {{ .Values.config.wpTablePrefix }}
       image: 'wordpress:6'
@@ -31,11 +31,13 @@ spec:
       metric: disabled
       minScale: 1
       maxScale: 1
-    capacityAI: false
+    capacityAI: true
     timeoutSeconds: {{ .Values.timeoutSeconds | int }}
   firewallConfig:
     external:
       inboundAllowCIDR:
+        - 0.0.0.0/0
+      outboundAllowCIDR:
         - 0.0.0.0/0
     internal:
       inboundAllowType: none
