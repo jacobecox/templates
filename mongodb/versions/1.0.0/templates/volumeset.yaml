@@ -1,0 +1,12 @@
+kind: volumeset
+name: {{ include "mongo.name" . }}
+gvc: {{ .Values.cpln.gvc }}
+tags:
+  {{- include "mongo.tags" . | nindent 4 }}
+spec:
+  fileSystemType: ext4
+  initialCapacity: 50
+  performanceClass: general-purpose-ssd
+  snapshots:
+    createFinalSnapshot: true
+    retentionDuration: 7d

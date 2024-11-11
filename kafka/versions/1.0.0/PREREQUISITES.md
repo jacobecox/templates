@@ -1,2 +1,0 @@
-policy,testnginx
-secret,testsecretfornginx

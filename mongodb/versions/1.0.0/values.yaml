@@ -1,6 +1,6 @@
 resources:
-  cpu: 300m
-  memory: 700Mi
+  cpu: 200m
+  memory: 250Mi
 
 config:
   username: username

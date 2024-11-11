@@ -1,0 +1,12 @@
+apiVersion: v2
+name: mongodb
+description: MongoDB app for Control Plane
+
+type: application
+version: 1.0.0
+appVersion: "6"
+
+annotations:
+  created: "2024-11-11"
+  lastModified: "2024-11-11"
+  category: "database"
