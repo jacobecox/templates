@@ -1,12 +1,3 @@
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-image:
-  repository: nginx
-  tag: latest
-
-nameOverride: nginx
-
 proxyWorkload:
   name: nginx
   port: 80
@@ -24,14 +15,6 @@ autoscaling:
 
 locations:
   - path: /
-    workload: default
+    workload: example
     port: 8080
     regexModifier: ""
-  - path: /user
-    port: 8080
-    workload: user
-    regexModifier: "^~"
-  - path: /unknown
-    port: 8080
-    workload: unknown
-    regexModifier: "^~"

@@ -6,12 +6,5 @@ config:
   username: username
   password: password
 
-
 postgres:
   database: database
-
-# This template works best with a single location
-# It will use the first location of the gvc by default
-# Uncomment below to override the location to be used
-
-# location: aws-eu-central-1

@@ -1,3 +1,3 @@
-## PostgreSQL Example
+## PostgreGIS Example
 
-Creates a PostgreSQL server with dedicated volume.
+Creates a PostgreGIS server with dedicated volume.
