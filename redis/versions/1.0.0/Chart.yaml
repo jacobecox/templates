@@ -1,0 +1,11 @@
+apiVersion: v2
+name: redis
+description: A single replica Redis template for Control Plane
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+annotations:
+  created: "2024-11-27"
+  lastModified: "2024-11-27"
+  category: "cache"
