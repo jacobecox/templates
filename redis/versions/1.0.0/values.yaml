@@ -3,8 +3,8 @@ image:
 
 containerName: redis
 port: 6379
-memory: 250Mi # EX. 3000Mi = 3Gi
-cpu: 200m # vCPU or milicores with; EX. 1.5 = 1500m
+memory: 1024Mi
+cpu: 500m
 inheritEnv: false
 capacityAI: false
 firewall:

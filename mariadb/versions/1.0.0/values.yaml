@@ -1,6 +1,6 @@
 resources:
-  cpu: 300m
-  memory: 700Mi
+  cpu: 500m
+  memory: 1024Mi
 
 timeoutSeconds: 15
 
