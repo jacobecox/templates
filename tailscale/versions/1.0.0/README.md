@@ -1,6 +1,3 @@
-## Warning
-You will need to request a quota increase for CPU and Memory if your org is at the default quotas.
-
 ## Tailscale Gateway Workload
 
 This example creates a workload in your Control Plane GVC that connects to your tailscale network. It publishes routes for other workloads running on Control Plane as well as for the internal dns servers so that workloads can be accessed from anywhere using the `cpln.local` endpoint.
