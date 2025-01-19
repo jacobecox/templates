@@ -43,7 +43,7 @@ spec:
       inboundAllowType: same-gvc
   loadBalancer:
     direct:
-      enabled: true
+      enabled: {{ .Values.directLoadBalancer.enabled }}
       ports:
         - containerPort: 27017
           externalPort: 27017

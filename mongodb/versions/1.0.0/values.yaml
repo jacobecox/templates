@@ -5,3 +5,6 @@ resources:
 config:
   username: username
   password: password
+
+directLoadBalancer:
+  enabled: false
