@@ -1,5 +1,5 @@
-{{- $current := . }}
 {{- if .Values.locations }}
+{{- $current := . }}
 kind: policy
 name: {{ $current.Release.Name }}-redis
 bindings:

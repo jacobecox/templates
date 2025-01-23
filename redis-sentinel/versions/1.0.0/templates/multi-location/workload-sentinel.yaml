@@ -1,16 +1,18 @@
+{{- if .Values.locations }} # A
 {{- $current := . }}
-{{- if .Values.locations }}
-{{- $value := int .Values.sentinel.quorum }}
-{{- $number := 0 }}
-{{- if eq $value 1 }}
-  {{- $number = 1 }}
-{{- else }}
-  {{- $number = int (add $value 1) }}
-{{- end }}
-{{ range $i := until $number }}
+{{ include "calculateWorkloadCounts" $current }}
+{{- $locationCount := $current.Values.global.locationCount }}
+{{- $baseCount := $current.Values.global.baseCount }}
+{{- $remainderCount := $current.Values.global.remainderCount }}
+{{- $workloadCount := $current.Values.global.workloadCount }}
+
+{{- range $l := until $locationCount }} # C
+{{- $workloadCountForLocation := $baseCount | int | add (ternary 1 0 (lt $l $remainderCount)) | int }}
+{{- range $w := until $workloadCountForLocation }} # D
+{{ $locationName := index $current.Values.locations $l }}
 kind: workload
-name: {{ $current.Release.Name }}-sentinel-{{ $i }}
-gvc: {{ $current.Release.Name }}-{{ index $current.Values.locations 0 }} 
+name: {{ $current.Release.Name }}-sentinel-{{ $w }}
+gvc: {{ $current.Release.Name }}-{{ $locationName }} 
 spec:
   type: stateful
   containers:
@@ -20,10 +22,10 @@ spec:
         - >-
           cp /config/sentinel.conf /etc/sentinel/sentinel.conf
 
-          echo "\nsentinel announce-ip {{ $current.Release.Name }}-sentinel-{{ $i }}.{{ $current.Release.Name }}-{{ index $current.Values.locations 0 }}.cpln.local" >>
+          echo "\nsentinel announce-ip {{ $current.Release.Name }}-sentinel-{{ $w }}.{{ $current.Release.Name }}-{{ $locationName }}.cpln.local" >>
           /etc/sentinel/sentinel.conf
 
-          echo "sentinel monitor mymaster {{ $current.Release.Name }}-redis.{{ $current.Release.Name }}-{{ index $current.Values.locations 0 }}.cpln.local
+          echo "sentinel monitor mymaster {{ $current.Release.Name }}-redis-0.{{ $current.Release.Name }}-{{ index $current.Values.locations 0 }}.cpln.local
           6379 ${REDIS_SENTINEL_QUORUM}" >> /etc/sentinel/sentinel.conf
 
           redis-sentinel /etc/sentinel/sentinel.conf
@@ -44,7 +46,7 @@ spec:
           uri: cpln://secret/{{ $current.Release.Name }}-sentinel-config
         - path: /etc/sentinel
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ $current.Release.Name }}-sentinel-{{ $i }}
+          uri: cpln://volumeset/{{ $current.Release.Name }}-sentinel-{{ $w }}
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
@@ -61,10 +63,11 @@ spec:
         - 0.0.0.0/0
     internal:
       inboundAllowType: same-org
-  identityLink: //gvc/{{ $current.Release.Name }}-{{ index $current.Values.locations 0 }}/identity/{{ $current.Release.Name }}-sentinel
-{{- if gt $number 1 }}
+  identityLink: //gvc/{{ $current.Release.Name }}-{{ $locationName }}/identity/{{ $current.Release.Name }}-sentinel
+{{- if gt $workloadCount 1 }} # E
 ---
-{{- end }}
-{{- end }}
+{{- end }} # E
+{{- end }} # D
+{{- end }} # C
 {{- else }}
-{{- end }}
+{{- end }} # A

@@ -1,8 +1,13 @@
+{{- if .Values.locations }}
 {{- $current := . }}
-{{- range .Values.locations }}
+{{ include "calculateWorkloadCounts" $current }}
+{{- $locationCount := $current.Values.global.locationCount }}
+{{- range $l := until $locationCount }}
+{{- range $i := until (int $current.Values.redis.replicas) }}
+{{ $locationName := index $current.Values.locations (int $l) }}
 kind: workload
-name: {{ $current.Release.Name }}-redis
-gvc: {{ $current.Release.Name }}-{{ . }}
+name: {{ $current.Release.Name }}-redis-{{ $i }}
+gvc: {{ $current.Release.Name }}-{{ $locationName }}
 spec:
   type: stateful
   containers:
@@ -14,13 +19,13 @@ spec:
 
           cp /config/redis.conf /etc/redis/redis.conf
 
-          echo "\nreplica-announce-ip {{ $current.Release.Name }}-redis.{{ $current.Release.Name }}-{{ . }}.cpln.local" >>
+          echo "\nreplica-announce-ip {{ $current.Release.Name }}-redis-{{ $i }}.{{ $current.Release.Name }}-{{ $locationName }}.cpln.local" >>
           /etc/redis/redis.conf
 
-          if [ "{{ . }}" = "{{ index $current.Values.locations 0 }}" ]; then
+          if [ "{{ $locationName }}" = "{{ index $current.Values.locations 0 }}" -a "{{ $i }}" = "0" ]; then
             redis-server /etc/redis/redis.conf
           else
-            redis-server /etc/redis/redis.conf --replicaof {{ $current.Release.Name }}-redis.{{ $current.Release.Name }}-{{ index $current.Values.locations 0 }}.cpln.local 6379
+            redis-server /etc/redis/redis.conf --replicaof {{ $current.Release.Name }}-redis-0.{{ $current.Release.Name }}-{{ index $current.Values.locations 0 }}.cpln.local 6379
           fi
       command: /bin/sh
       cpu: {{ $current.Values.redis.resources.cpu }}
@@ -33,7 +38,7 @@ spec:
       volumes:
         - path: /data
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ $current.Release.Name }}-redis
+          uri: cpln://volumeset/{{ $current.Release.Name }}-redis-{{ $i }}
         - path: /config/redis.conf
           recoveryPolicy: retain
           uri: cpln://secret/{{ $current.Release.Name }}-redis-config
@@ -41,8 +46,6 @@ spec:
     autoscaling:
       maxConcurrency: 0
       metric: cpu
-      # minScale: {{ $current.Values.redis.replicas }}
-      # maxScale: {{ $current.Values.redis.replicas }}
       minScale: 1
       maxScale: 1
       scaleToZeroDelay: 300
@@ -55,8 +58,11 @@ spec:
         - 0.0.0.0/0
     internal:
       inboundAllowType: same-org
-  identityLink: //gvc/{{ $current.Release.Name }}-{{ . }}/identity/{{ $current.Release.Name }}-redis
-{{- if gt (len $current.Values.locations) 1 }}
+  identityLink: //gvc/{{ $current.Release.Name }}-{{ $locationName }}/identity/{{ $current.Release.Name }}-redis
+{{- if or (gt (len $current.Values.locations) 1) (gt (int $current.redis.replicas) 1) }}
 ---
 {{- end }}
+{{- end }}
+{{- end }}
+{{- else }}
 {{- end }}
