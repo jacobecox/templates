@@ -19,7 +19,7 @@ spec:
           value: 'cpln://secret/{{ include "mongo.secretName" . }}.username'
         - name: MONGO_INITDB_USER
           value: 'cpln://secret/{{ include "mongo.secretName" . }}.username'
-      image: {{ .Values.resources.image }}
+      image: {{ .Values.image }}
       inheritEnv: false
       cpu: {{ .Values.resources.cpu }}
       memory: {{ .Values.resources.memory }}
