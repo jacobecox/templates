@@ -1,20 +1,6 @@
-## Redis example
+## Redis App
 
-This example creates a single node Redis Control Plane Platform and can be further customized as needed.
-
-### Steps to run this example:
-
-**HELM**
-
-The [Helm CLI](https://helm.sh/docs/intro/install/#through-package-managers) and [Control Plane CLI](https://docs.controlplane.com/reference/cli#install-npm) must be installed.
-
-1. Clone this repo and update the [values.yaml](redis-clsuter/values.yaml) file as needed.
-
-2. Run the command below from this directory.
-
-   ```bash
-   cpln helm install redis-dev --gvc mygvc
-   ```
+This app creates a single node Redis on Control Plane Platform.
 
 ### Accessing redis
 
@@ -24,21 +10,13 @@ Workloads are allowed to access Redis based on the `firewallConfig` you specify.
 
 Syntax: <WORKLOAD_NAME>
 ```
-redis-cli -c -h redis-dev -p 6379 set mykey "test"
-redis-cli -c -h redis-dev -p 6379 get mykey
+redis-cli -c -h {workload-name} -p 6379 set mykey "test"
+redis-cli -c -h {workload-name} -p 6379 get mykey
 ```
 #### Option 2: (By replica)
 
 Syntax: <REPLICA_NAME>.<WORKLOAD_NAME>
 ```
-redis-cli -c -h redis-dev-0.redis-dev -p 6379 set mykey "test"
-redis-cli -c -h redis-dev-1.redis-dev -p 6379 get mykey
-```
-
-### Cleanup
-
-**HELM**
-
-```bash
-cpln helm uninstall redis-dev
+redis-cli -c -h {workload-name}-0.{workload-name} -p 6379 set mykey "test"
+redis-cli -c -h {workload-name}-1.{workload-name} -p 6379 get mykey
 ```

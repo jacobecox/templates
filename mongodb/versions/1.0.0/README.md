@@ -1,4 +1,4 @@
-## MongoDB Example
+## MongoDB App
 
 Creates a MongoDB server with dedicated volume.
 

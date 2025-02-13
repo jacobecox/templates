@@ -1,4 +1,4 @@
-## MySQL Example
+## MySQL App
 
 Creates a MySQL server with dedicated volume.
 

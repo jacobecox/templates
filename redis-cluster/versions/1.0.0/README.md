@@ -1,22 +1,6 @@
-## Redis example
+## Redis Cluster App
 
-This example creates a Redis cluster with 6 nodes on the Control Plane Platform and can be further customized as needed.
-
-### Steps to run this example:
-
-**HELM**
-
-The [Helm CLI](https://helm.sh/docs/intro/install/#through-package-managers) and [Control Plane CLI](https://docs.controlplane.com/reference/cli#install-npm) must be installed.
-
-1. Clone this repo and update the [values.yaml](./values.yaml) file as needed.
-
-2. Run the command below from this directory.
-
-   ```bash
-   cpln helm install redis-cluster
-   ```
-
-   Note: Typically, it takes 5 minutes for all replicas of the workload to become ready and for the cluster to be created.
+This app creates a Redis Cluster with at least 6 nodes on Control Plane Platform.
 
 ### Accessing redis-cluster
 
@@ -29,8 +13,8 @@ Important: To access workloads listening on a TCP port, the client workload must
 Syntax: <WORKLOAD_NAME>
 
 ```
-redis-cli -c -h redis-cluster -p 6379 set mykey "test"
-redis-cli -c -h redis-cluster -p 6379 get mykey
+redis-cli -c -h {workload-name} -p 6379 set mykey "test"
+redis-cli -c -h {workload-name} -p 6379 get mykey
 ```
 
 #### Option 2: (By replica)
@@ -38,18 +22,10 @@ redis-cli -c -h redis-cluster -p 6379 get mykey
 Syntax: <REPLICA_NAME>.<WORKLOAD_NAME>
 
 ```
-redis-cli -c -h redis-cluster-0.redis-cluster -p 6379 set mykey "test"
-redis-cli -c -h redis-cluster-1.redis-cluster -p 6379 get mykey
-redis-cli -c -h redis-cluster-2.redis-cluster -p 6379 get mykey
-redis-cli -c -h redis-cluster-3.redis-cluster -p 6379 get mykey
-redis-cli -c -h redis-cluster-4.redis-cluster -p 6379 get mykey
-redis-cli -c -h redis-cluster-5.redis-cluster -p 6379 get mykey
-```
-
-### Cleanup
-
-**HELM**
-
-```bash
-cpln helm uninstall redis-cluster
+redis-cli -c -h {workload-name}-0.{workload-name} -p 6379 set mykey "test"
+redis-cli -c -h {workload-name}-1.{workload-name} -p 6379 get mykey
+redis-cli -c -h {workload-name}-2.{workload-name} -p 6379 get mykey
+redis-cli -c -h {workload-name}-3.{workload-name} -p 6379 get mykey
+redis-cli -c -h {workload-name}-4.{workload-name} -p 6379 get mykey
+redis-cli -c -h {workload-name}-5.{workload-name} -p 6379 get mykey
 ```

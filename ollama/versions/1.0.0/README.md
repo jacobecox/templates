@@ -1,8 +1,10 @@
-## Warning
+## Ollama App
+
+### Warning
 
 You will need to request a quota increase for CPU and Memory if your org is at the default quotas.
 
-## Ollama example
+### Overview
 
 The user interface is the project https://github.com/open-webui/open-webui
 It runs on port 8080 as a sidecar to the ollama API. Since 8080 is the first port specified in the workload definition all external traffic is forwarded to it.
@@ -12,29 +14,9 @@ It runs on port 11434 and is accessed by the open-webui sidecar. There is a pers
 
 On Control Plane, you can access GPU's from any cloud provider. You can even deploy this example to multiple cloud provider geo locations at the same time and end users will be routed to the closest available location.
 
-### Prerequisites
-
-A Control Plane GVC with at least one location assigned to it.
-
 ### Specification
 
 - NVIDIA T4 GPU
-
-### Steps to run this example:
-
-**HELM**
-
-The [Helm CLI](https://helm.sh/docs/intro/install/#through-package-managers) must be installed.
-
-1. Clone this repo and update the `values.yaml` file as needed.
-
-2. Run the command below from this directory.
-
-   ```bash
-   cpln helm install ollama --gvc ollama-example
-   ```
-
-3. Inspect the workload and access the external endpoint to view the web-ui
 
 ### Access the web-ui using the deployment link, found with [CLI](#CLI) or [UI](#UI)
 
@@ -46,17 +28,9 @@ https://github.com/open-webui/open-webui
 1. Run the command below to get the deployment link (replacing gvc and workload as needed)
 
 ```bash
-cpln workload get ollama-example --gvc ollama-example -o json | jq -r '.status.endpoint'
+cpln workload get {workload-name} --gvc {gvc-name} -o json | jq -r '.status.endpoint'
 ```
 
 #### UI
 
-1. Navigate to the ollama-example workload and click `Open` next to the worklod name
-
-### Cleanup
-
-**HELM**
-
-```bash
-cpln helm uninstall ollama
-```
+1. Navigate to the generated workload and click `Open` next to the worklod name

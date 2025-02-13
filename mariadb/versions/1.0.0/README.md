@@ -1,4 +1,4 @@
-## MariaDB Example
+## MariaDB App
 
 Creates a MariaDB server with dedicated volume.
 

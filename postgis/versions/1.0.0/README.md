@@ -1,4 +1,4 @@
-## PostgreGIS Example
+## PostgreGIS App
 
 Creates a PostgreGIS server with dedicated volume.
 

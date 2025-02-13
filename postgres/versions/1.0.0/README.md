@@ -1,4 +1,4 @@
-## PostgreSQL Example
+## PostgreSQL App
 
 Creates a PostgreSQL server with dedicated volume.
 

@@ -1,4 +1,4 @@
-## nginx custom routing example
+## Nginx App
 
 Creates an nginx proxy which routes traffic to different internally accessible workloads for different request paths.
 
