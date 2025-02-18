@@ -10,3 +10,6 @@ targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-config
   - //secret/{{ .Release.Name }}-start-script
+  {{- if .Values.redis.password }}
+  - //secret/{{ .Release.Name }}-redis-password
+  {{- end }}

@@ -6,3 +6,7 @@ cpu: 200m
 firewallConfig:
   internal:
     inboundAllowType: same-org
+
+# Configure Redis authentication by uncommenting and setting the password field
+redis: {}
+  # password: "your-secure-password-here"

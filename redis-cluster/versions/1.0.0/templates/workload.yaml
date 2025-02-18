@@ -18,13 +18,22 @@ spec:
           value: "{{ .Values.replicas }}"
         - name: CUSTOM_REDIS_PORT
           value: "{{ .Values.port }}"
+        {{- if .Values.redis.password }}
+        - name: REDIS_PASSWORD
+          value: 'cpln://secret/{{ .Release.Name }}-redis-password.REDIS_PASSWORD'
+        {{- end }}
       image: docker.io/redis:7.2
       readinessProbe:
         exec:
           command:
             - /bin/bash
             - "-c"
-            - redis-cli ping
+            - >-
+                if [ ! -z "$REDIS_PASSWORD" ]; then
+                  redis-cli --no-auth-warning -a "$REDIS_PASSWORD" ping;
+                else
+                  redis-cli ping;
+                fi
         failureThreshold: 10
         initialDelaySeconds: 20
         periodSeconds: 5
