@@ -1,0 +1,15 @@
+kind: policy
+name: {{ .Release.Name }}
+origin: default
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Release.Name }}
+targetKind: secret
+targetLinks:
+  - //secret/{{ .Release.Name }}-config
+  - //secret/{{ .Release.Name }}-start-script
+  {{- if .Values.redis.password }}
+  - //secret/{{ .Release.Name }}-redis-password
+  {{- end }}

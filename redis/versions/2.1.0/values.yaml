@@ -1,0 +1,19 @@
+redis:
+  resources:
+    cpu: 200m
+    memory: 256Mi
+  replicas: 3
+  # password: fu3h4f9834f8
+
+sentinel:
+  resources:
+    cpu: 200m
+    memory: 256Mi
+  quorum: 2 # Keep this an even number or just 1
+  # password: poek290f4238f
+
+# Uncomment the location list below and update as you wish if you want a multi location configuration
+# locations:
+#   - aws-eu-central-1
+#   - azure-eastus2
+#   - gcp-us-east1
