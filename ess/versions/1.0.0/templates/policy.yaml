@@ -1,0 +1,10 @@
+kind: policy
+name: {{ .Values.workload.name }}
+description: Allow the workload to manage secrets
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Values.workload.name }}
+target: all
+targetKind: secret
