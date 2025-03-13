@@ -3,7 +3,7 @@ name: {{ .Values.workload.name }}
 description: Allow the workload to manage secrets
 bindings:
   - permissions:
-      - reveal
+      - manage
     principalLinks:
       - //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Values.workload.name }}
 target: all
