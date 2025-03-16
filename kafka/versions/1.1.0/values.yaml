@@ -35,7 +35,6 @@ kafka:
       protocol: SASL_PLAINTEXT
       name: CLIENT
       containerPort: 9092 # If publicAddress is enabled, Client automatically set to port range 3000-3004
-      # publicAddress: kafka.igorcloud.com # Make sure Dedicated LB is enabled on GVC and CNAME is registered for the domain
       sasl:
       ## @param listeners.client.sasl.users Comma-separated list of usernames for client communications when SASL is enabled
       ## @param listeners.client.passwords Comma-separated list of passwords for client communications when SASL is enabled, must match the number of client.sasl.users
