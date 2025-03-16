@@ -17,19 +17,19 @@ spec:
           value: ''
         - name: LOGGING_LEVEL_ROOT
           value: INFO
-{{- if and .Values.kafka.secrets.kafka_admin_client_passwords (eq .Values.kafka.configurations.kafka_admin_client_listener_security_protocol "SASL_PLAINTEXT") }}
+{{- $listenerName := .Values.kafka_ui.listener }}
+{{- $listener := index .Values.kafka.listeners $listenerName }}
+{{- if eq $listener.protocol "SASL_PLAINTEXT" }}
+  {{- if not (and $listener.sasl $listener.sasl.admin) }}
+    {{- fail (printf "Error: SASL_PLAINTEXT listener '%s' must have sasl.admin configured for kafka_exporter" $listenerName) }}
+  {{- end }}
         - name: KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL
-          value: {{ .Values.kafka.configurations.kafka_admin_client_listener_security_protocol }}
-{{- else }}
-        - name: KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL
-          value: PLAINTEXT
-{{- end }}
-{{- if and .Values.kafka.secrets.kafka_admin_client_passwords (eq .Values.kafka.configurations.kafka_admin_client_listener_security_protocol "SASL_PLAINTEXT") }}
+          value: {{ $listener.protocol }}
         - name: KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM
           value: PLAIN
         - name: KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG
           value: >-
-            org.apache.kafka.common.security.plain.PlainLoginModule required username="kafka-admin" password="{{ .Values.kafka.secrets.kafka_admin_client_passwords }}";
+            org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ $listener.sasl.admin.username }}" password="{{ $listener.sasl.admin.password }}";
 {{- end }}
       image: 'provectuslabs/kafka-ui:latest'
       inheritEnv: false

@@ -1,6 +1,15 @@
 kind: workload
 name: {{ include "kafka.clusterName" . }}
 gvc: {{ .Values.cpln.gvc }}
+tags:
+  {{- if .Values.kafka.listeners }}
+  {{- range .Values.kafka.listeners }}
+    {{- if .publicAddress }}
+  cpln/replicaEndpoint: true
+    {{- break }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
 spec:
   type: stateful
   containers:
@@ -16,12 +25,12 @@ spec:
       env:
         - name: BITNAMI_DEBUG
           value: '{{ .Values.kafka.debug }}'
-{{- if and .Values.kafka.secrets.kafka_admin_client_passwords (eq .Values.kafka.configurations.kafka_admin_client_listener_security_protocol "SASL_PLAINTEXT") }}
-        - name: KAFKA_CLIENT_PASSWORDS
-          value: 'cpln://secret/{{ include "kafka.name" . }}-secrets.client-passwords'
-{{- end }}
-        - name: KAFKA_CLIENT_USERS
-          value: kafka-admin
+# {{- if and .Values.kafka.secrets.kafka_admin_client_passwords (eq .Values.kafka.configurations.kafka_admin_client_listener_security_protocol "SASL_PLAINTEXT") }}
+#         - name: KAFKA_CLIENT_PASSWORDS
+#           value: 'cpln://secret/{{ include "kafka.name" . }}-secrets.client-passwords'
+# {{- end }}
+        # - name: KAFKA_CLIENT_USERS
+        #   value: kafka-admin
         - name: KAFKA_CONTROLLER_PASSWORD
           value: 'cpln://secret/{{ include "kafka.name" . }}-secrets.controller-password'
         - name: KAFKA_CONTROLLER_USER
@@ -97,17 +106,29 @@ spec:
       args:
         - '-c'
         - >-
-{{- if .Values.kafka.secrets.kafka_admin_client_passwords }}
-  {{- if eq .Values.kafka.configurations.kafka_admin_client_listener_security_protocol "SASL_PLAINTEXT" }}
-          sleep 60 && kafka_exporter --kafka.server=localhost:{{ .Values.kafka.configurations.kafka_admin_client_port }}
-          --sasl.enabled --sasl.username=kafka-admin --sasl.mechanism=plain
-          --sasl.password=${KAFKA_CLIENT_PASSWORDS} --web.listen-address=:9308
-  {{- else }}
-          sleep 60 && kafka_exporter --kafka.server=localhost:{{ .Values.kafka.configurations.kafka_admin_client_port }}
-          --no-sasl.handshake --web.listen-address=:9308
-  {{- end }}
+{{- $listenerName := .Values.kafka_exporter.listener }}
+{{- if not (hasKey .Values.kafka.listeners $listenerName) }}
+  {{- fail (printf "Error: Listener '%s' specified in kafka_exporter.listener does not exist" $listenerName) }}
+{{- end }}
+{{- $listener := index .Values.kafka.listeners $listenerName }}
+{{- $port := 3000 }}
+{{- if $listener.containerPort }}
+  {{- $port = $listener.containerPort }}
 {{- else }}
-          sleep 60 && kafka_exporter --kafka.server=localhost:{{ .Values.kafka.configurations.kafka_admin_client_port }}
+  {{- $port = "$(echo $((3000 + $POD_ID)))" }}
+{{- end }}
+{{- if eq $listener.protocol "SASL_PLAINTEXT" }}
+  {{- if not (and $listener.sasl $listener.sasl.admin) }}
+    {{- fail (printf "Error: SASL_PLAINTEXT listener '%s' must have sasl.admin configured for kafka_exporter" $listenerName) }}
+  {{- end }}
+          sleep 60 && POD_ID=$(echo "$POD_NAME" | rev | cut -d'-' -f 1 | rev) && kafka_exporter --kafka.server=localhost:{{ if not $listener.containerPort }}$(echo $((3000 + $POD_ID))){{ else }}{{ $port }}{{ end }}
+          --sasl.enabled --sasl.username={{ $listener.sasl.admin.username }} --sasl.mechanism=plain
+          --sasl.password=${KAFKA_CLIENT_PASSWORDS} --web.listen-address=:9308
+{{- else if eq $listener.protocol "PLAINTEXT" }}
+          sleep 60 && POD_ID=$(echo "$POD_NAME" | rev | cut -d'-' -f 1 | rev) && kafka_exporter --kafka.server=localhost:{{ if not $listener.containerPort }}$(echo $((3000 + $POD_ID))){{ else }}{{ $port }}{{ end }}
+          --no-sasl.handshake --web.listen-address=:9308
+{{- else }}
+          sleep 60 && POD_ID=$(echo "$POD_NAME" | rev | cut -d'-' -f 1 | rev) && kafka_exporter --kafka.server=localhost:{{ if not $listener.containerPort }}$(echo $((3000 + $POD_ID))){{ else }}{{ $port }}{{ end }}
           --no-sasl.handshake --web.listen-address=:9308
 {{- end }}
       command: /bin/bash
@@ -118,10 +139,15 @@ spec:
       env:
         - name: BITNAMI_DEBUG
           value: '{{ .Values.kafka_exporter.debug }}'
-  {{- if and .Values.kafka.secrets.kafka_admin_client_passwords (eq .Values.kafka.configurations.kafka_admin_client_listener_security_protocol "SASL_PLAINTEXT") }}
+{{- $listenerName := .Values.kafka_exporter.listener }}
+{{- if not (hasKey .Values.kafka.listeners $listenerName) }}
+  {{- fail (printf "Error: Listener '%s' specified in kafka_exporter.listener does not exist" $listenerName) }}
+{{- end }}
+{{- $listener := index .Values.kafka.listeners $listenerName }}
+{{- if eq $listener.protocol "SASL_PLAINTEXT" }}
         - name: KAFKA_CLIENT_PASSWORDS
-          value: 'cpln://secret/{{ include "kafka.name" . }}-secrets.client-passwords'
-  {{- end }}
+          value: 'cpln://secret/{{ include "kafka.name" $ }}-secrets.{{ $listener.name | lower }}-admin-password'
+{{- end }}
       image: {{ .Values.kafka_exporter.image }}
       inheritEnv: false
       memory: {{ .Values.kafka_exporter.memory }}

@@ -5,18 +5,20 @@ kafka:
   replicas: 3 # must not be 2
   minReadySeconds: 60
   debug: false
-  logDirs: /opt/bitnami/kafka/logs-0,/opt/bitnami/kafka/logs-1 # A comma-separated list of the directories where the log data is stored.
+  logDirs: /opt/bitnami/kafka/logs-0,/opt/bitnami/kafka/logs-1
   volumes:
     logs:
-      initialCapacity: 20 # In GB
-      maxCapacity: 1000 # In GB
+      initialCapacity: 50 # In GB
       performanceClass: general-purpose-ssd # general-purpose-ssd / high-throughput-ssd (Min 1000GB)
       fileSystemType: ext4 # ext4 / xfs
-      minFreePercentage: 10
       snapshots:
         createFinalSnapshot: true
         retentionDuration: 7d
         schedule: 0 0 9 * * # UTC
+      autoscaling:
+        maxCapacity: 1000 # In GB
+        minFreePercentage: 20
+        scalingFactor: 1.1
   cpu: 2 # For millicores us 'm' like 500m
   memory: 4000Mi # Gi / Mi
   # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
@@ -25,40 +27,49 @@ kafka:
     # external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
     # external_outboundAllowCIDR: "111.222.333.444/16,111.222.444.333/32" # Provide a comma-separated list
   listeners:
-    ## @param listeners.client.name Name for the Kafka client listener
-    ## @param listeners.client.containerPort Port for the Kafka client listener. Except ports 9091,9093,9094
-    ## @param listeners.client.protocol Security protocol for the Kafka client listener. Allowed values are 'PLAINTEXT', 'SASL_PLAINTEXT'
-    ## @param listeners.client.brokersAddresses DNS address for public access to brokers. Must be the same as kafka.replicas
+    # @param listeners.client.name Name for the Kafka client listener
+    # @param listeners.client.containerPort Port for the Kafka client listener. Except ports 9091,9093,9094
+    # @param listeners.client.protocol Security protocol for the Kafka client listener. Allowed values are 'PLAINTEXT', 'SASL_PLAINTEXT'
+    # @param listeners.client.publicAddress DNS address for public access to brokers. Must be the same as kafka.replicas
     client:
-      containerPort: 9092 # If publicAddress is enabled, Client automatically set to port range 3000-3004
       protocol: SASL_PLAINTEXT
       name: CLIENT
+      containerPort: 9092 # If publicAddress is enabled, Client automatically set to port range 3000-3004
+      # publicAddress: kafka.igorcloud.com # Make sure Dedicated LB is enabled on GVC and CNAME is registered for the domain
       sasl:
       ## @param listeners.client.sasl.users Comma-separated list of usernames for client communications when SASL is enabled
-      ## @param listeners.client.brokersAddresses Comma-separated list of passwords for client communications when SASL is enabled, must match the number of client.sasl.users
-        users: "user1,user2"
-        passwords: "password1,password2"
-    # client2:
+      ## @param listeners.client.passwords Comma-separated list of passwords for client communications when SASL is enabled, must match the number of client.sasl.users
+      ## @param listeners.client.admin Admin username and password for client communications when SASL is enabled
+        admin:
+          username: admin
+          password: jf39jf459jf934
+        users: "user1,connectors"
+        passwords: "password1,jf348fjuhg34"
+    # public:
     #   protocol: SASL_PLAINTEXT # TLS enforced, Kafka clients should use SASL_SSL to access 'publicAddress' if provided
-    #   name: CLIENT2
+    #   name: PUBLIC
     #   publicAddress: kafka.example.com # Make sure Dedicate Load Balancer is enabled on the GVC
     #   # containerPort: 9095 # If publicAddress is enabled, Client automatically set to port range 3000-3004
     #   sasl:
     #   ## @param listeners.client.sasl.users Comma-separated list of usernames for client communications when SASL is enabled
     #   ## @param listeners.client.brokersAddresses Comma-separated list of passwords for client communications when SASL is enabled, must match the number of client.sasl.users
-    #     users: "user1" 
-    #     passwords: "password1"
-  configurations:
-    kafka_admin_client_port: 9092 # Ports 9093 and 9094 are Reserved for internal components
-    kafka_admin_client_listener_security_protocol: SASL_PLAINTEXT # PLAINTEXT / SASL_PLAINTEXT # kafka.secrets.kafka_admin_client_passwords Must be configured
-    default_replication_factor: 3 # default.replication.factor Can't be greater than the number of cluster replicas
-    auto_create_topics_enable: true # auto.create.topics.enable
-    log_retention_hours: 168 # The number of hours to keep a log file before deleting it (in hours)
+    #   ## @param listeners.client.admin Admin username and password for client communications when SASL is enabled
+    #     # admin:
+    #     #   username: admin
+    #     #   password: tgtgtg
+    #     users: "user2"
+    #     passwords: "password2"
+  acl:
+    superUsers: "User:admin" # User:admin;User:connectors (for multiple users)
+    allowEveryoneIfNoAclFound: false
   secrets:
-    kafka_admin_client_passwords: fkor3Dro52oodA # Must be for SASL_PLAINTEXT
     kraft_cluster_id: bkdDtS1Rsf536si7BGM0JY
     inter_broker_password: HfcgCHp32e
     controller_password: ayd8iJwqXe
+  extra_configurations:
+    default.replication.factor: 3 # default.replication.factor Can't be greater than the number of cluster replicas
+    auto.create.topics.enable: true # auto.create.topics.enable
+    log.retention.hours: 168 # The number of hours to keep a log file before deleting it (in hours)
 
 kafka_exporter:
   name: exporter
@@ -66,25 +77,93 @@ kafka_exporter:
   debug: false
   cpu: 50m
   memory: 128Mi
+  listener: client
 
 kafka_ui:
   name: ui
   image: provectuslabs/kafka-ui:latest
   cpu: 250m
   memory: 1Gi
+  listener: client
   # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
   firewall:
     # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc
     external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
     # external_outboundAllowCIDR: "111.222.333.444/16,111.222.444.333/32" # Provide a comma-separated list
 
-kafka_client:
-  name: client
-  image: docker.io/bitnami/kafka:3.9
-  cpu: 125m
-  memory: 150Mi
-  # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
-  # firewall:
-  # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc
-  # external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
-  # external_outboundAllowCIDR: "111.222.333.444/16,111.222.444.333/32" # Provide a comma-separated list
+kafka_connectors:
+  - name: camel-s3-sink
+    image: docker.io/bitnami/kafka:3.9
+    cpu: 500m
+    memory: 800Mi
+    plugins_folder: /opt/bitnami/kafka/plugins
+    replicas: 1
+    # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
+    firewall:
+      # external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
+      # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc
+      external_outboundAllowCIDR: "0.0.0.0/0" # Provide a comma-separated list
+    listener: client # Provide the listener name to connect to
+    connector_properties:
+      # bootstrap.servers: "kafka-dev-cluster:9092" # Optional. If not set, the bootstrap address will be the cluster name or publicAddress
+      group.id: "connect-cluster"
+      security.protocol: "SASL_PLAINTEXT"
+      sasl.mechanism: "PLAIN"
+      sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=admin password=jf39jf459jf934;"
+      consumer.security.protocol: "SASL_PLAINTEXT"
+      consumer.sasl.mechanism: "PLAIN"
+      consumer.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=admin password=jf39jf459jf934;"
+      key.converter.schemas.enable: "false"
+      value.converter.schemas.enable: "false"
+      offset.storage.topic: "connect-offsets"
+      offset.storage.replication.factor: "1"
+      config.storage.topic: "connect-configs"
+      config.storage.replication.factor: "1"
+      status.storage.topic: "connect-status"
+      status.storage.replication.factor: "1"
+      offset.flush.interval.ms: "10000"
+      plugin.path: "/opt/bitnami/kafka/plugins"
+      key.converter: "org.apache.kafka.connect.storage.StringConverter"
+      value.converter: "org.apache.kafka.connect.converters.ByteArrayConverter"
+    plugins:
+      - name: "camel-s3-sink"
+        artifacts:
+          - type: tgz
+            url: https://repo.maven.apache.org/maven2/org/apache/camel/kafkaconnector/camel-aws-s3-sink-kafka-connector/4.8.5/camel-aws-s3-sink-kafka-connector-4.8.5-package.tar.gz
+        config:
+          "connector.class": "org.apache.camel.kafkaconnector.awss3sink.CamelAwss3sinkSinkConnector"
+          "tasks.max": "1"
+          "topics": "topic1"
+          "camel.kamelet.aws-s3-sink.useSessionCredentials": "false"
+          "camel.kamelet.aws-s3-sink.bucketNameOrArn": "your-bucket-name"
+          "camel.kamelet.aws-s3-sink.keyName": "topic1-logs-${exchangeId}.txt"
+          "camel.kamelet.aws-s3-sink.region": "us-east-1"
+          "camel.kamelet.aws-s3-sink.autoCreateBucket": "true"
+          "camel.kamelet.aws-s3-sink.accessKey": "your-access-key"
+          "camel.kamelet.aws-s3-sink.secretKey": "your-secret-key"     
+
+  # - name: snowflake-sink
+  #   image: docker.io/bitnami/kafka:3.9
+  #   cpu: 500m
+  #   memory: 800Mi
+  #   plugins_folder: /opt/bitnami/kafka/plugins
+  #   replicas: 1
+  #   # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
+  #   firewall:
+  #     external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
+  #   # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc
+  #   # external_outboundAllowCIDR: "111.222.333.444/16,111.222.444.333/32" # Provide a comma-separated list
+  #   properties:
+  #     group.id: "connect-cluster"
+
+# kafka_client:
+#   name: client
+#   image: docker.io/bitnami/kafka:3.9
+#   cpu: 125m
+#   memory: 150Mi
+#   # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
+#   # firewall:
+#   # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc
+#   # external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
+#   # external_outboundAllowCIDR: "111.222.333.444/16,111.222.444.333/32" # Provide a comma-separated list
+
