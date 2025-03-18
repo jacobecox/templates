@@ -156,14 +156,19 @@ download_and_extract() {
   local artifact_type=$1
   local artifact_url=$2
   local plugin_path=$3
+  local plugin_name=$4
   local temp_dir=$(mktemp -d)
   
   echo "Downloading artifact from $artifact_url"
   
   if [ "$artifact_type" == "jar" ]; then
-    # For jar files, download directly to plugin path
-    wget -q "$artifact_url" -O "$plugin_path/$(basename "$artifact_url")"
-    echo "Downloaded JAR file to $plugin_path/$(basename "$artifact_url")"
+    # For jar files, create a directory for the plugin if it doesn't exist
+    local plugin_dir="$plugin_path/$plugin_name"
+    mkdir -p "$plugin_dir"
+    
+    # Download jar file to the plugin-specific directory
+    wget -q "$artifact_url" -O "$plugin_dir/$(basename "$artifact_url")"
+    echo "Downloaded JAR file to $plugin_dir/$(basename "$artifact_url")"
   else
     # For archives, download to temp dir and extract
     local archive_file="$temp_dir/$(basename "$artifact_url")"
@@ -188,15 +193,19 @@ download_and_extract() {
     rm -rf "$temp_dir"
   fi
 }
-
 # Process each Kafka connector
 echo "Setting up Kafka connector plugins"
 
-# Download and extract artifacts for each plugin
+# Download and extract artifacts for each enabled plugin
 {{- range .plugins }}
+{{- if eq .enabled true }}
 echo "Processing plugin: {{ .name }}"
+{{- $pluginName := .name }}
 {{- range .artifacts }}
-download_and_extract "{{ .type }}" "{{ .url }}" "{{ $.plugins_folder }}"
+download_and_extract "{{ .type }}" "{{ .url }}" "{{ $.plugins_folder }}" "{{ $pluginName }}"
+{{- end }}
+{{- else }}
+echo "Skipping disabled plugin: {{ .name }}"
 {{- end }}
 {{- end }}
 
