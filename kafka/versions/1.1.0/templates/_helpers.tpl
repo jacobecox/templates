@@ -147,8 +147,8 @@ Convert .Values.kafka.memory to appropriate JVM heap size settings.
 
 
 
-{{- define "kafka.connectors.script" -}}
-#!/bin/bash
+{{- define "kafka.connectors.download.script" -}}
+#!/bin/sh
 set -ex
 
 # Function to download and extract artifacts
@@ -162,12 +162,12 @@ download_and_extract() {
   
   if [ "$artifact_type" == "jar" ]; then
     # For jar files, download directly to plugin path
-    curl -sSL "$artifact_url" -o "$plugin_path/$(basename "$artifact_url")"
+    wget -q "$artifact_url" -O "$plugin_path/$(basename "$artifact_url")"
     echo "Downloaded JAR file to $plugin_path/$(basename "$artifact_url")"
   else
     # For archives, download to temp dir and extract
     local archive_file="$temp_dir/$(basename "$artifact_url")"
-    curl -sSL "$artifact_url" -o "$archive_file"
+    wget -q "$artifact_url" -O "$archive_file"
     
     echo "Extracting $artifact_type archive to $plugin_path"
     case "$artifact_type" in
@@ -189,6 +189,26 @@ download_and_extract() {
   fi
 }
 
+# Process each Kafka connector
+echo "Setting up Kafka connector plugins"
+
+# Download and extract artifacts for each plugin
+{{- range .plugins }}
+echo "Processing plugin: {{ .name }}"
+{{- range .artifacts }}
+download_and_extract "{{ .type }}" "{{ .url }}" "{{ $.plugins_folder }}"
+{{- end }}
+{{- end }}
+
+echo "All Kafka connector plugins have been downloaded and extracted."
+echo "Sleeping..."
+sleep infinity
+{{- end }}
+
+{{- define "kafka.connectors.run.script" -}}
+#!/bin/bash
+set -ex
+
 # Function to create or update a connector
 create_or_update_connector() {
   local connector_name=$1
@@ -208,16 +228,78 @@ create_or_update_connector() {
   echo "Connector $connector_name created/updated successfully"
 }
 
-# Process each Kafka connector
-echo "Setting up Kafka connector"
-
-# Download and extract artifacts for each plugin
-{{- range .plugins }}
-echo "Processing plugin: {{ .name }}"
-{{- range .artifacts }}
-download_and_extract "{{ .type }}" "{{ .url }}" "{{ $.plugins_folder }}"
-{{- end }}
-{{- end }}
+# Function to check and setup truststore for SSL connections
+truststore_init() {
+  local hostname=$1
+  local port=$2
+  local alias=$3
+  local jdbc_props=$4
+  
+  echo "Setting up truststore for $hostname:$port with alias $alias"
+  
+  # Parse JDBC connection properties
+  local truststore_path
+  local truststore_password
+  
+  # First check if ssl.truststore.location is provided in the config
+  if [[ -n "${SSL_TRUSTSTORE_LOCATION}" ]]; then
+    truststore_path="${SSL_TRUSTSTORE_LOCATION}"
+    echo "Using ssl.truststore.location from config: $truststore_path"
+  # Then check if it's in JDBC properties
+  elif [[ "$jdbc_props" =~ ssl\.truststore\.location=([^;]+) ]]; then
+    truststore_path="${BASH_REMATCH[1]}"
+    echo "Using ssl.truststore.location from JDBC properties: $truststore_path"
+  elif [[ "$jdbc_props" =~ trustStorePath=([^;]+) ]]; then
+    truststore_path="${BASH_REMATCH[1]}"
+    echo "Using trustStorePath from JDBC properties: $truststore_path"
+  else
+    # Use default path if not specified
+    truststore_path="/tmp/kafka.client.truststore.jks"
+    echo "No truststore path specified, using default: $truststore_path"
+  fi
+  
+  # Check if ssl.truststore.password is provided
+  if [[ -n "${SSL_TRUSTSTORE_PASSWORD}" ]]; then
+    truststore_password="${SSL_TRUSTSTORE_PASSWORD}"
+    echo "Using ssl.truststore.password from config"
+  # Then check if it's in JDBC properties
+  elif [[ "$jdbc_props" =~ ssl\.truststore\.password=([^;]+) ]]; then
+    truststore_password="${BASH_REMATCH[1]}"
+    echo "Using ssl.truststore.password from JDBC properties"
+  elif [[ "$jdbc_props" =~ trustStorePassword=([^;]+) ]]; then
+    truststore_password="${BASH_REMATCH[1]}"
+    echo "Using trustStorePassword from JDBC properties"
+  else
+    # Generate random password if not specified
+    truststore_password=$(openssl rand -base64 12)
+    export SSL_TRUSTSTORE_PASSWORD="${truststore_password}"
+    echo "Generated random ssl.truststore.password: ${truststore_password}"
+  fi
+  
+  # Create certs directory if it doesn't exist
+  mkdir -p $(dirname "$truststore_path")
+  
+  # Download CA certificate
+  echo "Downloading CA certificate for $hostname:$port"
+  echo | openssl s_client -connect $hostname:$port -showcerts 2>/dev/null | \
+    openssl x509 -outform PEM > $(dirname "$truststore_path")/$alias.pem
+  
+  # Create truststore if it doesn't exist or override existing one
+  echo "Creating new truststore with password"
+  cp $JAVA_HOME/lib/security/cacerts "$truststore_path"
+  
+  # Change the default password to our password
+  echo "Setting truststore password"
+  keytool -storepasswd -keystore "$truststore_path" \
+    -storepass "changeit" -new "${truststore_password}"
+  
+  # Import certificate into truststore
+  echo "Importing certificate into truststore"
+  keytool -import -noprompt -alias $alias -file $(dirname "$truststore_path")/$alias.pem \
+    -keystore "$truststore_path" -storepass "${truststore_password}"
+    
+  echo "Truststore setup completed for $hostname"
+}
 
 # Start Kafka Connect in the background
 echo "Starting Kafka Connect distributed worker..."
@@ -237,7 +319,29 @@ sleep 10
 
 # Create/update connectors
 {{- range .plugins }}
+echo "Processing connector: {{ .name }}"
+{{- if hasKey . "enabled" }}
+{{- if not .enabled }}
+echo "Connector {{ .name }} is disabled. Removing if it exists..."
+curl -s -X DELETE "http://localhost:8083/connectors/{{ .name }}" || true
+{{- else }}
 echo "Creating/updating connector: {{ .name }}"
+
+
+{{- if and (hasKey .config "ssl") (eq .config.ssl "true") }}
+# Check if SSL is enabled
+# Export ssl.truststore.location if it exists
+{{- if hasKey .config "ssl.truststore.location" }}
+export SSL_TRUSTSTORE_LOCATION={{ index .config "ssl.truststore.location" | quote }}
+{{- end }}
+# Export ssl.truststore.password if it exists
+{{- if hasKey .config "ssl.truststore.password" }}
+export SSL_TRUSTSTORE_PASSWORD={{ index .config "ssl.truststore.password" | quote }}
+{{- end }}
+# Setup truststore
+truststore_init "{{ .config.hostname }}" "{{ .config.port }}" "{{ .name }}" "{{ default "" .config.jdbcConnectionProperties }}"
+{{- end }}
+
 CONFIG=$(cat << 'EOF'
 {
   "name": "{{ .name }}",
@@ -247,12 +351,94 @@ CONFIG=$(cat << 'EOF'
     {{- if $first }}{{ $first = false }}{{ else }},{{ end }}
     "{{ $key }}": "{{ $value }}"
     {{- end }}
+    {{- if and (hasKey .config "ssl") (eq .config.ssl "true") (not (hasKey .config "ssl.truststore.password")) }}
+    ,"ssl.truststore.password": "${SSL_TRUSTSTORE_PASSWORD}"
+    {{- end }}
   }
 }
 EOF
 )
 
-create_or_update_connector "{{ .name }}" "$CONFIG"
+# If we have a generated password, replace it in the config
+if [[ -n "${SSL_TRUSTSTORE_PASSWORD}" && ! "{{ if hasKey .config "ssl.truststore.password" }}true{{ else }}false{{ end }}" == "true" ]]; then
+  CONFIG=$(echo "$CONFIG" | sed "s|\${SSL_TRUSTSTORE_PASSWORD}|${SSL_TRUSTSTORE_PASSWORD}|g")
+fi
+
+# Try to create connector with retry logic
+max_retries=5
+retry_count=0
+while [ $retry_count -lt $max_retries ]; do
+  if create_or_update_connector "{{ .name }}" "$CONFIG"; then
+    echo "Successfully created/updated connector {{ .name }} on attempt $((retry_count+1))"
+    break
+  else
+    retry_count=$((retry_count+1))
+    if [ $retry_count -lt $max_retries ]; then
+      echo "Failed to create/update connector {{ .name }}, retrying in 10 seconds (attempt $retry_count/$max_retries)..."
+      sleep 10
+    else
+      echo "Failed to create/update connector {{ .name }} after $max_retries attempts"
+    fi
+  fi
+done
+{{- end }}
+{{- else }}
+echo "Creating/updating connector: {{ .name }}"
+{{- if and (hasKey .config "ssl") (eq .config.ssl "true") }}
+# Check if SSL is enabled
+# Export ssl.truststore.location if it exists
+{{- if hasKey .config "ssl.truststore.location" }}
+export SSL_TRUSTSTORE_LOCATION={{ index .config "ssl.truststore.location" | quote }}
+{{- end }}
+# Export ssl.truststore.password if it exists
+{{- if hasKey .config "ssl.truststore.password" }}
+export SSL_TRUSTSTORE_PASSWORD={{ index .config "ssl.truststore.password" | quote }}
+{{- end }}
+# Setup truststore
+truststore_init "{{ .config.hostname }}" "{{ .config.port }}" "{{ .name }}" "{{ default "" .config.jdbcConnectionProperties }}"
+{{- end }}
+
+CONFIG=$(cat << 'EOF'
+{
+  "name": "{{ .name }}",
+  "config": {
+    {{- $first := true }}
+    {{- range $key, $value := .config }}
+    {{- if $first }}{{ $first = false }}{{ else }},{{ end }}
+    "{{ $key }}": "{{ $value }}"
+    {{- end }}
+    {{- if and (hasKey .config "ssl") (eq .config.ssl "true") (not (hasKey .config "ssl.truststore.password")) }}
+    {{- if not $first }},{{ end }}
+    "ssl.truststore.password": "${SSL_TRUSTSTORE_PASSWORD}"
+    {{- end }}
+  }
+}
+EOF
+)
+
+# If we have a generated password, replace it in the config
+if [[ -n "${SSL_TRUSTSTORE_PASSWORD}" && ! "{{ if hasKey .config "ssl.truststore.password" }}true{{ else }}false{{ end }}" == "true" ]]; then
+  CONFIG=$(echo "$CONFIG" | sed "s|\${SSL_TRUSTSTORE_PASSWORD}|${SSL_TRUSTSTORE_PASSWORD}|g")
+fi
+
+# Try to create connector with retry logic
+max_retries=5
+retry_count=0
+while [ $retry_count -lt $max_retries ]; do
+  if create_or_update_connector "{{ .name }}" "$CONFIG"; then
+    echo "Successfully created/updated connector {{ .name }} on attempt $((retry_count+1))"
+    break
+  else
+    retry_count=$((retry_count+1))
+    if [ $retry_count -lt $max_retries ]; then
+      echo "Failed to create/update connector {{ .name }}, retrying in 10 seconds (attempt $retry_count/$max_retries)..."
+      sleep 10
+    else
+      echo "Failed to create/update connector {{ .name }} after $max_retries attempts"
+    fi
+  fi
+done
+{{- end }}
 {{- end }}
 
 echo "All Kafka connectors have been configured and started."
