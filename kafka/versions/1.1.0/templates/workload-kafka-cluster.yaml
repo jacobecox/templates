@@ -1,3 +1,13 @@
+{{- if .Values.jmx_exporter }}
+kind: secret
+name: {{ include "kafka.name" . }}-jmx-exporter-conf
+type: opaque
+data:
+  encoding: plain
+  payload: |-
+    {{ .Values.jmx_exporter.config | toYaml | nindent 4 }}
+---
+{{- end }}
 kind: workload
 name: {{ include "kafka.clusterName" . }}
 gvc: {{ .Values.cpln.gvc }}
@@ -25,12 +35,10 @@ spec:
       env:
         - name: BITNAMI_DEBUG
           value: '{{ .Values.kafka.debug }}'
-# {{- if and .Values.kafka.secrets.kafka_admin_client_passwords (eq .Values.kafka.configurations.kafka_admin_client_listener_security_protocol "SASL_PLAINTEXT") }}
-#         - name: KAFKA_CLIENT_PASSWORDS
-#           value: 'cpln://secret/{{ include "kafka.name" . }}-secrets.client-passwords'
-# {{- end }}
-        # - name: KAFKA_CLIENT_USERS
-        #   value: kafka-admin
+        {{- if .Values.jmx_exporter }}
+        - name: JMX_PORT
+          value: {{ .Values.jmx_exporter.kafkaJmxPort | quote }}
+        {{- end }}
         - name: KAFKA_CONTROLLER_PASSWORD
           value: 'cpln://secret/{{ include "kafka.name" . }}-secrets.controller-password'
         - name: KAFKA_CONTROLLER_USER
@@ -77,6 +85,10 @@ spec:
           protocol: tcp
         - number: 9094
           protocol: tcp
+{{- if .Values.jmx_exporter }}
+        - number: {{ .Values.jmx_exporter.kafkaJmxPort }}
+          protocol: tcp
+{{- end }}
       readinessProbe:
         failureThreshold: 20
         initialDelaySeconds: 20
@@ -155,6 +167,31 @@ spec:
         - number: 9308
           protocol: tcp
 {{- end }}
+{{- if .Values.jmx_exporter }}
+    - name: jmx-exporter
+      command: java
+      args:
+        - -XX:MaxRAMPercentage=100
+        - -XshowSettings:vm
+        - -jar
+        - jmx_prometheus_standalone.jar
+        - {{ .Values.jmx_exporter.exporterPort | quote }}
+        - /etc/jmx-kafka/jmx-kafka-prometheus.yml
+      cpu: {{ .Values.jmx_exporter.cpu }}
+      metrics:
+        path: /metrics
+        port: {{ .Values.jmx_exporter.exporterPort }}
+      image: {{ .Values.jmx_exporter.image }}
+      inheritEnv: false
+      memory: {{ .Values.jmx_exporter.memory }}
+      ports:
+        - number: {{ .Values.jmx_exporter.exporterPort }}
+          protocol: tcp
+      volumes:
+        - path: /etc/jmx-kafka/jmx-kafka-prometheus.yml
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ include "kafka.name" . }}-jmx-exporter-conf
+{{- end }}
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
@@ -177,6 +214,9 @@ spec:
     {{- if hasKey .Values.kafka.firewall "internal_inboundAllowType" }}
     internal:
       inboundAllowType: {{ default "[]" .Values.kafka.firewall.internal_inboundAllowType }}
+      {{- if .Values.kafka.firewall.inboundAllowWorkload }}
+      inboundAllowWorkload: {{ .Values.kafka.firewall.inboundAllowWorkload | toYaml | nindent 8 }}
+      {{- end }}
     {{- end }}
 {{- end }}
   identityLink: //identity/{{ include "kafka.name" . }}

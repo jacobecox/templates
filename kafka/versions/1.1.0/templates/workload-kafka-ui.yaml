@@ -1,4 +1,4 @@
-{{- if .Values.kafka_ui }}
+{{- if .Values.kafbat_ui.enabled }}
 kind: workload
 name: {{ include "kafka.name" . }}-{{ .Values.kafka_ui.name }}
 description: kafka-ui
