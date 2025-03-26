@@ -21,7 +21,7 @@ essConfig:
         accessKeyId: <ACCESS_KEY> # alternatively configure identity to natively use AWS permissions
         secretAccessKey: <SECRET_ACCESS_KEY> # alternatively configure identity to natively use AWS permissions
     # - name: my-aws-secrets-manager
-    #   awsSecretsManager:
+    #   awsSecretManager:
     #     region: us-east-1
     #     accessKeyId: <ACCESS_KEY>
     #     secretAccessKey: <SECRET
