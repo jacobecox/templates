@@ -3,7 +3,15 @@
 kind: domain
 name: {{ .Values.kafbat_ui.domain }}
 description: {{ .Values.kafbat_ui.domain }}
-tags: {}
+tags:
+  {{- $hasTags := false }}
+  {{- if .Values.kafbat_ui.deletionProtection }}
+  cpln/protected: true
+  {{- $hasTags = true }}
+  {{- end }}
+  {{- if not $hasTags }}
+  {}
+  {{- end }}
 spec:
   acceptAllHosts: false
   dnsMode: cname
@@ -48,7 +56,15 @@ gvc: {{ $.Values.cpln.gvc }}
 kind: workload
 name: {{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
 description: {{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
-tags: {}
+tags:
+  {{- $hasTags := false }}
+  {{- if .Values.kafbat_ui.deletionProtection }}
+  cpln/protected: true
+  {{- $hasTags = true }}
+  {{- end }}
+  {{- if not $hasTags }}
+  {}
+  {{- end }}
 spec:
   type: standard
   containers:

@@ -67,7 +67,15 @@ kind: workload
 name: {{ include "kafka.name" $ }}-connect-{{ .name }}
 description: {{ include "kafka.name" $ }}-connect-{{ .name }}
 gvc: {{ $.Values.cpln.gvc }}
-tags: {}
+tags:
+  {{- $hasTags := false }}
+  {{- if .deletionProtection }}
+  cpln/protected: true
+  {{- $hasTags = true }}
+  {{- end }}
+  {{- if not $hasTags }}
+  {}
+  {{- end }}
 spec:
   type: stateful
   containers:
