@@ -70,12 +70,18 @@ spec:
   containers:
     - name: kafbat-ui
       cpu: {{ .Values.kafbat_ui.cpu }}
+      {{- if .Values.kafbat_ui.minCpu }}
+      minCpu: '{{ .Values.kafbat_ui.minCpu }}'
+      {{- end }}
       env:
         - name: SPRING_CONFIG_ADDITIONAL-LOCATION
           value: /etc/config.yaml
       image: {{ .Values.kafbat_ui.image }}
       inheritEnv: false
       memory: {{ .Values.kafbat_ui.memory }}
+      {{- if .Values.kafbat_ui.minMemory }}
+      minMemory: {{ .Values.kafbat_ui.minMemory }}
+      {{- end }}
       ports:
         - number: 8080
       volumes:
@@ -86,11 +92,15 @@ spec:
     autoscaling:
       maxConcurrency: 0
       maxScale: {{ .Values.kafbat_ui.replicas }}
-      metric: cpu
+      metric: disabled
       minScale: {{ .Values.kafbat_ui.replicas }}
       scaleToZeroDelay: 300
       target: 100
+    {{- if or .Values.kafbat_ui.minCpu .Values.kafbat_ui.minMemory }}
+    capacityAI: true
+    {{- else }}
     capacityAI: false
+    {{- end }}
     debug: false
     suspend: false
     timeoutSeconds: 30

@@ -41,6 +41,9 @@ spec:
           /opt/bitnami/scripts/kafka/run.sh
       command: /bin/bash
       cpu: '{{ .Values.kafka.cpu }}'
+      {{- if .Values.kafka.minCpu }}
+      minCpu: '{{ .Values.kafka.minCpu }}'
+      {{- end }}
       env:
         - name: BITNAMI_DEBUG
           value: '{{ .Values.kafka.debug }}'
@@ -75,6 +78,9 @@ spec:
           port: 9093
         timeoutSeconds: 15
       memory: {{ .Values.kafka.memory }}
+      {{- if .Values.kafka.minMemory }}
+      minMemory: {{ .Values.kafka.minMemory }}
+      {{- end }}
       ports:
 {{- range $key, $listener := .Values.kafka.listeners }}
 {{- include "kafka.validateListenerConfig" . }}
@@ -187,12 +193,18 @@ spec:
         - {{ .Values.jmx_exporter.exporterPort | quote }}
         - /etc/jmx-kafka/jmx-kafka-prometheus.yml
       cpu: {{ .Values.jmx_exporter.cpu }}
+      {{- if .Values.jmx_exporter.minCpu }}
+      minCpu: '{{ .Values.jmx_exporter.minCpu }}'
+      {{- end }}
       metrics:
         path: /metrics
         port: {{ .Values.jmx_exporter.exporterPort }}
       image: {{ .Values.jmx_exporter.image }}
       inheritEnv: false
       memory: {{ .Values.jmx_exporter.memory }}
+      {{- if .Values.jmx_exporter.minMemory }}
+      minMemory: {{ .Values.jmx_exporter.minMemory }}
+      {{- end }}
       ports:
         - number: {{ .Values.jmx_exporter.exporterPort }}
           protocol: tcp
