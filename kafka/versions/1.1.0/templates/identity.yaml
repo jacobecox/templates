@@ -1,4 +1,0 @@
-kind: identity
-name: {{ include "kafka.name" . }}
-description: {{ include "kafka.clusterName" . }} identity
-gvc: {{ .Values.cpln.gvc }}
