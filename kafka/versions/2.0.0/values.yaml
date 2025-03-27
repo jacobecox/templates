@@ -28,6 +28,10 @@ kafka:
   firewall:
     internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc(Recommended)
     external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
+    # # You can specify additional workloads with either same-gvc or workload-list:
+    # inboundAllowWorkload:
+    #   - //gvc/main-kafka/workload/main-kafka-kafbat-ui
+    #   - //gvc/client-gvc/workload/client
     # external_outboundAllowCIDR: "111.222.333.444/16,111.222.444.333/32" # Provide a comma-separated list
   listeners:
     # @param listeners.client.name Name for the Kafka client listener
@@ -141,6 +145,27 @@ jmx_exporter:
         pattern: kafka.server<type=(.+), name=(.+)><>(Count|Value)
       - name: java_lang_$1_$2
         pattern: java.lang<type=(.+)><>(.+)
+
+kafbat_ui:
+  enabled: false
+  deletionProtection: true
+  name: kafbat-ui
+  image: ghcr.io/kafbat/kafka-ui
+  cpu: 300m
+  memory: 1000Mi
+  minCpu: 100m
+  minMemory: 400Mi
+  replicas: 1
+  configuration_secret: kafka-kafbat-ui-config # Securely pre-create a secret with the configuration
+  # Domain name for the UI. 
+  # Make sure the required DNS records are created in your DNS server
+  # https://docs.controlplane.com/guides/configure-domain#subdomain-e-g-sample-domain-com-cname-mode-path-based-routing
+  domain: kafbat-ui.example.com # Domain name for the UI. 
+  # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
+  firewall:
+    # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc
+    external_inboundAllowCIDR: "0.0.0.0/0" # Provide a comma-separated list
+    external_outboundAllowCIDR: "0.0.0.0/0" # Provide a comma-separated list
 
 # kafka_connectors:
 #   - name: connect-cluster
