@@ -105,10 +105,10 @@ spec:
           protocol: tcp
 {{- end }}
       readinessProbe:
-        failureThreshold: 20
+        failureThreshold: 25
         initialDelaySeconds: 20
         periodSeconds: 10
-        successThreshold: 1
+        successThreshold: 6
         tcpSocket:
           port: 9093
         timeoutSeconds: 5
