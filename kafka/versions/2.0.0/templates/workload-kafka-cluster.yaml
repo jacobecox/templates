@@ -105,7 +105,7 @@ spec:
           protocol: tcp
 {{- end }}
       readinessProbe:
-        failureThreshold: 25
+        failureThreshold: 20
         initialDelaySeconds: 20
         periodSeconds: 10
         successThreshold: 6
