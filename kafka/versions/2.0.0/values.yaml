@@ -176,14 +176,17 @@ kafbat_ui:
 #     minMemory: 375Mi
 #     plugins_folder: /opt/bitnami/kafka/plugins
 #     replicas: 1
+#     env:
+#         - name: KAFKA_HEAP_OPTS 
+#           value: '-Xms900m -Xmx900m' # set to 50%-75% of the memory
 #     # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
 #     firewall:
-#       # external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
-#       # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc
-#       # # You can specify additional workloads with either same-gvc or workload-list:
-#       # inboundAllowWorkload:
-#       #   - //gvc/main-kafka/workload/main-kafka-kafbat-ui
-#       #   - //gvc/client-gvc/workload/client
+      # external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
+      # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc
+      # # You can specify additional workloads with either same-gvc or workload-list:
+      # inboundAllowWorkload:
+      #   - //gvc/main-kafka/workload/main-kafka-kafbat-ui
+      #   - //gvc/client-gvc/workload/client
 #       external_outboundAllowCIDR: "0.0.0.0/0" # Provide a comma-separated list
 #     listener: client # Provide the listener name to connect to
 #     connector_properties:

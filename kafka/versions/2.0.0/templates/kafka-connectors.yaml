@@ -80,6 +80,10 @@ spec:
   type: stateful
   containers:
     - name: kafka-connect
+      {{- if and .env (ne (len .env) 0) }}
+      env:
+        {{- toYaml .env | nindent 8 }}
+      {{- end }}
       args:
         - '-c'
         - sleep 60 && cp /opt/bitnami/kafka/init.sh /opt/bitnami/kafka/init-run.sh && chmod +x /opt/bitnami/kafka/init-run.sh && /opt/bitnami/kafka/init-run.sh
