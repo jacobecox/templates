@@ -103,7 +103,7 @@ spec:
     {{- end }}
     debug: false
     suspend: false
-    timeoutSeconds: 30
+    timeoutSeconds: {{ .Values.kafbat_ui.timeoutSeconds }}
 {{- if .Values.kafbat_ui.firewall }}
   firewallConfig:
     {{- if or (hasKey .Values.kafbat_ui.firewall "external_inboundAllowCIDR") (hasKey .Values.kafbat_ui.firewall "external_outboundAllowCIDR") }}

@@ -19,7 +19,7 @@ You can connect to Kafka from the same GVC in which it's deployed using the foll
 
 1. To activate the Kafka client, make sure `kafka_client` is uncommented in your values file. If necessary, reinstall the chart with the command:
    ```bash
-   cpln helm install kafka-dev-cluster -f values-kafka-dev.yaml
+   cpln helm install kafka-dev -f values-kafka-dev.yaml
    ```
 
 2. To connect to the `kafka-client` workload, navigate through the UI to the appropriate GVC and select the `kafka-client` workload. In the workload details, find and use the **Connect** feature to establish a connection, which can be done either via the UI or by utilizing the CLI command provided there.
