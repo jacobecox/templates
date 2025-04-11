@@ -147,7 +147,7 @@ jmx_exporter:
         pattern: java.lang<type=(.+)><>(.+)
 
 kafbat_ui:
-  enabled: false
+  enabled: true
   deletionProtection: true
   name: kafbat-ui
   image: ghcr.io/kafbat/kafka-ui
@@ -156,11 +156,12 @@ kafbat_ui:
   minCpu: 100m
   minMemory: 400Mi
   replicas: 1
+  timeoutSeconds: 30
   configuration_secret: kafka-kafbat-ui-config # Securely pre-create a secret with the configuration
   # Domain name for the UI. 
   # Make sure the required DNS records are created in your DNS server
   # https://docs.controlplane.com/guides/configure-domain#subdomain-e-g-sample-domain-com-cname-mode-path-based-routing
-  domain: kafbat-ui.example.com # Domain name for the UI. 
+  # domain: kafbat-ui.example.com # Domain name for the UI. 
   # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
   firewall:
     # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc
@@ -175,6 +176,7 @@ kafbat_ui:
 #     minCpu: 100m
 #     minMemory: 375Mi
 #     plugins_folder: /opt/bitnami/kafka/plugins
+#     timeoutSeconds: 15
 #     replicas: 1
 #     env:
 #         - name: KAFKA_HEAP_OPTS 
@@ -292,6 +294,67 @@ kafbat_ui:
 #           "errors.tolerance": "all"
 #           "errors.log.enable": "true"
 #           "errors.log.include.messages": "true"
+
+kafka_rest_proxy:
+  enabled: true
+  deletionProtection: true
+  name: rest-proxy
+  image: confluentinc/cp-kafka-rest:latest
+  cpu: 500m
+  memory: 1000Mi
+  capacityAI:
+    enabled: true
+    minCpu: 125m # This only applied when capacityAI is enabled
+    minMemory: 200Mi # This only applied when capacityAI is enabled
+  replicas: 1
+  timeoutSeconds: 15
+  # domain: kafka-rest.example.com # Domain name for the Kafka Rest Proxy.
+
+  # To disable all traffic, comment out the corresponding rule. Docs: https://docs.controlplane.com/concepts/security#firewall
+  firewall:
+    # internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc(Recommended)
+    external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
+    # # You can specify additional workloads with either same-gvc or workload-list:
+    # inboundAllowWorkload:
+    #   - //gvc/main-kafka/workload/main-kafka-kafbat-ui
+    #   - //gvc/client-gvc/workload/client
+    external_outboundAllowCIDR: "0.0.0.0/0" # Provide a comma-separated list
+  properties:
+    # host.name: kafka-rest.example.com
+    bootstrap.servers: SASL_PLAINTEXT://kafka-dev-cluster:9092
+    resource.extension: ALL
+    api.v3.enable: true
+    api.v2.enable: true
+    client.sasl.mechanism: PLAIN
+    api.compatibility.mode: BOTH
+    log4j.opts: -Dlog4j.configuration=file:/tmp/log4j.properties
+    listeners: http://0.0.0.0:8082
+    authentication.realm: KafkaRest
+    authentication.method: BASIC
+    authentication.roles: user
+    client.security.protocol: SASL_PLAINTEXT
+
+  # JAAS configuration for Kafka client and Kafka Rest Proxy
+  # https://docs.confluent.io/platform/current/kafka-rest/production-deployment/confluent-server/security.html#authentication-between-the-admin-rest-and-ak-brokers
+  jaas_conf:
+    KafkaClient {
+    org.apache.kafka.common.security.plain.PlainLoginModule required
+    username="admin"
+    password="your-admin-password";
+    };
+    KafkaRest {
+      org.eclipse.jetty.jaas.spi.PropertyFileLoginModule required
+      debug="true"
+      file="/etc/kafka-rest/password.properties";
+    };
+
+  # # Password properties for Kafka Rest Proxy
+  # # Required when authentication.method is set to BASIC
+  # # https://docs.confluent.io/platform/current/kafka-rest/production-deployment/confluent-server/security.html#password-properties
+  password_properties:
+    user: your-user-password,user
+    user1: password213,user
+    user2: password214,user
 
 kafka_client:
   name: client

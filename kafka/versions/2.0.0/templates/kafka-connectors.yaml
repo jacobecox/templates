@@ -139,7 +139,7 @@ spec:
     capacityAI: false
     debug: false
     suspend: false
-    timeoutSeconds: 5
+    timeoutSeconds: {{ .timeoutSeconds }}
 {{- if .firewall }}
   firewallConfig:
     {{- if or (hasKey .firewall "external_inboundAllowCIDR") (hasKey .firewall "external_outboundAllowCIDR") }}
