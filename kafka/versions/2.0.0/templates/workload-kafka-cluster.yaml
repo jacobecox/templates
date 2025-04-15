@@ -26,6 +26,10 @@ tags:
   cpln/protected: true
   {{- $hasTags = true }}
   {{- end }}
+  {{- if .Values.kafka.multiZone }}
+  cpln/multiZone: true
+  {{- $hasTags = true }}
+  {{- end }}
   {{- if not $hasTags }}
   {}
   {{- end }}
