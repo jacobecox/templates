@@ -73,6 +73,10 @@ tags:
   cpln/protected: true
   {{- $hasTags = true }}
   {{- end }}
+  {{- if .multiZone }}
+  cpln/multiZone: true
+  {{- $hasTags = true }}
+  {{- end }}
   {{- if not $hasTags }}
   {}
   {{- end }}
