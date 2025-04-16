@@ -172,6 +172,7 @@ kafbat_ui:
 # kafka_connectors:
 #   - name: connect-cluster
 #     image: docker.io/bitnami/kafka:3.9
+#     multiZone: true
 #     cpu: 400m
 #     memory: 1500Mi
 #     minCpu: 100m
