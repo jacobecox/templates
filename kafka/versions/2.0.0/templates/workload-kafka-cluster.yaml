@@ -60,7 +60,7 @@ spec:
         - name: KAFKA_CONTROLLER_USER
           value: controller_user
         - name: KAFKA_HEAP_OPTS
-          value: "{{ include "kafka.heap.opts" . | trim }}"
+          value: "{{ .Values.kafka.overrideHeapOpts | default (include "kafka.heap.opts" .) | trim }}"
         - name: KAFKA_INTER_BROKER_PASSWORD
           value: 'cpln://secret/{{ include "kafka.name" . }}-secrets.inter-broker-password'
         - name: KAFKA_INTER_BROKER_USER

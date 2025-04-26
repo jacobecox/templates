@@ -26,7 +26,8 @@ Convert .Values.kafka.memory to appropriate JVM heap size settings.
 {{- else }}
   {{- $memoryInMi = 512 }} # Default to 512Mi if no suffix
 {{- end }}
--Xmx{{ $memoryInMi }}m -Xms{{ $memoryInMi }}m
+{{- $heapSize := div (mul $memoryInMi 60) 100 | int }}
+-Xmx{{ $heapSize }}m -Xms{{ $heapSize }}m
 {{- end }}
 
 {{- define "kafka.validateListenerConfig" -}}
