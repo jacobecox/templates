@@ -1,5 +1,5 @@
 apiVersion: v2
-name: redis-sentinel
+name: redis
 description: A master-replica Redis configuration with Redis Sentinel, using Valkey
 type: application
 version: 2.0.0
