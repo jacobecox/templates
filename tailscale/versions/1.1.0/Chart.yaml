@@ -1,0 +1,11 @@
+apiVersion: v2
+name: tailscale
+description: A Tailscale app for Control Plane
+type: application
+version: 1.1.0
+appVersion: "stable"
+
+annotations:
+  created: 2025-05-13
+  lastModified: 2025-05-13
+  category: "mesh-vpn"
