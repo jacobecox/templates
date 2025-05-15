@@ -33,4 +33,4 @@ cpln workload get {workload-name} --gvc {gvc-name} -o json | jq -r '.status.endp
 
 #### UI
 
-1. Navigate to the generated workload and click `Open` next to the worklod name
+1. Navigate to the generated workload and click `Open` next to the workload name

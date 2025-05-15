@@ -4,7 +4,7 @@ This app creates a Redis sentinel cluster on Control Plane Platform.
 
 ### Accessing redis
 
-Workloads are allowed to access Redis based on the `firewallConfig` you specify. You can learn more about in our [documentation](https://docs.controlplane.com/reference/workload#internal).
+Workloads are allowed to access Redis based on the `firewallConfig` you specify. You can learn more about it in our [documentation](https://docs.controlplane.com/reference/workload#internal).
 
 #### Option 1:
 

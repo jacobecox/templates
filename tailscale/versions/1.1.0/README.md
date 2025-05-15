@@ -65,7 +65,7 @@ Any workload that allows access from this tailscale workload will be able to be 
 
       https://console.cpln.io/
 
-      The tailscale workload will show as `Partially Suspended` this is because a location specific option is configured to run the workload in the one location selected by the values.yaml `location` parameter.
+      The tailscale workload will show as `Partially Suspended`, this is because a location specific option is configured to run the workload in the one location selected by the values.yaml `location` parameter.
       All other locations are suspended so
       there is only one replica running in one location.
 
@@ -85,7 +85,7 @@ Any workload that allows access from this tailscale workload will be able to be 
 
    <img src="images/connected.png" alt="connected" width="400"/>
 
-4. Try to connect to the httpbin workload using the Control Plane internal endpoint from you local machine. You can also complete this step by opening a web browser.
+4. Try to connect to the httpbin workload using the Control Plane internal endpoint from your local machine. You can also complete this step by opening a web browser.
 
    Replace the $GVC with the one specified in the values.yaml file above.
 

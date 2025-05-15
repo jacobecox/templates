@@ -12,7 +12,7 @@ You can connect to Kafka from the same GVC in which it's deployed using the foll
   - `{kafka-cluster-workload-name}-2.{kafka-cluster-workload-name}:9092`
 
 - If you're configuring your Kafka for external access, you'll need to provide a domain name for the public address of the listener you want to use. Prerequisites:
-  - Make sure dedicated load balancer is enabled on the GVC. See [Configure Domain documentation](https://docs.controlplane.com/guides/configure-domain#dedicated-load-balancing).
+  - Make sure the dedicated load balancer is enabled on the GVC. See [Configure Domain documentation](https://docs.controlplane.com/guides/configure-domain#dedicated-load-balancing).
   - Make sure to register your [Apex domain](https://docs.controlplane.com/reference/domain#apex-domain-considerations) name with Control Plane and set up a DNS record for the Kafka public address CNAME with the canonical GVC endpoint in your DNS provider.
 
 ### Test Kafka Cluster with Kafka Client

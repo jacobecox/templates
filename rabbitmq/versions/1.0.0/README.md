@@ -4,7 +4,7 @@ This app creates a single node RabbitMQ on Control Plane Platform.
 
 ### Accessing RabbitMQ
 
-Workloads are allowed to access Rabbitmq based on the `firewallConfig` you specify. You can learn more about in our [documentation](https://docs.controlplane.com/reference/workload#internal).
+Workloads are allowed to access Rabbitmq based on the `firewallConfig` you specify. You can learn more about it in our [documentation](https://docs.controlplane.com/reference/workload#internal).
 
 #### Option 1:
 
