@@ -1,0 +1,304 @@
+---
+# Source: redis/templates/common/identity-redis.yaml
+#
+# kind: identity
+# name: igor-redis-redis
+# gvc: igor-redis
+#
+---
+# Source: redis/templates/common/identity-sentinel.yaml
+#
+# kind: identity
+# name: igor-redis-sentinel
+# gvc: igor-redis
+#
+---
+# Source: redis/templates/common/policy-redis.yaml
+#
+# kind: policy
+# name: igor-redis-redis
+# bindings:
+#   - permissions:
+#       - reveal
+#     principalLinks:
+#       - //gvc/igor-redis/identity/igor-redis-redis
+# targetKind: secret
+# targetLinks:
+#   - //secret/igor-redis-redis-config
+#
+---
+# Source: redis/templates/common/policy-sentinel.yaml
+#
+# kind: policy
+# name: igor-redis-sentinel
+# bindings:
+#   - permissions:
+#       - reveal
+#     principalLinks:
+#       - //gvc/igor-redis/identity/igor-redis-sentinel
+# targetKind: secret
+# targetLinks:
+#   - //secret/igor-redis-sentinel-config
+#
+---
+# Source: redis/templates/common/secret-redis-config.yaml
+#
+# kind: secret
+# name: igor-redis-redis-config
+# type: opaque
+# data:
+#   encoding: plain
+#   payload: |-
+#     bind 0.0.0.0
+#     protected-mode no
+#     port 6379
+#     save 900 1
+#     save 300 10
+#     save 60 10000
+#     appendonly yes
+#
+---
+# Source: redis/templates/common/secret-sentinel-config.yaml
+#
+# kind: secret
+# name: igor-redis-sentinel-config
+# type: opaque
+# data:
+#   encoding: plain
+#   payload: |-
+#     port 26379
+#     dir /tmp
+#     sentinel announce-hostnames yes
+#     sentinel resolve-hostnames yes
+#     sentinel down-after-milliseconds mymaster 5000
+#     sentinel failover-timeout mymaster 10000
+#     sentinel parallel-syncs mymaster 1
+#
+---
+# Source: redis/templates/common/volumeset-redis.yaml
+#
+# kind: volumeset
+# name: igor-redis-redis
+# gvc: igor-redis
+# spec:
+#   fileSystemType: ext4
+#   initialCapacity: 20
+#   performanceClass: general-purpose-ssd
+#
+---
+# Source: redis/templates/common/volumeset-sentinel.yaml
+#
+# kind: volumeset
+# name: igor-redis-sentinel
+# gvc: igor-redis
+# spec:
+#   fileSystemType: ext4
+#   initialCapacity: 20
+#   performanceClass: general-purpose-ssd
+#
+---
+# Source: redis/templates/multi-location/volumeset-sentinel.yaml
+# A
+---
+# Source: redis/templates/multi-location/workload-sentinel.yaml
+# A
+---
+# Source: redis/templates/single-location/identity-redis.yaml
+kind: identity
+name: igor-redis-redis
+gvc: igor-redis
+---
+# Source: redis/templates/single-location/identity-sentinel.yaml
+kind: identity
+name: igor-redis-sentinel
+gvc: igor-redis
+---
+# Source: redis/templates/single-location/policy-redis.yaml
+kind: policy
+name: igor-redis-redis
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/igor-redis/identity/igor-redis-redis
+targetKind: secret
+targetLinks:
+  - //secret/igor-redis-redis-config
+---
+# Source: redis/templates/single-location/policy-sentinel.yaml
+kind: policy
+name: igor-redis-sentinel
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/igor-redis/identity/igor-redis-sentinel
+targetKind: secret
+targetLinks:
+  - //secret/igor-redis-sentinel-config
+---
+# Source: redis/templates/single-location/secret-redis-config.yaml
+kind: secret
+name: igor-redis-redis-config
+type: opaque
+data:
+  encoding: plain
+  payload: |-
+    bind 0.0.0.0
+    protected-mode no
+    port 6379
+    save 900 1
+    save 300 10
+    save 60 10000
+    appendonly yes
+    requirepass fu3h4f9834f8
+    masterauth fu3h4f9834f8
+---
+# Source: redis/templates/single-location/secret-sentinel-config.yaml
+kind: secret
+name: igor-redis-sentinel-config
+type: opaque
+data:
+  encoding: plain
+  payload: |-
+    port 26379
+    dir /tmp
+    sentinel announce-hostnames yes
+    sentinel resolve-hostnames yes
+    sentinel down-after-milliseconds mymaster 5000
+    sentinel failover-timeout mymaster 10000
+    sentinel parallel-syncs mymaster 1
+    sentinel auth-pass mymaster fu3h4f9834f8
+---
+# Source: redis/templates/single-location/volumeset-redis.yaml
+kind: volumeset
+name: igor-redis-redis
+gvc: igor-redis
+spec:
+  fileSystemType: ext4
+  initialCapacity: 20
+  performanceClass: general-purpose-ssd
+---
+# Source: redis/templates/single-location/volumeset-sentinel.yaml
+kind: volumeset
+name: igor-redis-sentinel
+gvc: igor-redis
+spec:
+  fileSystemType: ext4
+  initialCapacity: 20
+  performanceClass: general-purpose-ssd
+---
+# Source: redis/templates/single-location/workload-redis.yaml
+kind: workload
+name: igor-redis-redis
+spec:
+  type: stateful
+  containers:
+    - name: valkey
+      args:
+        - '-c'
+        - >-
+          mkdir /etc/redis
+
+          cp /config/redis.conf /etc/redis/redis.conf
+
+          echo "\nreplica-announce-ip ${HOSTNAME}.igor-redis-redis" >>
+          /etc/redis/redis.conf
+
+          if [ "$(hostname)" = "igor-redis-redis-0" ]; then
+            redis-server /etc/redis/redis.conf
+          else
+            redis-server /etc/redis/redis.conf --replicaof igor-redis-redis-0.igor-redis-redis 6379
+          fi
+      command: /bin/sh
+      cpu: 200m
+      memory: 256Mi
+      image: redis/redis-stack:7.4.0-v3
+      inheritEnv: false
+      ports:
+        - number: 6379
+          protocol: tcp
+      volumes:
+        - path: /data
+          recoveryPolicy: retain
+          uri: cpln://volumeset/igor-redis-redis
+        - path: /config/redis.conf
+          recoveryPolicy: retain
+          uri: cpln://secret/igor-redis-redis-config
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 0
+      metric: cpu
+      minScale: 3
+      maxScale: 3
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      outboundAllowCIDR:
+        - 0.0.0.0/0
+    internal:
+      inboundAllowType: same-gvc
+  identityLink: //gvc/igor-redis/identity/igor-redis-redis
+---
+# Source: redis/templates/single-location/workload-sentinel.yaml
+kind: workload
+name: igor-redis-sentinel
+spec:
+  type: stateful
+  containers:
+    - name: valkey
+      args:
+        - '-c'
+        - >-
+          cp /config/sentinel.conf /etc/sentinel/sentinel.conf
+
+          echo "\nsentinel announce-ip ${HOSTNAME}.igor-redis-sentinel" >>
+          /etc/sentinel/sentinel.conf
+
+          echo "sentinel monitor mymaster igor-redis-redis-0.igor-redis-redis
+          6379 ${REDIS_SENTINEL_QUORUM}" >> /etc/sentinel/sentinel.conf
+
+          redis-sentinel /etc/sentinel/sentinel.conf
+      command: /bin/sh
+      cpu: 200m
+      memory: 256Mi
+      env:
+        - name: REDIS_SENTINEL_QUORUM
+          value: '2'
+      image: redis/redis-stack:7.4.0-v3
+      inheritEnv: false
+      ports:
+        - number: 26379
+          protocol: tcp
+      volumes:
+        - path: /config/sentinel.conf
+          recoveryPolicy: retain
+          uri: cpln://secret/igor-redis-sentinel-config
+        - path: /etc/sentinel
+          recoveryPolicy: retain
+          uri: cpln://volumeset/igor-redis-sentinel
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 0
+      minScale: 
+        3
+      
+      maxScale: 
+        3
+      
+      metric: cpu
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      outboundAllowCIDR:
+        - 0.0.0.0/0
+    internal:
+      inboundAllowType: same-gvc
+  identityLink: //gvc/igor-redis/identity/igor-redis-sentinel
+

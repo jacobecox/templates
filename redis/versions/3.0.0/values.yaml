@@ -1,0 +1,22 @@
+redis:
+  image: redis/redis-stack:7.4.0-v3
+  resources:
+    cpu: 200m
+    memory: 256Mi
+  replicas: 5
+  password: fu3h4f9834f8
+  serverCommand: redis-stack-server  # Can be overridden based on the version of redis image
+
+sentinel:
+  image: redis/redis-stack:7.4.0-v3
+  resources:
+    cpu: 200m
+    memory: 256Mi
+  quorum: 2 # Keep this an even number or just 1
+  # password: poek290f4238f
+
+# Uncomment the location list below and update as you wish if you want a multi location configuration
+# locations:
+#   - aws-eu-central-1
+#   - azure-eastus2
+#   - gcp-us-east1
