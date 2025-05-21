@@ -1,0 +1,10 @@
+# Helm template for NATS identities
+{{- range $gvc := .Values.gvcs }}
+---
+kind: identity
+name: nats-id
+description: nats-id
+tags: {}
+# Include the GVC name as a field
+gvc: {{ $gvc.name }}
+{{- end }}

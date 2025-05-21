@@ -1,0 +1,22 @@
+# Helm template for GVC definitions
+{{- range $gvc := .Values.gvcs }}
+---
+kind: gvc
+name: {{ $gvc.name }}
+description: {{ $gvc.description | default $gvc.name }}
+{{- if $gvc.tags }}
+tags:
+{{ toYaml $gvc.tags | indent 2 }}
+{{- else }}
+tags: {}
+{{- end }}
+spec:
+  loadBalancer:
+    dedicated: {{ $gvc.loadBalancer.dedicated | default false }}
+    trustedProxies: {{ $gvc.loadBalancer.trustedProxies | default 0 }}
+  staticPlacement:
+    locationLinks:
+    {{- range $location := $gvc.locationLinks }}
+    - {{ $location }}
+    {{- end }}
+{{- end }}
