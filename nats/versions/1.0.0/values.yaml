@@ -1,0 +1,125 @@
+# Organization configuration
+org:
+  name: acme
+
+# NATS default configuration
+nats:
+  # The workload name that will be used across all GVCs
+  workloadName: nats1
+
+  # NATS container image
+  image: nats
+
+  # NATS box container image
+  natsBoxImage: natsio/nats-box
+
+  defaults:
+    port: 4222
+    allowNonTls: true
+    cluster:
+      listen: "0.0.0.0:6222"
+      port: 6222 # Added explicit port for cluster
+      noAdvertise: true
+    gateway:
+      listen: "0.0.0.0:7522"
+      port: 7522
+
+# Define all GVCs (locations) with both GVC definition and NATS configuration
+gvcs:
+  - name: aws-us-west-2
+    description: AWS US West (Oregon)
+    tags: {}
+    loadBalancer:
+      dedicated: false
+      trustedProxies: 0
+    locationLinks:
+      - //location/aws-us-west-2
+    nats:
+      cluster: {}
+      gateway: {}
+      resources:
+        cpu: 500m
+        memory: 256Mi
+      natsBox:
+        resources:
+          cpu: 500m
+          memory: 512Mi
+      multiZone: false
+      loadBalancer:
+        enabled: false
+        ports: []
+
+  - name: aws-us-east-2
+    description: AWS US East (Ohio)
+    tags:
+      environment: production
+      region: us-east-2
+    loadBalancer:
+      dedicated: false
+      trustedProxies: 0
+    locationLinks:
+      - //location/aws-us-east-2
+    nats:
+      cluster: {}
+      gateway: {}
+      resources:
+        cpu: 500m
+        memory: 256Mi
+      natsBox:
+        resources:
+          cpu: 500m
+          memory: 512Mi
+      multiZone: false
+      loadBalancer:
+        enabled: false
+        ports: []
+
+  - name: gcp-us-central1
+    description: GCP US Central (Iowa)
+    tags: {}
+    loadBalancer:
+      dedicated: false
+      trustedProxies: 0
+    locationLinks:
+      - //location/gcp-us-central1
+    nats:
+      gateway:
+        extraGateways:
+          - name: external-gateway
+            urls:
+              - "nats://external.example.com:7522"
+      resources:
+        cpu: 500m
+        memory: 256Mi
+      natsBox:
+        resources:
+          cpu: 500m
+          memory: 512Mi
+      multiZone: false
+      loadBalancer:
+        enabled: false
+        ports: []
+
+  # New GVC for Middle East region
+  - name: gcp-me-west1
+    description: GCP Middle East West 1 (Tel Aviv)
+    tags: {}
+    loadBalancer:
+      dedicated: false
+      trustedProxies: 0
+    locationLinks:
+      - //location/gcp-me-west1
+    nats:
+      cluster: {}
+      gateway: {}
+      resources:
+        cpu: 500m
+        memory: 256Mi
+      natsBox:
+        resources:
+          cpu: 500m
+          memory: 512Mi
+      multiZone: false
+      loadBalancer:
+        enabled: false
+        ports: []
