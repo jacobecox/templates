@@ -73,10 +73,6 @@ tags:
   cpln/protected: true
   {{- $hasTags = true }}
   {{- end }}
-  {{- if .multiZone }}
-  cpln/multiZone: true
-  {{- $hasTags = true }}
-  {{- end }}
   {{- if not $hasTags }}
   {}
   {{- end }}
@@ -142,6 +138,13 @@ spec:
       target: 100
     capacityAI: false
     debug: false
+    {{- if .multiZone }}
+    multiZone:
+      enabled: true
+    {{- else }}
+    multiZone:
+      enabled: false
+    {{- end }}
     suspend: false
     timeoutSeconds: {{ .timeoutSeconds }}
 {{- if .firewall }}
