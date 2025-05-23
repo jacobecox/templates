@@ -146,15 +146,6 @@ spec:
 kind: domain
 name: {{ .Values.kafka_rest_proxy.domain }}
 description: {{ .Values.kafka_rest_proxy.domain }}
-tags:
-  {{- $hasTags := false }}
-  {{- if .Values.kafka_rest_proxy.deletionProtection }}
-  cpln/protected: true
-  {{- $hasTags = true }}
-  {{- end }}
-  {{- if not $hasTags }}
-  {}
-  {{- end }}
 spec:
   acceptAllHosts: false
   dnsMode: cname

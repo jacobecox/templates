@@ -13,15 +13,6 @@ name: {{ include "kafka.clusterName" . }}
 gvc: {{ .Values.cpln.gvc }}
 tags:
   {{- $hasTags := false }}
-  {{- if .Values.kafka.listeners }}
-  {{- range .Values.kafka.listeners }}
-    {{- if .publicAddress }}
-  cpln/replicaEndpoint: true
-    {{- $hasTags = true }}
-    {{- break }}
-    {{- end }}
-  {{- end }}
-  {{- end }}
   {{- if .Values.kafka.deletionProtection }}
   cpln/protected: true
   {{- $hasTags = true }}
@@ -244,6 +235,15 @@ spec:
       {{- end }}
     {{- end }}
 {{- end }}
+  {{- if .Values.kafka.listeners }}
+  {{- range .Values.kafka.listeners }}
+    {{- if .publicAddress }}
+  loadBalancer:
+    replicaDirect: true
+    {{- break }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
   identityLink: //identity/{{ include "kafka.name" . }}
   rolloutOptions:
     maxSurgeReplicas: 25%
