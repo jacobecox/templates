@@ -17,10 +17,6 @@ tags:
   cpln/protected: true
   {{- $hasTags = true }}
   {{- end }}
-  {{- if .Values.kafka.multiZone }}
-  cpln/multiZone: true
-  {{- $hasTags = true }}
-  {{- end }}
   {{- if not $hasTags }}
   {}
   {{- end }}
@@ -218,6 +214,13 @@ spec:
       target: 95
     capacityAI: false
     debug: false
+    {{- if .Values.kafka.multiZone }}
+    multiZone:
+      enabled: true
+    {{- else }}
+    multiZone:
+      enabled: false
+    {{- end }}
     suspend: {{ .Values.kafka.suspend }}
     timeoutSeconds: 30
 {{- if .Values.kafka.firewall }}
@@ -239,6 +242,9 @@ spec:
   {{- range .Values.kafka.listeners }}
     {{- if .publicAddress }}
   loadBalancer:
+    direct:
+      enabled: false
+      ports: []
     replicaDirect: true
     {{- break }}
     {{- end }}
