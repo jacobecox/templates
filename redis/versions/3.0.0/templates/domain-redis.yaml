@@ -1,0 +1,18 @@
+{{- if and (hasKey .Values.redis "publicAccess") .Values.redis.publicAccess.enabled }}
+kind: domain
+name: {{ .Values.redis.publicAccess.address }}
+description: {{ .Values.redis.publicAccess.address }}
+spec:
+  acceptAllHosts: false
+  dnsMode: cname
+  ports:
+    {{- range $i := until (int .Values.redis.replicas) }}
+    - number: {{ add 6380 $i }}
+      protocol: tcp
+      routes:
+        - port: {{ add 6380 $i }}
+          prefix: /
+          replica: {{ $i }}
+          workloadLink: //gvc/{{ $.Values.cpln.gvc }}/workload/{{ $.Release.Name }}-redis
+    {{- end }}
+{{- end }}

@@ -16,7 +16,7 @@ kafka:
       snapshots:
         createFinalSnapshot: true
         retentionDuration: 7d
-        schedule: 0 0 9 * * # UTC
+        schedule: 0 0 * * * # UTC
       autoscaling:
         maxCapacity: 1000 # In GB
         minFreePercentage: 20
