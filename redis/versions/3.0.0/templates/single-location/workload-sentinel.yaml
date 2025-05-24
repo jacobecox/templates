@@ -8,57 +8,109 @@ spec:
     - name: sentinel
       args:
         - '-c'
-        - >-
+        - |-
+          {{- if and (hasKey .Values.sentinel "persistence") .Values.sentinel.persistence.enabled }}
+          mkdir -p /etc/sentinel/data
+          {{- else }}
+          mkdir -p /etc/sentinel
+          {{- end }}
           cp /config/sentinel.conf /etc/sentinel/sentinel.conf
 
-          echo "\nsentinel announce-ip ${HOSTNAME}.{{ .Release.Name }}-sentinel" >>
-          /etc/sentinel/sentinel.conf
+          {{- if and (hasKey .Values.sentinel "publicAccess") .Values.sentinel.publicAccess.enabled }}
+          POD_ID=$(echo "$POD_NAME" | rev | cut -d'-' -f 1 | rev)
+          PORT=$((26380 + POD_ID))
+          echo "\nport $PORT" >> /etc/sentinel/sentinel.conf
+          echo "\nsentinel announce-ip {{ .Values.sentinel.publicAccess.address }}" >> /etc/sentinel/sentinel.conf
+          echo "\nsentinel announce-port $PORT" >> /etc/sentinel/sentinel.conf
+          {{ else }}
+          echo "\nport 26379" >> /etc/sentinel/sentinel.conf
+          echo "\nsentinel announce-ip ${HOSTNAME}.{{ .Release.Name }}-sentinel" >> /etc/sentinel/sentinel.conf
+          echo "\nsentinel announce-port 26379" >> /etc/sentinel/sentinel.conf
+          {{ end }}
 
-          echo "sentinel monitor mymaster {{ .Release.Name }}-redis-0.{{ .Release.Name }}-redis
-          6379 ${REDIS_SENTINEL_QUORUM}" >> /etc/sentinel/sentinel.conf
+          {{- if and (hasKey .Values.redis "publicAccess") .Values.redis.publicAccess.enabled }}
+          echo "sentinel monitor mymaster {{ .Values.redis.publicAccess.address }} 6380 ${REDIS_SENTINEL_QUORUM}" >> /etc/sentinel/sentinel.conf
+          {{ else }}
+          echo "sentinel monitor mymaster {{ .Release.Name }}-redis-0.{{ .Release.Name }}-redis 6379 ${REDIS_SENTINEL_QUORUM}" >> /etc/sentinel/sentinel.conf
+          {{ end }}
 
           redis-sentinel /etc/sentinel/sentinel.conf
       command: /bin/sh
       cpu: {{ .Values.sentinel.resources.cpu }}
       memory: {{ .Values.sentinel.resources.memory }}
+      minCpu: {{ .Values.sentinel.resources.minCpu }}
+      minMemory: {{ .Values.sentinel.resources.minMemory }}
       env:
         - name: REDIS_SENTINEL_QUORUM
-          value: '{{ .Values.sentinel.quorum }}'
+          value: '{{ if .Values.sentinel.quorumAutoCalculation }}{{ add (div (int .Values.sentinel.replicas) 2) 1 }}{{ else }}{{ .Values.sentinel.quorumOverride }}{{ end }}'
+        - name: REDIS_SENTINEL_DATA_DIR
+          value: /etc/sentinel/data
+      {{- if .Values.sentinel.env }}
+{{ toYaml .Values.sentinel.env | indent 8 }}
+      {{- end }}
       image: {{ .Values.sentinel.image }}
       inheritEnv: false
       ports:
+{{- if and (hasKey .Values.sentinel "publicAccess") .Values.sentinel.publicAccess.enabled }}
+    {{- $startPort := 26380 }}
+    {{- $replicas := $.Values.sentinel.replicas | int }}
+    {{- range $replicaIndex := until $replicas }}
+        - number: {{ add $startPort $replicaIndex }}
+          protocol: tcp
+    {{- end }}
+{{- else }}
         - number: 26379
           protocol: tcp
+{{- end }}
       volumes:
         - path: /config/sentinel.conf
           recoveryPolicy: retain
           uri: cpln://secret/{{ .Release.Name }}-sentinel-config
+        {{- if and (hasKey .Values.sentinel "persistence") .Values.sentinel.persistence.enabled }}
         - path: /etc/sentinel
           recoveryPolicy: retain
           uri: cpln://volumeset/{{ .Release.Name }}-sentinel
+        {{- end }}
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
-      minScale: {{ if eq (int .Values.sentinel.quorum) 1 }}
-        1
-      {{ else }}
-        {{ add (int .Values.sentinel.quorum) 1 }}
-      {{ end }}
-      maxScale: {{ if eq (int .Values.sentinel.quorum) 1 }}
-        1
-      {{ else }}
-        {{ add (int .Values.sentinel.quorum) 1 }}
-      {{ end }}
-      metric: cpu
+      minScale: {{ .Values.sentinel.replicas }}
+      maxScale: {{ .Values.sentinel.replicas }}
+      metric: disabled
       scaleToZeroDelay: 300
       target: 100
     capacityAI: false
-    timeoutSeconds: 5
+    debug: false
+    suspend: false
+    timeoutSeconds: {{ .Values.sentinel.timeoutSeconds }}
+    {{- if .Values.sentinel.multiZone }}
+    multiZone:
+      enabled: true
+    {{- else }}
+    multiZone:
+      enabled: false
+    {{- end }}
+{{- if .Values.sentinel.firewall }}
   firewallConfig:
+    {{- if or (hasKey .Values.sentinel.firewall "external_inboundAllowCIDR") (hasKey .Values.sentinel.firewall "external_outboundAllowCIDR") }}
     external:
-      outboundAllowCIDR:
-        - 0.0.0.0/0
+      inboundAllowCIDR: {{- if .Values.sentinel.firewall.external_inboundAllowCIDR }}{{ .Values.sentinel.firewall.external_inboundAllowCIDR | splitList "," | toYaml | nindent 8 }}{{- else }} []{{- end }}
+      outboundAllowCIDR: {{- if .Values.sentinel.firewall.external_outboundAllowCIDR }}{{ .Values.sentinel.firewall.external_outboundAllowCIDR | splitList "," | toYaml | nindent 8 }}{{- else }} []{{- end }}
+    {{- end }}
+    {{- if hasKey .Values.sentinel.firewall "internal_inboundAllowType" }}
     internal:
-      inboundAllowType: same-gvc
+      inboundAllowType: {{ default "[]" .Values.sentinel.firewall.internal_inboundAllowType }}
+      {{- if .Values.sentinel.firewall.inboundAllowWorkload }}
+      inboundAllowWorkload: {{ .Values.sentinel.firewall.inboundAllowWorkload | toYaml | nindent 8 }}
+      {{- end }}
+    {{- end }}
+{{- end }}
   identityLink: //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Release.Name }}-sentinel
+{{- if and (hasKey .Values.sentinel "publicAccess") .Values.sentinel.publicAccess.enabled }}
+  loadBalancer:
+    replicaDirect: true
+{{- else }}
+  loadBalancer:
+    replicaDirect: false
+{{- end }}
 {{- end }}
