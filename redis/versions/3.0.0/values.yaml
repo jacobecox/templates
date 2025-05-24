@@ -7,11 +7,18 @@ redis:
     minMemory: 128Mi
   replicas: 3
   timeoutSeconds: 15
-  password: fu3h4f9834f8
+  auth:
+    fromSecret:
+      enabled: false
+      name: example-redis-auth-password
+      passwordKey: password
+    password:
+      enabled: false
+      value: your-password
   serverCommand: redis-stack-server  # Can be overridden based on the version of redis image
   publicAccess:
     enabled: false
-    address: redis-test.igorcloud.com
+    address: redis-test.example-cpln.com
   firewall:
     internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc(Recommended) / workload-list
     external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list
@@ -48,10 +55,17 @@ sentinel:
   timeoutSeconds: 10
   quorumAutoCalculation: true  # Set to false if you want to override quorum. Quorum is (replicas/2)+1
   quorumOverride: null  # Only used if quorumAutoCalculation is false
-  password: fu3h4f9834f8
+  auth:
+    fromSecret:
+      enabled: false
+      name: example-redis-auth-password
+      passwordKey: password
+    password:
+      enabled: false
+      value: your-password
   publicAccess:
     enabled: false
-    address: redis-sentinel-test.igorcloud.com
+    address: redis-sentinel-test.example-cpln.com
   firewall:
     internal_inboundAllowType: "same-gvc" # Options: same-org / same-gvc(Recommended)
     external_inboundAllowCIDR: 0.0.0.0/0 # Provide a comma-separated list

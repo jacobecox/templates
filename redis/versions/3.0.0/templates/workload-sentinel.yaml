@@ -1,5 +1,4 @@
-{{- if .Values.locations }}
-{{- else }}
+{{ include "validateAuth" (dict "auth" .Values.sentinel.auth) }}
 kind: workload
 name: {{ .Release.Name }}-sentinel
 spec:
@@ -15,6 +14,14 @@ spec:
           mkdir -p /etc/sentinel
           {{- end }}
           cp /config/sentinel.conf /etc/sentinel/sentinel.conf
+
+          if [ -n "$CUSTOM_REDIS_PASSWORD" ]; then
+            echo "\nsentinel auth-pass mymaster $CUSTOM_REDIS_PASSWORD" >> /etc/sentinel/sentinel.conf
+          fi
+
+          if [ -n "$CUSTOM_SENTINEL_PASSWORD" ]; then
+            echo "\nrequirepass $CUSTOM_SENTINEL_PASSWORD" >> /etc/sentinel/sentinel.conf
+          fi
 
           {{- if and (hasKey .Values.sentinel "publicAccess") .Values.sentinel.publicAccess.enabled }}
           POD_ID=$(echo "$POD_NAME" | rev | cut -d'-' -f 1 | rev)
@@ -45,6 +52,20 @@ spec:
           value: '{{ if .Values.sentinel.quorumAutoCalculation }}{{ add (div (int .Values.sentinel.replicas) 2) 1 }}{{ else }}{{ .Values.sentinel.quorumOverride }}{{ end }}'
         - name: REDIS_SENTINEL_DATA_DIR
           value: /etc/sentinel/data
+      {{- if and (hasKey .Values.redis "auth") (hasKey .Values.redis.auth "fromSecret") .Values.redis.auth.fromSecret.enabled }}
+        - name: CUSTOM_REDIS_PASSWORD
+          value: cpln://secret/{{ .Values.redis.auth.fromSecret.name }}.{{ .Values.redis.auth.fromSecret.passwordKey }}
+      {{- else if and (hasKey .Values.redis "auth") (hasKey .Values.redis.auth "password") .Values.redis.auth.password.enabled }}
+        - name: CUSTOM_REDIS_PASSWORD
+          value: cpln://secret/{{ .Release.Name }}-redis-auth-password.password
+      {{- end }}
+      {{- if and (hasKey .Values.sentinel "auth") (hasKey .Values.sentinel.auth "fromSecret") .Values.sentinel.auth.fromSecret.enabled }}
+        - name: CUSTOM_SENTINEL_PASSWORD
+          value: cpln://secret/{{ .Values.sentinel.auth.fromSecret.name }}.{{ .Values.sentinel.auth.fromSecret.passwordKey }}
+      {{- else if and (hasKey .Values.sentinel "auth") (hasKey .Values.sentinel.auth "password") .Values.sentinel.auth.password.enabled }}
+        - name: CUSTOM_SENTINEL_PASSWORD
+          value: cpln://secret/{{ .Release.Name }}-sentinel-auth-password.password
+      {{- end }}
       {{- if .Values.sentinel.env }}
 {{ toYaml .Values.sentinel.env | indent 8 }}
       {{- end }}
@@ -112,5 +133,4 @@ spec:
 {{- else }}
   loadBalancer:
     replicaDirect: false
-{{- end }}
 {{- end }}

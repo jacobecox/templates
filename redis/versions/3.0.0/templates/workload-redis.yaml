@@ -1,5 +1,4 @@
-{{- if .Values.locations }}
-{{- else }}
+{{ include "validateAuth" (dict "auth" .Values.redis.auth) }}
 kind: workload
 name: {{ .Release.Name }}-redis
 spec:
@@ -9,7 +8,15 @@ spec:
       env:
       {{- if .Values.redis.env }}
 {{ toYaml .Values.redis.env | indent 8 }}
-      {{- else }}
+      {{- end }}
+      {{- if and (hasKey .Values.redis "auth") (hasKey .Values.redis.auth "fromSecret") .Values.redis.auth.fromSecret.enabled }}
+        - name: CUSTOM_REDIS_PASSWORD
+          value: cpln://secret/{{ .Values.redis.auth.fromSecret.name }}.{{ .Values.redis.auth.fromSecret.passwordKey }}
+      {{- else if and (hasKey .Values.redis "auth") (hasKey .Values.redis.auth "password") .Values.redis.auth.password.enabled }}
+        - name: CUSTOM_REDIS_PASSWORD
+          value: cpln://secret/{{ .Release.Name }}-redis-auth-password.password
+      {{- end }}
+      {{- if not (or .Values.redis.env (and (hasKey .Values.redis "auth") (or (and (hasKey .Values.redis.auth "fromSecret") .Values.redis.auth.fromSecret.enabled) (and (hasKey .Values.redis.auth "password") .Values.redis.auth.password.enabled)))) }}
         []
       {{- end }}
       args:
@@ -18,6 +25,11 @@ spec:
           mkdir /etc/redis
 
           cp /config/redis.conf /etc/redis/redis.conf
+
+          if [ -n "$CUSTOM_REDIS_PASSWORD" ]; then
+            echo "\nrequirepass $CUSTOM_REDIS_PASSWORD" >> /etc/redis/redis.conf
+            echo "\nmasterauth $CUSTOM_REDIS_PASSWORD" >> /etc/redis/redis.conf
+          fi
 
           {{- if and (hasKey .Values.redis "publicAccess") .Values.redis.publicAccess.enabled }}
           POD_ID=$(echo "$POD_NAME" | rev | cut -d'-' -f 1 | rev)
@@ -109,5 +121,4 @@ spec:
 {{- else }}
   loadBalancer:
     replicaDirect: false
-{{- end }}
 {{- end }}
