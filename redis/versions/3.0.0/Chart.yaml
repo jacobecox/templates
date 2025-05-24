@@ -3,7 +3,7 @@ name: redis
 description: A master-replica Redis configuration with Redis Sentinel
 type: application
 version: 3.0.0
-appVersion: "8"
+appVersion: "custom"
 
 annotations:
   created: "2025-05-24"
