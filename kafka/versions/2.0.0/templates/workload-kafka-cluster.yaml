@@ -13,21 +13,8 @@ name: {{ include "kafka.clusterName" . }}
 gvc: {{ .Values.cpln.gvc }}
 tags:
   {{- $hasTags := false }}
-  {{- if .Values.kafka.listeners }}
-  {{- range .Values.kafka.listeners }}
-    {{- if .publicAddress }}
-  cpln/replicaEndpoint: true
-    {{- $hasTags = true }}
-    {{- break }}
-    {{- end }}
-  {{- end }}
-  {{- end }}
   {{- if .Values.kafka.deletionProtection }}
   cpln/protected: true
-  {{- $hasTags = true }}
-  {{- end }}
-  {{- if .Values.kafka.multiZone }}
-  cpln/multiZone: true
   {{- $hasTags = true }}
   {{- end }}
   {{- if not $hasTags }}
@@ -227,6 +214,13 @@ spec:
       target: 95
     capacityAI: false
     debug: false
+    {{- if .Values.kafka.multiZone }}
+    multiZone:
+      enabled: true
+    {{- else }}
+    multiZone:
+      enabled: false
+    {{- end }}
     suspend: {{ .Values.kafka.suspend }}
     timeoutSeconds: 30
 {{- if .Values.kafka.firewall }}
@@ -244,6 +238,18 @@ spec:
       {{- end }}
     {{- end }}
 {{- end }}
+  {{- if .Values.kafka.listeners }}
+  {{- range .Values.kafka.listeners }}
+    {{- if .publicAddress }}
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: true
+    {{- break }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
   identityLink: //identity/{{ include "kafka.name" . }}
   rolloutOptions:
     maxSurgeReplicas: 25%
