@@ -72,7 +72,7 @@ spec:
       image: {{ .Values.sentinel.image }}
       inheritEnv: false
       ports:
-{{- if and (hasKey .Values.sentinel "publicAccess") .Values.sentinel.publicAccess.enabled }}
+{{- if and (hasKey .Values.sentinel "publicAccess") .Values.sentinel.publicAccess.enabled (gt (.Values.sentinel.replicas | int) 0) }}
     {{- $startPort := 26380 }}
     {{- $replicas := $.Values.sentinel.replicas | int }}
     {{- range $replicaIndex := until $replicas }}
