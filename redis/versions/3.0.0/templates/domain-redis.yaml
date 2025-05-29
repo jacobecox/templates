@@ -5,6 +5,7 @@ description: {{ .Values.redis.publicAccess.address }}
 spec:
   acceptAllHosts: false
   dnsMode: cname
+  {{- if gt .Values.sentinel.replicas 0 }}
   ports:
     {{- range $i := until (int .Values.redis.replicas) }}
     - number: {{ add 6380 $i }}
@@ -15,4 +16,5 @@ spec:
           replica: {{ $i }}
           workloadLink: //gvc/{{ $.Values.cpln.gvc }}/workload/{{ $.Release.Name }}-redis
     {{- end }}
+  {{- end }}
 {{- end }}
