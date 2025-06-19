@@ -24,7 +24,12 @@ essConfig:
     #   awsSecretsManager:
     #     region: us-east-1
     #     accessKeyId: <ACCESS_KEY>
-    #     secretAccessKey: <SECRET
+    #     secretAccessKey: <SECRET_ACCESS_KEY>
+    # - name: my-1password
+    #   onePassword:
+    #     serviceAccountToken: <TOKEN>
+    #     integrationName: my-ess <optional - defaults to syncer.cpln.io>
+    #     integrationVersion: 1.0.0 <optional - defaults to image tag>
   secrets:
     - name: auth
       provider: my-vault
