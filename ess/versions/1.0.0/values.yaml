@@ -59,6 +59,6 @@ essConfig:
     #     PASSWORD:
     #       path: /example/app
     #       parse: password
-    - name: doppler
-      provider: my-doppler
-      opaque: /project/config/secret
+    # - name: doppler
+    #   provider: my-doppler
+    #   opaque: /project/config/secret
