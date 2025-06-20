@@ -1,6 +1,6 @@
 workload:
   name: ess
-  image: ghcr.io/controlplane-com/cpln-build/external-secret-syncer:1.1.0
+  image: ghcr.io/controlplane-com/cpln-build/external-secret-syncer:1.2.2
   resources:
     cpu: 200m
     memory: 256Mi
@@ -30,6 +30,9 @@ essConfig:
     #     serviceAccountToken: <TOKEN>
     #     integrationName: my-ess <optional - defaults to syncer.cpln.io>
     #     integrationVersion: 1.0.0 <optional - defaults to image tag>
+    # - name: my-doppler
+    #   doppler:
+    #     accessToken: <TOKEN>
   secrets:
     - name: auth
       provider: my-vault
@@ -56,3 +59,6 @@ essConfig:
     #     PASSWORD:
     #       path: /example/app
     #       parse: password
+    - name: doppler
+      provider: my-doppler
+      opaque: /project/config/secret
