@@ -1,0 +1,20 @@
+{{- if and (hasKey .Values.redis "persistence") .Values.redis.persistence.enabled }}
+kind: volumeset
+name: {{ .Release.Name }}-redis
+gvc: {{ .Values.cpln.gvc }}
+spec:
+  fileSystemType: {{ .Values.redis.persistence.volumes.data.fileSystemType }}
+  initialCapacity: {{ .Values.redis.persistence.volumes.data.initialCapacity }}
+  performanceClass: {{ .Values.redis.persistence.volumes.data.performanceClass }}
+  {{- if .Values.redis.persistence.volumes.data.snapshots }}
+  snapshots:
+    retentionDuration: {{ .Values.redis.persistence.volumes.data.snapshots.retentionDuration }}
+    schedule: {{ .Values.redis.persistence.volumes.data.snapshots.schedule }}
+  {{- end }}
+  {{- if .Values.redis.persistence.volumes.data.autoscaling }}
+  autoscaling:
+    maxCapacity: {{ .Values.redis.persistence.volumes.data.autoscaling.maxCapacity }}
+    minFreePercentage: {{ .Values.redis.persistence.volumes.data.autoscaling.minFreePercentage }}
+    scalingFactor: {{ .Values.redis.persistence.volumes.data.autoscaling.scalingFactor }}
+  {{- end }}
+{{- end }}
