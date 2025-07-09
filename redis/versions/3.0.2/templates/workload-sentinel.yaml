@@ -1,6 +1,15 @@
 {{ include "validateAuth" (dict "auth" .Values.sentinel.auth) }}
 kind: workload
 name: {{ .Release.Name }}-sentinel
+tags:
+  {{- $hasTags := false }}
+  {{- if .Values.sentinel.tags }}
+{{ toYaml .Values.sentinel.tags | indent 2 }}
+    {{- $hasTags = true }}
+  {{- end }}
+  {{- if not $hasTags }}
+  {}
+  {{- end }}
 spec:
   type: stateful
   containers:
