@@ -1,0 +1,103 @@
+# Helm template for NATS workloads
+{{- $workloadName := .Values.nats.workloadName }}
+{{- range $gvc := .Values.gvcs }}
+---
+kind: workload
+name: {{ $workloadName }}
+description: {{ $workloadName }}
+tags: {}
+# Add gvc field to ensure deployment to the correct GVC
+gvc: {{ $gvc.name }}
+spec:
+  type: stateful
+  containers:
+    - name: nats
+      args:
+        - '-c'
+        - /etc/nats/{{ $gvc.name }}.conf
+        - '--no_advertise'
+        - '--client_advertise'
+        - {{ $workloadName }}.{{ $gvc.name }}.cpln.local:{{ $gvc.nats.port | default $.Values.nats.defaults.port | default 4222 }}
+      command: nats-server
+      cpu: {{ default "500m" (($gvc.nats).resources).cpu | default nil }}
+      image: {{ $.Values.nats.image | default "nats" }}
+      inheritEnv: false
+      memory: {{ default "256Mi" (($gvc.nats).resources).memory | default nil }}
+      ports:
+        {{- $websocketConfig := $gvc.nats.websocket | default $.Values.nats.defaults.websocket | default nil }}
+        {{- if $websocketConfig }}
+        {{- if $websocketConfig.enabled }}
+        - number: {{ $websocketConfig.port | default 8080 }}
+          protocol: http  # WebSocket uses HTTP protocol
+        {{- end }}
+        {{- end }}
+        - number: {{ $gvc.nats.port | default $.Values.nats.defaults.port | default 4222 }}
+          protocol: tcp
+        - number: {{ default 6222 (default ($.Values.nats.defaults.cluster).port (($gvc.nats.cluster).port | default nil)) }}
+          protocol: tcp
+        - number: {{ default 7522 (default ($.Values.nats.defaults.gateway).port (($gvc.nats.gateway).port | default nil)) }}
+          protocol: tcp
+        
+      readinessProbe:
+        failureThreshold: 3
+        initialDelaySeconds: 0
+        periodSeconds: 10
+        successThreshold: 1
+        tcpSocket:
+          port: {{ $gvc.nats.port | default $.Values.nats.defaults.port | default 4222 }}
+        timeoutSeconds: 1
+      volumes:
+        - path: /etc/nats/{{ $gvc.name }}.conf
+          recoveryPolicy: retain
+          uri: cpln://secret/nats-{{ $gvc.name }}.payload
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 0
+      maxScale: 1
+      metric: disabled
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    # Fix: handle both boolean and object multiZone
+    multiZone:
+      enabled: false
+    suspend: false
+    timeoutSeconds: 10
+  firewallConfig:
+    external:
+      inboundAllowCIDR: 
+        - 0.0.0.0/0
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: same-org
+      inboundAllowWorkload: []
+  # Ensure identity reference is to nats-id in the same GVC
+  identityLink: //gvc/{{ $gvc.name }}/identity/nats-id
+  loadBalancer:
+    direct:
+      enabled: {{ if (hasKey $gvc.nats "loadBalancer") }}{{ if (hasKey $gvc.nats.loadBalancer "enabled") }}{{ $gvc.nats.loadBalancer.enabled }}{{ else }}false{{ end }}{{ else }}false{{ end }}
+      {{- $websocketConfig := $gvc.nats.websocket | default $.Values.nats.defaults.websocket | default nil }}
+      {{- $websocketEnabled := false }}
+      {{- if $websocketConfig }}{{ if $websocketConfig.enabled }}{{ $websocketEnabled = true }}{{ end }}{{ end }}
+      {{- $lbPorts := list }}
+      {{- if (hasKey $gvc.nats "loadBalancer") }}{{ if (hasKey $gvc.nats.loadBalancer "ports") }}{{ $lbPorts = $gvc.nats.loadBalancer.ports }}{{ end }}{{ end }}
+      {{- if and $websocketEnabled (hasKey $gvc.nats "loadBalancer") (hasKey $gvc.nats.loadBalancer "enabled") $gvc.nats.loadBalancer.enabled }}
+      {{- $wsPort := 8080 }}
+      {{- if $websocketConfig.port }}{{ $wsPort = $websocketConfig.port }}{{ end }}
+      {{- $wsPortFound := false }}
+      {{- range $port := $lbPorts }}
+        {{- if eq $port $wsPort }}{{ $wsPortFound = true }}{{ end }}
+      {{- end }}
+      {{- if not $wsPortFound }}
+        {{- $lbPorts = append $lbPorts $wsPort }}
+      {{- end }}
+      {{- end }}
+      ports: {{ $lbPorts | toJson }}
+  supportDynamicTags: false
+{{- end }}

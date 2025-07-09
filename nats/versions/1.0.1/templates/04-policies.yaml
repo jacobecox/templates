@@ -1,0 +1,16 @@
+# Helm template for NATS policies
+{{- range $gvc := .Values.gvcs }}
+---
+kind: policy
+name: nats-{{ $gvc.name }}-policy
+description: nats-{{ $gvc.name }}-policy
+tags: {}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ $gvc.name }}/identity/nats-id
+targetKind: secret
+targetLinks:
+  - //secret/nats-{{ $gvc.name }}
+{{- end }}
