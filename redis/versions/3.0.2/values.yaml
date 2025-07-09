@@ -29,6 +29,7 @@ redis:
     #   - //gvc/client-gvc/workload/client
     # external_outboundAllowCIDR: "0.0.0.0/0" # Provide a comma-separated list
   env: []
+  tags: {}
   dataDir: /data
   persistence:
     enabled: false
@@ -76,6 +77,7 @@ sentinel:
     #   - //gvc/client-gvc/workload/client
     # external_outboundAllowCIDR: "0.0.0.0/0" # Provide a comma-separated list
   env: []
+  tags: {}
   persistence:
     enabled: false
     volumes:
