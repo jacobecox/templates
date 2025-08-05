@@ -1,0 +1,80 @@
+{{- $natsConfig := .Values.nats_defaults }}
+---
+kind: workload
+name: {{ $natsConfig.workload_name }}
+description: NATS cluster across multiple locations
+tags:
+  service: nats
+  environment: {{ .Values.gvc.name }}
+spec:
+  type: stateful
+  containers:
+    - name: {{ $natsConfig.workload_name }}
+      cpu: 100m
+      image: controlplanecorporation/mynats:0.1
+      inheritEnv: false
+      memory: 256Mi
+      ports:
+        {{- if and $natsConfig.websocket $natsConfig.websocket.enabled }}
+        - number: {{ $natsConfig.websocket.port }}
+          protocol: http
+        {{- end }}
+        - number: {{ $natsConfig.port }}
+          protocol: tcp
+        {{- if $natsConfig.cluster }}
+        - number: {{ $natsConfig.cluster.port }}
+          protocol: tcp
+        {{- end }}
+        {{- if $natsConfig.gateway }}
+        - number: {{ $natsConfig.gateway.port }}
+          protocol: tcp
+        {{- end }}
+      volumes:
+        - path: /etc/nats/nats.yaml
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Values.secret.name }}.payload
+        - path: /etc/nats/nats-extra.yaml
+          recoveryPolicy: retain
+          uri: cpln://secret/nats-extra-data.payload
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 0
+      maxScale: {{ (index .Values.gvc.locations 0).replicas | int }}
+      metric: disabled
+      minScale: {{ (index .Values.gvc.locations 0).replicas | int }}
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 10
+  firewallConfig:
+    external:
+      inboundAllowCIDR: {{ toYaml .Values.allowCIDR | nindent 6 }}
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: same-gvc
+      inboundAllowWorkload: []
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Values.identity.name }}
+  loadBalancer:
+    replicaDirect: true
+  localOptions:
+    {{- range $location := .Values.gvc.locations }}
+    - autoscaling:
+        maxConcurrency: 0
+        maxScale: {{ if eq ($location.replicas | int) 0 }}1{{ else }}{{ $location.replicas | int }}{{ end }}
+        metric: disabled
+        minScale: {{ if eq ($location.replicas | int) 0 }}0{{ else }}{{ $location.replicas | int }}{{ end }}
+        scaleToZeroDelay: 300
+        target: 100
+      capacityAI: false
+      debug: false
+      location: //location/{{ $location.name }}
+      suspend: {{ if eq ($location.replicas | int) 0 }}true{{ else }}false{{ end }}
+      timeoutSeconds: 10
+    {{- end }}
+  supportDynamicTags: false
