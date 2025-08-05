@@ -3,7 +3,7 @@ name: nats
 description: NATS super cluster across regions
 type: application
 version: 1.0.2
-appVersion: "1.0.2"
+appVersion: "2.11.6"
 
 annotations:
   created: "2025-07-04"
