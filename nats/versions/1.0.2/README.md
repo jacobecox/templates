@@ -1,0 +1,11 @@
+## NATS Super Cluster
+
+### Overview
+NATS is an open-source, high-performance, lightweight messaging system optimized for cloud-native architectures. It supports pub/sub, queueing and request/reply patterns, and its Supercluster architecture replicates data and balances load across one or multiple regions for global scalability, fault tolerance and low latency. This template create one GVC with a super cluster configuration that can span across any regions of your GVC. By default it exposes a Websockets interface. Make sure you modify the CIDR groups to just the IPs you wish to accept connections from. 
+
+You can also add any valid NATS configuration in the values file under nats_extra_config
+
+
+
+### Supported External Services
+- [NATS Documentation](https://docs.nats.io/)
