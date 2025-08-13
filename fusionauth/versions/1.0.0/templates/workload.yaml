@@ -1,0 +1,70 @@
+kind: workload
+name: {{ include "fusionauth.name" . }}-auth
+gvc: {{ .Values.cpln.gvc }}
+tags:
+  {{- include "fusionauth.tags" . | nindent 2 }}
+spec:
+  type: serverless
+  identityLink: //identity/{{ include "postgres.pg.name" . }}
+
+  {{- $postgresHost := printf "%s-%s" .Release.Name "postgres" }}
+
+  containers:
+    - name: fusionauth
+      cpu: 512m
+      memory: 1024Mi
+      image: /org/jacob-cox/image/fusionauth-app:01
+      inheritEnv: false
+      env:
+        - name: DATABASE_PASSWORD
+          value: 'cpln://secret/{{ include "postgres.pg.secretName" . }}.password'
+        - name: DATABASE_URL
+          value: {{ include "fusionauth.databaseURL" . }}
+        - name: DATABASE_USERNAME
+          value: 'cpln://secret/{{ include "postgres.pg.secretName" . }}.username'
+
+      ports:
+        - number: 9011
+          protocol: http
+
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 1000
+      maxScale: 3
+      metric: concurrency
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: true
+    debug: false
+    suspend: false
+    timeoutSeconds: 30
+
+  firewallConfig:
+    external:
+      inboundAllowCIDR:
+        - 0.0.0.0/0
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname:
+{{- if .Values.identityProviders.google.enabled }}
+        - oauth2.googleapis.com
+        - www.googleapis.com
+        - accounts.google.com
+{{- end }}
+      outboundAllowPort:
+{{- if .Values.identityProviders.google.enabled }}
+        - number: 443
+          protocol: tcp
+{{- end }}
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: none
+      inboundAllowWorkload: []
+
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: false
+  supportDynamicTags: false
