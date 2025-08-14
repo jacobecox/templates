@@ -22,6 +22,9 @@ spec:
           value: {{ include "fusionauth.databaseURL" . }}
         - name: DATABASE_USERNAME
           value: 'cpln://secret/{{ include "postgres.pg.secretName" . }}.username'
+        - name: FUSIONAUTH_MAINTENANCE_MODE
+          value: 'false'
+
 
       ports:
         - number: 9011
