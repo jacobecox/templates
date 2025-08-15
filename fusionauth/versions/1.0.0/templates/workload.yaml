@@ -7,13 +7,13 @@ spec:
   type: serverless
   identityLink: //identity/{{ include "postgres.pg.name" . }}
 
-  {{- $postgresHost := printf "%s-%s" .Release.Name "postgres" }}
+  {{- $postgresHost := printf "%s-%s" .Release.Name "db" }}
 
   containers:
     - name: fusionauth
       cpu: 512m
       memory: 1024Mi
-      image: /org/jacob-cox/image/fusionauth-app:01
+      image: fusionauth/fusionauth-app:latest
       inheritEnv: false
       env:
         - name: DATABASE_PASSWORD
@@ -22,13 +22,27 @@ spec:
           value: {{ include "fusionauth.databaseURL" . }}
         - name: DATABASE_USERNAME
           value: 'cpln://secret/{{ include "postgres.pg.secretName" . }}.username'
-        - name: FUSIONAUTH_MAINTENANCE_MODE
+        - name: MAINTENANCE_MODE
           value: 'false'
-
+        - name: FUSIONAUTH_APP_RUNTIME_MODE
+          value: 'production'
+        - name: FUSIONAUTH_APP_SILENT_MODE
+          value: 'true'
 
       ports:
         - number: 9011
           protocol: http
+      livenessProbe:
+        exec:
+          command:
+            - sh
+            - -c
+            - "curl -s -o /dev/null -w '%{http_code}' http://localhost:9011/api/health | grep -q '^200$'"
+        failureThreshold: 3
+        initialDelaySeconds: 60
+        periodSeconds: 15
+        successThreshold: 1
+        timeoutSeconds: 5
 
   defaultOptions:
     autoscaling:

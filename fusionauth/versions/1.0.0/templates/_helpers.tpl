@@ -50,7 +50,7 @@ app.cpln.io/instance: {{ .Release.Name }}
 PostgreSQL Host Name
 */}}
 {{- define "fusionauth.postgresHost" -}}
-{{- printf "%s" .Release.Name }}
+{{- printf "%s-db" .Release.Name }}
 {{- end }}
 
 {{/*
