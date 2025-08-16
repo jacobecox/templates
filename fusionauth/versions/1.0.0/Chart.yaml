@@ -9,7 +9,7 @@ appVersion: "1.58.2"
 dependencies:
   - name: postgres
     version: 2.0.0
-    repository: file://../../../postgres/versions/2.0.0
+    repository: "https://github.com/controlplane-com/templates/tree/main/postgres/versions/2.0.0"
 
 
 annotations:
