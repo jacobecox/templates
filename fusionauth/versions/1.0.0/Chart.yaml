@@ -1,0 +1,18 @@
+apiVersion: v2
+name: fusionauth
+description: FusionAuth app for Control Plane
+
+type: application
+version: 1.0.0
+appVersion: "1.58.2"
+
+dependencies:
+  - name: postgres
+    version: 2.0.0
+    repository: file://../../../postgres/versions/2.0.0
+
+
+annotations:
+  created: "2025-08-15"
+  lastModified: "2025-08-15"
+  category: "authentication"

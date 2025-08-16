@@ -1,0 +1,79 @@
+kind: workload
+name: {{ include "fusionauth.name" . }}-auth
+gvc: {{ .Values.cpln.gvc }}
+tags:
+  {{- include "fusionauth.tags" . | nindent 2 }}
+spec:
+  type: serverless
+  identityLink: //identity/{{ include "postgres.pg.name" . }}
+
+  {{- $postgresHost := printf "%s-%s" .Release.Name "db" }}
+
+  containers:
+    - name: fusionauth
+      cpu: 512m
+      memory: 1024Mi
+      image: controlplanecorporation/fusionauth:0.1
+      inheritEnv: false
+      env:
+        - name: DATABASE_PASSWORD
+          value: 'cpln://secret/{{ include "postgres.pg.secretName" . }}.password'
+        - name: DATABASE_URL
+          value: {{ include "fusionauth.databaseURL" . }}
+        - name: DATABASE_USERNAME
+          value: 'cpln://secret/{{ include "postgres.pg.secretName" . }}.username'
+        - name: MAINTENANCE_MODE
+          value: 'false'
+        - name: FUSIONAUTH_APP_RUNTIME_MODE
+          value: 'production'
+        - name: FUSIONAUTH_APP_SILENT_MODE
+          value: 'true'
+        - name: FUSIONAUTH_APP_HTTP_PORT
+          value: '443'
+
+      ports:
+        - number: 443
+          protocol: http
+      livenessProbe:
+        exec:
+          command:
+            - sh
+            - -c
+            - "curl -s -o /dev/null -w '%{http_code}' http://localhost:443/api/health | grep -q '^200$'"
+        failureThreshold: 3
+        initialDelaySeconds: 60
+        periodSeconds: 15
+        successThreshold: 1
+        timeoutSeconds: 5
+
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 1000
+      maxScale: 3
+      metric: concurrency
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: true
+    debug: false
+    suspend: false
+    timeoutSeconds: 30
+
+  firewallConfig:
+    external:
+      inboundAllowCIDR:
+        - 0.0.0.0/0
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname:
+{{- if .Values.identityProviders.google.enabled }}
+        - oauth2.googleapis.com
+        - www.googleapis.com
+        - accounts.google.com
+{{- end }}
+      outboundAllowPort:
+{{- if .Values.identityProviders.google.enabled }}
+        - number: 443
+          protocol: tcp
+{{- end }}
+      outboundBlockedCIDR: []

@@ -1,0 +1,15 @@
+postgres:
+  config:
+    username: username
+    password: password
+    database: test
+  resources:
+    cpu: 500m
+    memory: 1024Mi
+  cpln:
+    gvc: test-gvc
+    org: jacob-cox
+
+identityProviders:
+  google:
+    enabled: true
