@@ -57,7 +57,7 @@ PostgreSQL Host Name
 Database URL
 */}}
 {{- define "fusionauth.databaseURL" -}}
-{{- printf "jdbc:postgresql://%s.%s.cpln.local:5432/test" (include "fusionauth.postgresHost" .) .Values.cpln.gvc }}
+{{- printf "jdbc:postgresql://%s.%s.cpln.local:5432/%s" (include "fusionauth.postgresHost" .) .Values.cpln.gvc .Values.postgres.config.database }}
 {{- end }}
 
 {{/*

@@ -53,17 +53,7 @@ This will automatically configure the necessary firewall rules for Google OAuth 
 
 Use the FusionAuth admin panel to configure your IdP.
 
-**Note**: If using any IdP, you must configure a domain name for your FusionAuth workload with the following headers for proper header forwarding to FusionAuth:
-- X-Forwarded-Host: YOUR_DOMAIN_NAME
-- X-Forwarded-Port: '443'
-- X-Forwarded-Proto: https
-
-Be sure to configure your app's tenant to use the proper issuer for issuing tokens (e.g. `https://my-fusionauth-app.io`)
-
-## Access
-Once deployed, FusionAuth will be accessible on port 9011 with the following endpoints:
-- Health endpoint: `/health`
-- Default admin interface: `/admin`
+**Note**: Be sure to configure your app's tenant to use the proper issuer for issuing tokens (e.g. `my-fusionauth-app.io`)
 
 ## Additional Resources
 - [FusionAuth Documentation](https://fusionauth.io/docs/)

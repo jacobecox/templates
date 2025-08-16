@@ -13,7 +13,7 @@ spec:
     - name: fusionauth
       cpu: 512m
       memory: 1024Mi
-      image: fusionauth/fusionauth-app:latest
+      image: controlplanecorporation/fusionauth:0.1
       inheritEnv: false
       env:
         - name: DATABASE_PASSWORD
@@ -28,16 +28,18 @@ spec:
           value: 'production'
         - name: FUSIONAUTH_APP_SILENT_MODE
           value: 'true'
+        - name: FUSIONAUTH_APP_HTTP_PORT
+          value: '443'
 
       ports:
-        - number: 9011
+        - number: 443
           protocol: http
       livenessProbe:
         exec:
           command:
             - sh
             - -c
-            - "curl -s -o /dev/null -w '%{http_code}' http://localhost:9011/api/health | grep -q '^200$'"
+            - "curl -s -o /dev/null -w '%{http_code}' http://localhost:443/api/health | grep -q '^200$'"
         failureThreshold: 3
         initialDelaySeconds: 60
         periodSeconds: 15
@@ -75,13 +77,3 @@ spec:
           protocol: tcp
 {{- end }}
       outboundBlockedCIDR: []
-    internal:
-      inboundAllowType: none
-      inboundAllowWorkload: []
-
-  loadBalancer:
-    direct:
-      enabled: false
-      ports: []
-    replicaDirect: false
-  supportDynamicTags: false
