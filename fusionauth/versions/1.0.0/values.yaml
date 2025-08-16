@@ -6,9 +6,6 @@ postgres:
   resources:
     cpu: 500m
     memory: 1024Mi
-  cpln:
-    gvc: test-gvc
-    org: jacob-cox
 
 identityProviders:
   google:
