@@ -1,0 +1,10 @@
+apiVersion: v2
+name: test-app-2
+description: Test app for Control Plane
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+annotations:
+  created: "2025-04-16"
+  lastModified: "2025-04-16"
+  category: "test"
