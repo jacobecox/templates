@@ -9,12 +9,7 @@ appVersion: "1.58.2"
 dependencies:
   - name: postgres
     version: 2.0.0
-<<<<<<< Updated upstream
-    repository: "https://jacobecox.github.io/templates/helm-packages/"
-=======
     repository: "https://controlplane-com.github.io/helm-packages"
->>>>>>> Stashed changes
-
 
 annotations:
   created: "2025-08-15"
