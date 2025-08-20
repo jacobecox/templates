@@ -5,7 +5,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ include "kafka.name" . }}
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "kafka.name" . }}
 targetKind: secret
 targetLinks:
   - //secret/{{ include "kafka.name" . }}-controller-configuration

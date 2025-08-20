@@ -2,5 +2,5 @@
 {{- else }}
 kind: identity
 name: {{ .Release.Name }}-redis
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 {{- end }}

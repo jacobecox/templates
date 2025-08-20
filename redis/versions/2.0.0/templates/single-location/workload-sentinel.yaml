@@ -60,5 +60,5 @@ spec:
         - 0.0.0.0/0
     internal:
       inboundAllowType: same-gvc
-  identityLink: //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Release.Name }}-sentinel
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-sentinel
 {{- end }}

@@ -2,7 +2,7 @@
 # {{- else }}
 # kind: volumeset
 # name: {{ .Release.Name }}-redis
-# gvc: {{ .Values.cpln.gvc }}
+# gvc: {{ .Values.global.cpln.gvc }}
 # spec:
 #   fileSystemType: ext4
 #   initialCapacity: 20

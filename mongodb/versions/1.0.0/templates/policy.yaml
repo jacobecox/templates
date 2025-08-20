@@ -6,7 +6,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ include "mongo.name" . }}
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "mongo.name" . }}
 targetKind: secret
 targetLinks:
   - //secret/{{ include "mongo.secretName" . }}

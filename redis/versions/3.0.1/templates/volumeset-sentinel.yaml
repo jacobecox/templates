@@ -1,7 +1,7 @@
 {{- if and (hasKey .Values.sentinel "persistence") .Values.sentinel.persistence.enabled }}
 kind: volumeset
 name: {{ .Release.Name }}-sentinel
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 spec:
   fileSystemType: {{ .Values.sentinel.persistence.volumes.data.fileSystemType }}
   initialCapacity: {{ .Values.sentinel.persistence.volumes.data.initialCapacity }}

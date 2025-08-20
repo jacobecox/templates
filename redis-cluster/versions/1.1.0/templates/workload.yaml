@@ -1,6 +1,6 @@
 kind: workload
 name: {{ .Release.Name }}
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 description: {{ .Release.Name }}
 spec:
   type: stateful

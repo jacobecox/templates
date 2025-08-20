@@ -2,7 +2,7 @@
 kind: workload
 name: {{ include "kafka.name" . }}-{{ .Values.kafka_ui.name }}
 description: kafka-ui
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 spec:
   type: standard
   containers:

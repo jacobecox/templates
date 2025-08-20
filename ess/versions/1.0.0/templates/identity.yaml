@@ -1,4 +1,4 @@
 kind: identity
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 name: {{ .Values.workload.name }}
 description: Auto-managed identity for the workload {{ .Values.workload.name }}
