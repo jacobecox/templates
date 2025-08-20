@@ -8,7 +8,7 @@
 {{- if $found }}
 kind: workload
 name: example
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 description: default
 spec:
   type: serverless
@@ -33,5 +33,5 @@ spec:
       inboundAllowType: workload-list
       # allow access from envoyproxy internally
       inboundAllowWorkload:
-        - //gvc/{{ .Values.cpln.gvc }}/workload/{{ include "nginx.name" . }}
+        - //gvc/{{ .Values.global.cpln.gvc }}/workload/{{ include "nginx.name" . }}
 {{- end }}

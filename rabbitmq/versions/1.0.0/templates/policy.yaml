@@ -6,7 +6,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Release.Name }}
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}
 targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-config

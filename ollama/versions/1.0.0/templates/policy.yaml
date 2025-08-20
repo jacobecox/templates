@@ -5,7 +5,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ include "ollama.name" . }}
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "ollama.name" . }}
 targetKind: secret
 targetLinks:
   - //secret/{{ include "ollama.name" . }}

@@ -1,5 +1,5 @@
 kind: volumeset
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 name: {{ include "ollama.name" . }}
 spec:
   fileSystemType: ext4

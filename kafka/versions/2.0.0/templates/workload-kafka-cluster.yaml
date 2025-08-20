@@ -10,7 +10,7 @@ data:
 {{- end }}
 kind: workload
 name: {{ include "kafka.clusterName" . }}
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- $hasTags := false }}
   {{- if .Values.kafka.deletionProtection }}

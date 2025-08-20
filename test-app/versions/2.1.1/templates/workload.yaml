@@ -3,7 +3,7 @@ name: {{ .Release.Name }}
 {{- if (get (get .Values "workload") "description") }}
 description: {{ .Values.workload.description | quote }}
 {{- end }}
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 spec:
   type: serverless
   containers:

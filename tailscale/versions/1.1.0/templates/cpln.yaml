@@ -1,6 +1,6 @@
 kind: workload
 name: {{ include "ts.name" . }}
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 tags:
   cpln/checksum: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
 spec:
@@ -54,7 +54,7 @@ spec:
 ---
 kind: workload
 name: httpbin
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 description: default
 spec:
   type: serverless
@@ -78,12 +78,12 @@ spec:
       inboundAllowType: workload-list
       # allow access from tailscale internally
       inboundAllowWorkload:
-        - //gvc/{{ .Values.cpln.gvc }}/workload/{{ include "ts.name" . }}
+        - //gvc/{{ .Values.global.cpln.gvc }}/workload/{{ include "ts.name" . }}
 {{- end }}
 ---
 kind: identity
 name: {{ include "ts.name" . }}
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 description: Identity for the workload "tailscale" used to grant access to the tailscale secret
 
 ---
@@ -94,7 +94,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ include "ts.name" . }}
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "ts.name" . }}
 targetKind: secret
 targetLinks:
   - //secret/{{ include "ts.name" . }}

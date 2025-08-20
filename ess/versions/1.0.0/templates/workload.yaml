@@ -53,7 +53,7 @@ spec:
     internal:
       inboundAllowType: none
       inboundAllowWorkload: []
-  identityLink: //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Values.workload.name }}
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Values.workload.name }}
   loadBalancer:
     direct:
       enabled: false

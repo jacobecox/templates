@@ -38,7 +38,7 @@ data:
 kind: identity
 name: {{ include "kafka.name" . }}-rest-proxy-identity
 description: Identity for Kafka Rest Proxy {{ include "kafka.name" . }}
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 ---
 kind: policy
 name: {{ include "kafka.name" . }}-rest-proxy-policy
@@ -47,7 +47,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ include "kafka.name" . }}-rest-proxy-identity
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "kafka.name" . }}-rest-proxy-identity
 targetKind: secret
 targetLinks:
 {{- if .Values.kafka_rest_proxy.password_properties }}
@@ -59,7 +59,7 @@ targetLinks:
 kind: workload
 name: {{ include "kafka.name" . }}-{{ .Values.kafka_rest_proxy.name }}
 description: Kafka Rest Proxy
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- $hasTags := false }}
   {{- if .Values.kafka_rest_proxy.deletionProtection }}
@@ -155,7 +155,7 @@ spec:
       routes:
         - port: 8082
           prefix: /
-          workloadLink: //gvc/{{ .Values.cpln.gvc }}/workload/{{ include "kafka.name" . }}-{{ .Values.kafka_rest_proxy.name }}
+          workloadLink: //gvc/{{ .Values.global.cpln.gvc }}/workload/{{ include "kafka.name" . }}-{{ .Values.kafka_rest_proxy.name }}
       tls:
         cipherSuites:
           - ECDHE-ECDSA-AES256-GCM-SHA384

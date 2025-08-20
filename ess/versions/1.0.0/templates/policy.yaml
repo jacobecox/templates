@@ -5,6 +5,6 @@ bindings:
   - permissions:
       - manage
     principalLinks:
-      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Values.workload.name }}
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Values.workload.name }}
 target: all
 targetKind: secret

@@ -1,5 +1,5 @@
 kind: workload
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 name: {{ include "ollama.name" . }}
 spec:
   type: stateful
@@ -98,4 +98,4 @@ spec:
         - 0.0.0.0/0
       outboundAllowCIDR:
         - 0.0.0.0/0
-  identityLink: //gvc/{{ .Values.cpln.gvc }}/identity/{{ include "ollama.name" . }}
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "ollama.name" . }}

@@ -4,7 +4,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Release.Name }}-redis
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-redis
 targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-redis-config

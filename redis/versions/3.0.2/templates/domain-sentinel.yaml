@@ -14,7 +14,7 @@ spec:
         - port: {{ add 26380 $i }}
           prefix: /
           replica: {{ $i }}
-          workloadLink: //gvc/{{ $.Values.cpln.gvc }}/workload/{{ $.Release.Name }}-sentinel
+          workloadLink: //gvc/{{ $.Values.global.cpln.gvc }}/workload/{{ $.Release.Name }}-sentinel
     {{- end }}
   {{- end }}
 {{- end }}

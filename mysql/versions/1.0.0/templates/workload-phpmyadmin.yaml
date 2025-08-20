@@ -1,7 +1,7 @@
 {{- if .Values.enablePhpMyAdmin }}
 kind: workload
 name: {{ include "mysql.name" . }}-phpmyadmin
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "mysql.tags" . | nindent 2 }}
 spec:
@@ -10,7 +10,7 @@ spec:
     - name: phpmyadmin
       env:
         - name: PMA_HOST
-          value: '{{ include "mysql.name" . }}.{{ .Values.cpln.gvc }}.cpln.local'
+          value: '{{ include "mysql.name" . }}.{{ .Values.global.cpln.gvc }}.cpln.local'
         - name: PMA_PORT
           value: '3306'
         - name: MYSQL_ROOT_PASSWORD

@@ -12,7 +12,7 @@ spec:
       routes:
         - port: 8080
           prefix: /
-          workloadLink: //gvc/{{ $.Values.cpln.gvc }}/workload/{{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
+          workloadLink: //gvc/{{ $.Values.global.cpln.gvc }}/workload/{{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
       tls:
         cipherSuites:
           - ECDHE-ECDSA-AES256-GCM-SHA384
@@ -34,7 +34,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ $.Values.cpln.gvc }}/identity/{{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
+      - //gvc/{{ $.Values.global.cpln.gvc }}/identity/{{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
 targetKind: secret
 targetLinks:
   - //secret/{{ .Values.kafbat_ui.configuration_secret }}
@@ -42,7 +42,7 @@ targetLinks:
 kind: identity
 name: {{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
 description: {{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
-gvc: {{ $.Values.cpln.gvc }}
+gvc: {{ $.Values.global.cpln.gvc }}
 ---
 kind: workload
 name: {{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
@@ -107,7 +107,7 @@ spec:
       inboundAllowType: {{ default "[]" .Values.kafbat_ui.firewall.internal_inboundAllowType }}
     {{- end }}
 {{- end }}
-  identityLink: //gvc/{{ $.Values.cpln.gvc }}/identity/{{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
+  identityLink: //gvc/{{ $.Values.global.cpln.gvc }}/identity/{{ include "kafka.name" $ }}-{{ .Values.kafbat_ui.name }}
   loadBalancer:
     direct:
       enabled: false

@@ -16,7 +16,7 @@ spec:
         - port: {{ add 3000 $i }}
           prefix: /
           replica: {{ $i }}
-          workloadLink: //gvc/{{ $.Values.cpln.gvc }}/workload/{{ include "kafka.clusterName" $ }}
+          workloadLink: //gvc/{{ $.Values.global.cpln.gvc }}/workload/{{ include "kafka.clusterName" $ }}
       tls:
         cipherSuites:
           - ECDHE-ECDSA-AES256-GCM-SHA384

@@ -1,7 +1,7 @@
 {{- if and (hasKey .Values.redis "persistence") .Values.redis.persistence.enabled }}
 kind: volumeset
 name: {{ .Release.Name }}-redis
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 spec:
   fileSystemType: {{ .Values.redis.persistence.volumes.data.fileSystemType }}
   initialCapacity: {{ .Values.redis.persistence.volumes.data.initialCapacity }}

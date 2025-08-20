@@ -99,8 +99,8 @@ Any workload that allows access from this tailscale workload will be able to be 
 
 Wait for the workloads to be started and then try hitting the httpbin internal endpoint of httpbin.
 
-{{ .Values.cpln.gvc }}.cpln.local:80
+{{ .Values.global.cpln.gvc }}.cpln.local:80
 
-{{- if not (eq (index .Values.locationDNS .Values.cpln.location) `172.20.0.10`) }}
-You must update the tailscale DNS configuration for cpln.local to {{index .Values.locationDNS .Values.cpln.location}} instead of 172.20.0.10.
+{{- if not (eq (index .Values.locationDNS .Values.global.cpln.location) `172.20.0.10`) }}
+You must update the tailscale DNS configuration for cpln.local to {{index .Values.locationDNS .Values.global.cpln.location}} instead of 172.20.0.10.
 {{- end }}

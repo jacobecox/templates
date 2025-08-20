@@ -148,7 +148,7 @@ spec:
       {{- end }}
     {{- end }}
 {{- end }}
-  identityLink: //gvc/{{ .Values.cpln.gvc }}/identity/{{ .Release.Name }}-sentinel
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-sentinel
 {{- if and (hasKey .Values.sentinel "publicAccess") .Values.sentinel.publicAccess.enabled }}
   loadBalancer:
     replicaDirect: true

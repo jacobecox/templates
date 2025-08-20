@@ -1,6 +1,6 @@
 kind: workload
 name: {{ include "mongo.name" . }}
-gvc: {{ .Values.cpln.gvc }}
+gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "mongo.tags" . | nindent 2 }}
 spec:

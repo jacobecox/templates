@@ -5,7 +5,7 @@
 kind: volumeset
 name: {{ include "kafka.name" $root }}-logs-{{ $counter }}
 description: {{ include "kafka.name" $root }} logs {{ $counter }}
-gvc: {{ $root.Values.cpln.gvc }}
+gvc: {{ $root.Values.global.cpln.gvc }}
 spec:
   initialCapacity: {{ $root.Values.kafka.volumes.logs.initialCapacity }}
   performanceClass: {{ $root.Values.kafka.volumes.logs.performanceClass }}
