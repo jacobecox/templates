@@ -6,7 +6,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.cpln.gvc }}/identity/{{ include "pg.name" . }}
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "pg.name" . }}
 targetKind: secret
 targetLinks:
   - //secret/{{ include "pg.secretName" . }}
