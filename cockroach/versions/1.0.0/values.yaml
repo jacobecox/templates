@@ -1,0 +1,28 @@
+gvc:
+  name: cockroach-gvc
+  locations:
+    - name: aws-us-east-1
+      replicas: 3
+    - name: aws-us-west-2
+      replicas: 2
+    - name: aws-eu-central-1
+      replicas: 4
+
+identity:
+  name: cockroach-identity
+
+secret:
+  name: cockroach-secret
+
+cockroach_defaults:
+  workload_name: cockroach
+  sql_port: 26257
+  http_port: 8080
+  insecure: true
+  primary_init_location: "" # Location that runs `cockroach init`
+
+certs:
+  secret_name: cockroach-certs
+
+allowCIDR:
+  - 0.0.0.0/0

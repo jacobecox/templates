@@ -1,0 +1,12 @@
+kind: policy
+name: cockroach-{{ .Values.gvc.name }}-policy
+description: cockroach-{{ .Values.gvc.name }}-policy
+tags: {}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.gvc.name }}/identity/{{ .Values.identity.name }}
+targetKind: secret
+targetLinks:
+  - //secret/{{ .Values.secret.name }}

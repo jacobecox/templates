@@ -1,0 +1,5 @@
+kind: identity
+gvc: {{ .Values.gvc.name }}
+name: {{ .Values.identity.name }}
+description: {{ .Values.identity.name }}
+tags: {}
