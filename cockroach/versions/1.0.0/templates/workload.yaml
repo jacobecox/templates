@@ -12,8 +12,13 @@ spec:
     - name: {{ $crdb.workload_name }}
       cpu: {{ .Values.resources.cpu }}
       memory: {{ .Values.resources.memory }}
-      image: controlplanecorporation/cockroachdb:0.1
+      image: controlplanecorporation/cockroachdb:0.2
       inheritEnv: false
+      env:
+        - name: DB_NAME
+          value: 'cpln://secret/cockroach-db-config.database'
+        - name: DB_USER
+          value: 'cpln://secret/cockroach-db-config.username'
       ports:
         - number: {{ $crdb.http_port }}
           protocol: http
@@ -40,15 +45,10 @@ spec:
     timeoutSeconds: 10
   firewallConfig:
     external:
-      inboundAllowCIDR: {{ toYaml .Values.allowCIDR | nindent 6 }}
-      inboundBlockedCIDR: []
-      outboundAllowCIDR: []
-      outboundAllowHostname: []
-      outboundAllowPort: []
-      outboundBlockedCIDR: []
+      outboundAllowCIDR:
+      - 0.0.0.0/0
     internal:
       inboundAllowType: same-gvc
-      inboundAllowWorkload: []
   identityLink: //gvc/{{ .Values.gvc.name }}/identity/cockroach-identity
   loadBalancer:
     replicaDirect: true

@@ -12,10 +12,11 @@ resources:
   cpu: 2000m
   memory: 4096Mi
 
+database:
+  name: mydb
+  user: myuser
+
 cockroach_defaults:
   workload_name: cockroach
   sql_port: 26257
   http_port: 8080
-
-allowCIDR:
-  - 0.0.0.0/0

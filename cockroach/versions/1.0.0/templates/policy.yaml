@@ -11,3 +11,4 @@ bindings:
 targetKind: secret
 targetLinks:
   - //secret/cockroach-secret
+  - //secret/cockroach-db-config
