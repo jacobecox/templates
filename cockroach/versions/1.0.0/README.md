@@ -1,13 +1,15 @@
-TODO:
+# CockroachDB
 
-1. Change Values.gvc... to Values.global.gvc and others where needed
+CockroachDB is a distributed SQL database built on a transactional and strongly-consistent key-value store. It provides automatic replication, distribution, and survivability across multiple locations with minimal latency and maximum throughput. CockroachDB offers ACID transactions, horizontal scalability, and built-in fault tolerance, making it ideal for applications requiring global data distribution and high availability.
 
-2. See if we need to add a PREREQUISITES.md file
+## Configuration
 
-3. Add helpers.tpl file
+To configure your CockroachDB cluster across multiple locations, update the `gvc.locations` section in the `values.yaml` file:
 
-4. See if we need to build image first, then test with image containing app.
+## Access
 
-5. Change image location to controlplanecorporation/cockroachdb:0.1
+Once deployed, CockroachDB will be available on:
+- **SQL Port**: 26257 (default)
+- **HTTP Port**: 8080 (for admin UI)
 
-6. Condense comments in app to a minimum before final commmit
+The cluster automatically handles data distribution and replication across your configured locations.
