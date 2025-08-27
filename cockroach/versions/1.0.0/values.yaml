@@ -20,3 +20,5 @@ cockroach_defaults:
   workload_name: cockroach
   sql_port: 26257
   http_port: 8080
+
+allow_clients:

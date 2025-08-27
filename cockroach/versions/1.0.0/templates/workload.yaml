@@ -45,6 +45,12 @@ spec:
     timeoutSeconds: 10
   firewallConfig:
     external:
+      {{- if .Values.allow_clients }}
+      inboundAllowCIDR:
+        {{- range $client := .Values.allow_clients }}
+        - {{ $client }}
+        {{- end }}
+      {{- end }}
       outboundAllowCIDR:
       - 0.0.0.0/0
     internal:
