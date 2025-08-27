@@ -1,0 +1,24 @@
+gvc:
+  name: cockroach-gvc
+  locations:
+    - name: aws-us-east-1
+      replicas: 2
+    - name: aws-us-west-2
+      replicas: 2
+    - name: gcp-us-east1
+      replicas: 2
+
+resources:
+  cpu: 2000m
+  memory: 4096Mi
+
+database:
+  name: mydb
+  user: myuser
+
+cockroach_defaults:
+  workload_name: cockroach
+  sql_port: 26257
+  http_port: 8080
+
+allow_clients:
