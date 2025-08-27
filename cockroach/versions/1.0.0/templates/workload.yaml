@@ -16,9 +16,9 @@ spec:
       inheritEnv: false
       env:
         - name: DB_NAME
-          value: 'cpln://secret/cockroach-db-config.database'
+          value: {{ .Values.database.name }}
         - name: DB_USER
-          value: 'cpln://secret/cockroach-db-config.username'
+          value: 'cpln://secret/cockroach-user.payload'
       ports:
         - number: {{ $crdb.http_port }}
           protocol: http
@@ -30,7 +30,7 @@ spec:
           uri: cpln://volumeset/cockroach-vs
         - path: /etc/cockroach/cockroach.yaml
           recoveryPolicy: retain
-          uri: cpln://secret/cockroach-secret.payload
+          uri: cpln://secret/cockroach-config.payload
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
