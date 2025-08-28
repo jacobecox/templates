@@ -9,7 +9,9 @@ spec:
       cpu: {{ .Values.resources.cpu }}
       memory: {{ .Values.resources.memory }}
       image: cockroachdb/cockroach:latest-v25.2
-      command: ["/bin/bash", "/cockroach/start.sh"]
+      command: "/bin/bash"                   # The executable
+      args:                                  # Script to run
+        - "/cockroach/start.sh"
       inheritEnv: false
       env:
         - name: DB_NAME
