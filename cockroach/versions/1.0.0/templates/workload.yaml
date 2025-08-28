@@ -9,8 +9,8 @@ spec:
       cpu: {{ .Values.resources.cpu }}
       memory: {{ .Values.resources.memory }}
       image: cockroachdb/cockroach:latest-v25.2
-      command: "/bin/bash"                   # The executable
-      args:                                  # Script to run
+      command: "/bin/bash"
+      args:
         - "/cockroach/start.sh"
       inheritEnv: false
       env:
@@ -43,16 +43,13 @@ spec:
     timeoutSeconds: 10
   firewallConfig:
     external:
-      {{- if .Values.allow_clients }}
-      inboundAllowCIDR:
-        {{- range $client := .Values.allow_clients }}
-        - {{ $client }}
-        {{- end }}
-      {{- end }}
       outboundAllowCIDR:
       - 0.0.0.0/0
     internal:
-      inboundAllowType: same-gvc
+      inboundAllowType: {{ .Values.internal_access.type }}
+      {{- if .Values.internal_access.workloads }}
+      inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
+      {{- end }}
   identityLink: //gvc/{{ .Values.gvc.name }}/identity/cockroach-identity
   loadBalancer:
     replicaDirect: true
