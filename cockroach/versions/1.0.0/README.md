@@ -10,27 +10,11 @@ To configure your CockroachDB cluster across multiple locations, update the `gvc
 
 To create a database with a user on initialization, configure the `database` section in your `values.yaml` file:
 
-```yaml
-database:
-  name: mydb
-  user: myuser
-```
-
 This will automatically create the specified database and user when the CockroachDB cluster is first deployed.
-
-**Note**: Password creation is not required as CockroachDB grants access to users based on firewall restrictions. Other workloads given internal access can connect without authentication. It is important not to expose this workload externally.
 
 ### Internal Access Configuration
 
 To specify which workloads can access this CockroachDB cluster internally, configure the `internal_access` section in your `values.yaml` file:
-
-```yaml
-internal_access:
-  type: same-gvc
-  workloads:
-    - //gvc/my-gvc/workload/my-app-backend
-    - //gvc/my-gvc/workload/my-api-service
-```
 
 **Access Types:**
 - `same-gvc`: Allow access from all workloads in the same GVC
