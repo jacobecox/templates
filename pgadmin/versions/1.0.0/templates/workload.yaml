@@ -6,14 +6,11 @@ spec:
   type: standard
   containers:
     - name: pgadmin4
-      command: "/bin/bash"
-      args:
-        - "/pgadmin/start.sh"
       env:
         - name: PGADMIN_DEFAULT_EMAIL
-          value: 'cpln://secret/{{ include "pgadmin.secretName" . }}.username'
+          value: 'cpln://secret/pgadmin-secret.username'
         - name: PGADMIN_DEFAULT_PASSWORD
-          value: 'cpln://secret/{{ include "pgadmin.secretName" . }}.password'
+          value: 'cpln://secret/pgadmin-secret.password'
       image: dpage/pgadmin4
       inheritEnv: false
       cpu: '1'
@@ -21,26 +18,8 @@ spec:
       ports:
         - number: 80
           protocol: http
-      volumes:
-        - path: /var/lib/pgadmin
-          recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-vs
-        - path: /pgadmin/start.sh
-          uri: cpln://secret/pgadmin-config.payload
-  defaultOptions:
-    autoscaling:
-      keda:
-        cooldownPeriod: 1
-        initialCooldownPeriod: 1
-        pollingInterval: 1
-        triggers: []
-      maxConcurrency: 0
-      maxScale: 3
-      metric: cpu
-      minScale: 1
-      scaleToZeroDelay: 300
-      target: 100
-    capacityAI: false
-    debug: false
-    suspend: false
-    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR:
+        - 0.0.0.0/0
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/pgadmin-identity

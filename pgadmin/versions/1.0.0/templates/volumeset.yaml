@@ -1,5 +1,5 @@
 kind: volumeset
-name: {{ .Release.Name }}-vs
+name: pgadmin-vs
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   workload: {{ .Release.Name }}

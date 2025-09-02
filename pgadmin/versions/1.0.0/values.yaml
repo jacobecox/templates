@@ -1,10 +1,3 @@
 admin_login:
   email: admin@example.com
   password: password
-
-connect_pg:
-  user: username
-  password: password
-  host: host
-  port: port
-  database: database

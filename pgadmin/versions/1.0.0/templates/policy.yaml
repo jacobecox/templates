@@ -1,7 +1,7 @@
 ---
 kind: policy
-name: pgadmin-{{ .Release.Name }}-policy
-description: pgadmin-{{ .Release.Name }}-policy
+name: {{ .Release.Name }}-pgadmin-policy
+description: {{ .Release.Name }}-pgadmin-policy
 tags: {}
 bindings:
   - permissions:
