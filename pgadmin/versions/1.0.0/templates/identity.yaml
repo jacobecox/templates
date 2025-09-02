@@ -1,0 +1,6 @@
+---
+kind: identity
+gvc: {{ .Values.global.cpln.gvc }}
+name: pgadmin-identity
+description: pgadmin-identity
+tags: {}

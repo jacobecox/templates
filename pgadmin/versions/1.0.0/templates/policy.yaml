@@ -1,0 +1,13 @@
+---
+kind: policy
+name: pgadmin-{{ .Release.Name }}-policy
+description: pgadmin-{{ .Release.Name }}-policy
+tags: {}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/pgadmin-identity
+targetKind: secret
+targetLinks:
+  - //secret/pgadmin-secret

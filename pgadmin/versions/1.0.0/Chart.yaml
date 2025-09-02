@@ -1,0 +1,13 @@
+apiVersion: v2
+name: pgadmin
+description: PGAdmin app to monitor PostgreSQL databases on Control Plane
+
+type: application
+version: 1.0.0
+appVersion: "9.7.0"
+
+annotations:
+  created: "2025-09-02"
+  lastModified: "2025-09-02"
+  category: "database monitoring"
+  pgadminVersion: "9.7.0"
