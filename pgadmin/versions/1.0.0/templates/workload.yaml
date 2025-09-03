@@ -3,7 +3,7 @@ name: {{ .Release.Name }}
 description: pgadmin
 tags: {}
 spec:
-  type: standard
+  type: stateful
   containers:
     - name: pgadmin4
       env:
@@ -11,6 +11,10 @@ spec:
           value: 'cpln://secret/pgadmin-secret.username'
         - name: PGADMIN_DEFAULT_PASSWORD
           value: 'cpln://secret/pgadmin-secret.password'
+      volumes:
+        - path: /var/lib/pgadmin
+          recoveryPolicy: retain
+          uri: cpln://volumeset/pgadmin-vs
       image: dpage/pgadmin4
       inheritEnv: false
       cpu: '1'
@@ -22,4 +26,6 @@ spec:
     external:
       inboundAllowCIDR:
         - 0.0.0.0/0
+  securityOptions:
+    filesystemGroupId: 5050
   identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/pgadmin-identity

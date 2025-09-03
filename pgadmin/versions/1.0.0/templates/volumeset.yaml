@@ -8,7 +8,7 @@ spec:
     maxCapacity: 1000
     minFreePercentage: 1
     scalingFactor: 1.1
-  fileSystemType: shared
+  fileSystemType: ext4
   initialCapacity: 10
   performanceClass: general-purpose-ssd
   snapshots:
