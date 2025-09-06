@@ -1,0 +1,71 @@
+---
+kind: workload
+name: {{ .Release.Name }}-server
+description: tidb server
+tags: {}
+spec:
+  type: standard
+  containers:
+    - name: {{ .Release.Name }}-server
+      cpu: '2'
+      image: pingcap/tidb:v8.5.3
+      command: "/bin/bash"
+      args:
+        - "/scripts/server-startup.sh"
+      inheritEnv: false
+      memory: 2Gi
+      ports:
+        - number: 10080
+          protocol: http
+        - number: 4000
+          protocol: tcp
+      volumes:
+        - path: /scripts/server-startup.sh
+          uri: cpln://secret/tidb-server-startup.payload
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/tidb-identity
+  defaultOptions:
+    autoscaling:
+      keda: {}
+      maxConcurrency: 0
+      maxScale: 5
+      metric: cpu
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 95
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  localOptions:
+    {{- range $location := .Values.gvc.locations }}
+    - autoscaling:
+        maxConcurrency: 0
+        maxScale: {{ if eq ($location.replicas | int) 0 }}1{{ else }}{{ $location.replicas | int }}{{ end }}
+        metric: disabled
+        minScale: {{ if eq ($location.replicas | int) 0 }}0{{ else }}{{ $location.replicas | int }}{{ end }}
+        scaleToZeroDelay: 300
+        target: 100
+      capacityAI: false
+      debug: false
+      location: //location/{{ $location.name }}
+      suspend: {{ if eq ($location.replicas | int) 0 }}true{{ else }}false{{ end }}
+      timeoutSeconds: 10
+    {{- end }}
+  firewallConfig:
+    external:
+      inboundAllowCIDR:
+        - 0.0.0.0/0 #REMOVE THIS
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: same-gvc
+      inboundAllowWorkload: []
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: false
+  supportDynamicTags: false

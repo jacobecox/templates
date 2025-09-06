@@ -10,5 +10,7 @@ bindings:
       - //gvc/{{ .Values.gvc.name }}/identity/tidb-identity
 targetKind: secret
 targetLinks:
-  - //secret/tidb-startup
   - //secret/tidb-user
+  - //secret/tidb-pd-startup
+  - //secret/tidb-server-startup
+  - //secret/tidb-tikv-startup
