@@ -13,12 +13,12 @@ spec:
       args:
         - "/scripts/tikv-startup.sh"
       inheritEnv: false
-      memory: 2Gi
+      memory: 4Gi
       ports:
         - number: 20160
-          protocol: grpc
+          protocol: tcp
         - number: 20180
-          protocol: http
+          protocol: tcp
       volumes:
         - path: /mnt/data/tikv:/data
           recoveryPolicy: retain
@@ -68,5 +68,5 @@ spec:
     direct:
       enabled: false
       ports: []
-    replicaDirect: false
+    replicaDirect: true
   supportDynamicTags: false

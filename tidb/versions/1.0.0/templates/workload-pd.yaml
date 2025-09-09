@@ -6,18 +6,18 @@ spec:
   type: stateful
   containers:
     - name: {{ .Release.Name }}-pd
-      cpu: 50m
+      cpu: '2'
       image: pingcap/pd:v8.5.3
       command: "/bin/bash"
       args:
         - "/scripts/pd-startup.sh"
       inheritEnv: false
-      memory: 128Mi
+      memory: 4Gi
       ports:
         - number: 2379
-          protocol: http
+          protocol: tcp
         - number: 2380
-          protocol: grpc
+          protocol: tcp
       volumes:
         - path: /mnt/data/pd:/data
           recoveryPolicy: retain
