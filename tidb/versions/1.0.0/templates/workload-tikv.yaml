@@ -21,7 +21,7 @@ spec:
           protocol: tcp
       volumes:
         - path: /mnt/data/tikv:/data
-          recoveryPolicy: retain
+          #recoveryPolicy: retain
           uri: cpln://volumeset/tidb-tikv-vs
         - path: /scripts/tikv-startup.sh
           uri: cpln://secret/tidb-tikv-startup.payload
