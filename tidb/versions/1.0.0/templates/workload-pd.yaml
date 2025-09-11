@@ -20,7 +20,7 @@ spec:
           protocol: tcp
       volumes:
         - path: /mnt/data/pd:/data
-          #recoveryPolicy: retain
+          recoveryPolicy: retain
           uri: cpln://volumeset/tidb-pd-vs
         - path: /scripts/pd-startup.sh
           uri: cpln://secret/tidb-pd-startup.payload

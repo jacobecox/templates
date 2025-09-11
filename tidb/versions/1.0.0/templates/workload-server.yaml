@@ -53,15 +53,15 @@ spec:
     {{- end }}
   firewallConfig:
     external:
-      inboundAllowCIDR:
-        - 0.0.0.0/0 #REMOVE THIS
+      inboundAllowCIDR: []
       inboundBlockedCIDR: []
-      outboundAllowCIDR: []
+      outboundAllowCIDR:
+        - 0.0.0.0/0
       outboundAllowHostname: []
       outboundAllowPort: []
       outboundBlockedCIDR: []
     internal:
-      inboundAllowType: same-gvc
+      inboundAllowType: same-org
       inboundAllowWorkload: []
   loadBalancer:
     direct:
