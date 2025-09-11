@@ -13,6 +13,15 @@ spec:
       args:
         - "/scripts/server-startup.sh"
       inheritEnv: false
+      env:
+        - name: ROOT_PW
+          value: cpln://secret/tidb-user.rootPassword
+        - name: APP_DB
+          value: cpln://secret/tidb-user.db
+        - name: APP_USER
+          value: cpln://secret/tidb-user.user
+        - name: APP_PW
+          value: cpln://secret/tidb-user.password
       memory: 2Gi
       ports:
         - number: 10080
@@ -34,6 +43,8 @@ spec:
       target: 95
     capacityAI: false
     debug: false
+    multiZone:
+      enabled: true
     suspend: false
     timeoutSeconds: 5
   localOptions:
@@ -61,8 +72,10 @@ spec:
       outboundAllowPort: []
       outboundBlockedCIDR: []
     internal:
-      inboundAllowType: same-org
-      inboundAllowWorkload: []
+      inboundAllowType: {{ .Values.internal_access.type }}
+      {{- if .Values.internal_access.workloads }}
+      inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
+      {{- end }}
   loadBalancer:
     direct:
       enabled: false
