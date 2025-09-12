@@ -7,7 +7,7 @@ spec:
   type: standard
   containers:
     - name: {{ .Release.Name }}-server
-      cpu: '2'
+      cpu: "{{ .Values.resources.server.cpu }}"
       image: pingcap/tidb:v8.5.3
       command: "/bin/bash"
       args:
@@ -22,7 +22,7 @@ spec:
           value: cpln://secret/tidb-user.user
         - name: APP_PW
           value: cpln://secret/tidb-user.password
-      memory: 2Gi
+      memory: {{ .Values.resources.server.memory }}
       ports:
         - number: 10080
           protocol: http

@@ -7,13 +7,13 @@ spec:
   type: stateful
   containers:
     - name: {{ .Release.Name }}-tikv
-      cpu: '2'
+      cpu: "{{ .Values.resources.tikv.cpu }}"
       image: pingcap/tikv:v8.5.3
       command: "/bin/bash"
       args:
         - "/scripts/tikv-startup.sh"
       inheritEnv: false
-      memory: 4Gi
+      memory: {{ .Values.resources.tikv.memory }}
       ports:
         - number: 20160
           protocol: tcp

@@ -6,13 +6,13 @@ spec:
   type: stateful
   containers:
     - name: {{ .Release.Name }}-pd
-      cpu: '2'
+      cpu: "{{ .Values.resources.pd.cpu }}"
       image: pingcap/pd:v8.5.3
       command: "/bin/bash"
       args:
         - "/scripts/pd-startup.sh"
       inheritEnv: false
-      memory: 4Gi
+      memory: {{ .Values.resources.pd.memory }}
       ports:
         - number: 2379
           protocol: tcp

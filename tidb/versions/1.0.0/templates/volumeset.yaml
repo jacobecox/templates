@@ -27,7 +27,7 @@ spec:
     minFreePercentage: 1
     scalingFactor: 1.1
   fileSystemType: ext4
-  initialCapacity: 30
+  initialCapacity: 10
   performanceClass: general-purpose-ssd
   snapshots:
     createFinalSnapshot: true
