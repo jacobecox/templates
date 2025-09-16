@@ -20,7 +20,7 @@ spec:
         - number: 20180
           protocol: tcp
       volumes:
-        - path: /mnt/data/tikv:/data
+        - path: /data
           recoveryPolicy: retain
           uri: cpln://volumeset/tidb-tikv-vs
         - path: /scripts/tikv-startup.sh

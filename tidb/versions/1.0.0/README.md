@@ -1,6 +1,6 @@
 # TiDB
 
-TiDB is a distributed SQL database that provides horizontal scalability, strong consistency, and MySQL compatibility. It features a distributed architecture with separate components for storage (TiKV), computation (TiDB), and metadata management (PD), making it ideal for applications requiring massive scale, high availability, and seamless migration from MySQL.
+TiDB is a distributed SQL database that provides horizontal scalability, strong consistency, and MySQL compatibility. It features a distributed architecture with separate components for storage (TiKV), computation (TiDB Server), and metadata management (PD), making it ideal for applications requiring massive scale, high availability, and seamless migration from MySQL.
 
 ## Configuration
 
@@ -34,13 +34,22 @@ To specify which workloads can access this TiDB cluster internally, configure th
 
 Once deployed, TiDB will be available on Port 4000 (default)
 
+### Connecting to TiDB
+
+To connect to your TiDB cluster using the MySQL client, use the following command:
+
+```bash
+mysql -h <TIDB_SERVER_WORKLOAD_INTERNAL_NAME> -P 4000 -u <USER> -p
+```
+
+Replace:
+- `<TIDB_SERVER_WORKLOAD_INTERNAL_NAME>` with the internal name of your TiDB server workload
+- `<USER>` with your database username
+- The `-p` flag will prompt you for the password
+
+**Note:** Depending on the number of replicas and locations configured, TiDB can take up to 5 minutes to become ready for connections.
+
 The cluster automatically handles data distribution and replication across your configured locations.
 
 ### Supported External Services
 - [TiDB Documentation](https://docs.pingcap.com/tidb/stable/)
-
-
-TODO:
-1. Figure out why client is not connecting
-2. Test TiKV restart resiliancy
-3. Get TiKV data to persist across client connections
