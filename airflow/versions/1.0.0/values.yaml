@@ -1,7 +1,6 @@
 # Global Virtual Cluster (gvc) settings
 gvc:
   name: airflow
-  description: 
   locationLinks:
     - //location/aws-eu-central-1
 
