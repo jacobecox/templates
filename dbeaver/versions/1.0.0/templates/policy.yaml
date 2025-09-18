@@ -1,0 +1,14 @@
+---
+kind: policy
+name: {{ .Release.Name }}-dbeaver-policy
+description: dbeaver-policy startup
+tags: {}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/dbeaver-identity
+targetKind: secret
+targetLinks:
+  - //secret/dbeaver-init
+  - //secret/dbeaver-config

@@ -1,0 +1,77 @@
+kind: workload
+name: {{ .Release.Name }}
+description: dbeaver
+tags: {}
+spec:
+  type: stateful
+  containers:
+    - name: {{ .Release.Name }}
+      cpu: {{ .Values.resources.cpu }}
+      image: dbeaver/cloudbeaver:25.2.0
+      #command: "/bin/bash"
+      #args:
+        #- "/scripts/dbeaver-init.sh"
+      inheritEnv: false
+      env:
+        - name: CLOUDBEAVER_DB_DRIVER
+          value: cpln://secret/dbeaver-config.driver
+        - name: CLOUDBEAVER_DB_URL
+          value: cpln://secret/dbeaver-config.url
+        - name: CLOUDBEAVER_DB_USER
+          value: cpln://secret/dbeaver-config.user
+        - name: CLOUDBEAVER_DB_PASSWORD
+          value: cpln://secret/dbeaver-config.password
+        - name: CB_ADMIN_NAME
+          value: cpln://secret/dbeaver-config.admin_name
+        - name: CB_ADMIN_PASSWORD
+          value: cpln://secret/dbeaver-config.admin_password
+        - name: CB_SERVER_NAME
+          value: {{ .Release.Name }}
+        - name: CB_SERVER_URL
+          value: http://tomorrow.test-gvc.cpln.local:8978
+      memory: {{ .Values.resources.memory }}
+      ports:
+        - number: 8978
+          protocol: http
+      volumes:
+        - path: /opt/cloudbeaver/workspace
+          recoveryPolicy: retain
+          uri: cpln://volumeset/{{ .Release.Name }}-vs
+        - path: /scripts/dbeaver-init.sh
+          uri: cpln://secret/dbeaver-init.payload
+  defaultOptions:
+    autoscaling:
+      keda:
+        cooldownPeriod: 1
+        initialCooldownPeriod: 1
+        pollingInterval: 1
+        triggers: []
+      maxConcurrency: 0
+      maxScale: 3
+      metric: cpu
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR:
+        - 0.0.0.0/0
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: none
+      inboundAllowWorkload: []
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/dbeaver-identity
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: false
+  supportDynamicTags: false
