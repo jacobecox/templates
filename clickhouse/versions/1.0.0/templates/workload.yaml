@@ -1,15 +1,15 @@
 kind: workload
-name: clickhouse
+name: {{ .Release.Name }}
 description: clickhouse
 tags: {}
 spec:
   type: stateful
   containers:
-    - name: clickhouse-server
-      cpu: 500m
+    - name: {{ .Release.Name }}
+      cpu: {{ .Values.resources.cpu }}
       image: clickhouse/clickhouse-server:25.8
       inheritEnv: false
-      memory: 1Gi
+      memory: {{ .Values.resources.memory }}
       ports:
         - number: 8123
           protocol: http
@@ -18,14 +18,14 @@ spec:
       volumes:
         - path: /var/lib/clickhouse
           recoveryPolicy: retain
-          uri: cpln://volumeset/clickhouse-vs
+          uri: cpln://volumeset/{{ .Release.Name }}-vs
   defaultOptions:
     autoscaling:
       keda: {}
       maxConcurrency: 0
-      maxScale: 3
+      maxScale: {{ .Values.replicas }}
       metric: cpu
-      minScale: 1
+      minScale: {{ .Values.replicas }}
       scaleToZeroDelay: 300
       target: 100
     capacityAI: false

@@ -1,0 +1,5 @@
+replicas: 2
+
+resources:
+  cpu: 1
+  memory: 1Gi
