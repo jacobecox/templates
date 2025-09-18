@@ -22,6 +22,33 @@ targetLinks:
   {{- end }}
   {{- end }}
   {{- end }}
+  {{- /* Check for secrets in ssl_truststore configuration values */ -}}
+  {{- if hasKey . "ssl_truststore" }}
+  {{- range $key, $value := .ssl_truststore }}
+  {{- if and (kindIs "string" $value) (contains "//secret/" $value) }}
+  {{- $secretName := regexReplaceAll ".*//secret/([^.]+).*" $value "${1}" }}
+  - //secret/{{ $secretName }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- /* Check for secrets in env variables */ -}}
+  {{- if hasKey . "env" }}
+  {{- range .env }}
+  {{- if and (hasKey . "value") (contains "//secret/" .value) }}
+  {{- $secretName := regexReplaceAll ".*//secret/([^.]+).*" .value "${1}" }}
+  - //secret/{{ $secretName }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- /* Check for secrets in connector_properties */ -}}
+  {{- if hasKey . "connector_properties" }}
+  {{- range $key, $value := .connector_properties }}
+  {{- if and (kindIs "string" $value) (contains "//secret/" $value) }}
+  {{- $secretName := regexReplaceAll ".*//secret/([^.]+).*" $value "${1}" }}
+  - //secret/{{ $secretName }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
 ---
 kind: secret
 name: {{ include "kafka.name" $ }}-connect-{{ .name }}-download

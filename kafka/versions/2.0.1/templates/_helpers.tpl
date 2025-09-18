@@ -311,32 +311,186 @@ truststore_init() {
   echo "Truststore setup completed for $hostname"
 }
 
-# Start Kafka Connect in the background
-echo "Starting Kafka Connect distributed worker..."
+# Function to setup multi-domain truststore from values configuration
+setup_multi_domain_truststore() {
+  local plugin_name="$1"
+  local ssl_truststore_config="$2"
+  
+  echo "Setting up multi-domain truststore for plugin: $plugin_name"
+  
+  # Parse the ssl_truststore configuration (passed as JSON-like string)
+  local generate=$(echo "$ssl_truststore_config" | grep -o '"generate"[[:space:]]*:[[:space:]]*true' | wc -l)
+  
+  if [[ $generate -eq 0 ]]; then
+    echo "Multi-domain truststore generation disabled for $plugin_name"
+    return 0
+  fi
+  
+  echo "Multi-domain truststore generation enabled for $plugin_name"
+  
+  # Extract truststore path (REQUIRED)
+  local truststore_path=$(echo "$ssl_truststore_config" | grep -o '"truststore_path"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"truststore_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+  if [[ -z "$truststore_path" ]]; then
+    echo "ERROR: ssl_truststore.truststore_path is required when ssl_truststore.generate is true for plugin $plugin_name"
+    exit 1
+  fi
+  
+  # Extract password environment variable name (REQUIRED)
+  local password_env=$(echo "$ssl_truststore_config" | grep -o '"truststore_password_env"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"truststore_password_env"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+  if [[ -z "$password_env" ]]; then
+    echo "ERROR: ssl_truststore.truststore_password_env is required when ssl_truststore.generate is true for plugin $plugin_name"
+    exit 1
+  fi
+  
+  # Check if password already exists
+  if [[ -n "${!password_env}" ]]; then
+    echo "Using existing password from environment variable: $password_env"
+    local truststore_password="${!password_env}"
+  else
+    # Generate random password
+    local truststore_password=$(openssl rand -base64 12)
+    export "$password_env"="$truststore_password"
+    echo "Generated random password for $password_env: $truststore_password"
+  fi
+  
+  # Create truststore directory if it doesn't exist
+  mkdir -p $(dirname "$truststore_path")
+  
+  # Create truststore if it doesn't exist or if we're starting fresh
+  if [[ ! -f "$truststore_path" ]]; then
+    echo "Creating new multi-domain truststore at: $truststore_path"
+    
+    # Validate JAVA_HOME exists
+    if [[ -z "$JAVA_HOME" ]]; then
+      echo "ERROR: JAVA_HOME environment variable is not set, required for truststore creation for plugin $plugin_name"
+      exit 1
+    fi
+    
+    # Validate cacerts file exists
+    if [[ ! -f "$JAVA_HOME/lib/security/cacerts" ]]; then
+      echo "ERROR: Java cacerts file not found at $JAVA_HOME/lib/security/cacerts for plugin $plugin_name"
+      exit 1
+    fi
+    
+    # Copy cacerts as base truststore
+    if ! cp "$JAVA_HOME/lib/security/cacerts" "$truststore_path"; then
+      echo "ERROR: Failed to create truststore file at $truststore_path for plugin $plugin_name"
+      exit 1
+    fi
+    
+    # Change the default password to our password
+    echo "Setting truststore password"
+    if ! keytool -storepasswd -keystore "$truststore_path" \
+         -storepass "changeit" -new "$truststore_password" >/dev/null 2>&1; then
+      echo "ERROR: Failed to set truststore password for plugin $plugin_name"
+      exit 1
+    fi
+  fi
+  
+  # Extract and process hostnames (REQUIRED)
+  local hostnames=$(echo "$ssl_truststore_config" | grep -o '"hostnames"[[:space:]]*:[[:space:]]*\[[^]]*\]' | sed 's/.*"hostnames"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/' | tr ',' '\n')
+  
+  if [[ -z "$hostnames" ]]; then
+    echo "ERROR: ssl_truststore.hostnames is required and must be a non-empty array when ssl_truststore.generate is true for plugin $plugin_name"
+    exit 1
+  fi
+  
+  # Validate that hostnames array is not empty
+  local hostname_count=$(echo "$hostnames" | grep -v '^$' | wc -l)
+  if [[ $hostname_count -eq 0 ]]; then
+    echo "ERROR: ssl_truststore.hostnames must contain at least one hostname when ssl_truststore.generate is true for plugin $plugin_name"
+    exit 1
+  fi
+  
+  # Download and import certificates for each hostname
+  while IFS= read -r hostname_entry; do
+    if [[ -n "$hostname_entry" ]]; then
+      # Clean up the hostname (remove quotes and whitespace)
+      local clean_hostname=$(echo "$hostname_entry" | sed 's/[[:space:]]*"\([^"]*\)".*/\1/' | xargs)
+      
+      if [[ -n "$clean_hostname" ]]; then
+        local hostname=$(echo "$clean_hostname" | cut -d':' -f1)
+        local port=$(echo "$clean_hostname" | cut -d':' -f2)
+        
+        # Validate hostname:port format
+        if [[ -z "$hostname" || -z "$port" || "$hostname" == "$port" ]]; then
+          echo "ERROR: Invalid hostname format '$clean_hostname' in ssl_truststore.hostnames for plugin $plugin_name. Expected format: 'hostname:port'"
+          exit 1
+        fi
+        
+        # Validate port is numeric
+        if ! [[ "$port" =~ ^[0-9]+$ ]]; then
+          echo "ERROR: Invalid port '$port' in hostname '$clean_hostname' for plugin $plugin_name. Port must be numeric."
+          exit 1
+        fi
+        
+        local alias="$plugin_name-$(echo $hostname | tr '.' '-')"
+        
+                echo "Downloading certificate for $hostname:$port with alias $alias"
+        
+        # Download CA certificate
+        local cert_file="$(dirname "$truststore_path")/$alias.pem"
+        if ! echo | openssl s_client -connect $hostname:$port -showcerts 2>/dev/null | \
+             openssl x509 -outform PEM > "$cert_file"; then
+          echo "ERROR: Failed to download certificate from $hostname:$port for plugin $plugin_name"
+          exit 1
+        fi
+        
+        # Validate certificate file is not empty
+        if [[ ! -s "$cert_file" ]]; then
+          echo "ERROR: Downloaded certificate from $hostname:$port is empty for plugin $plugin_name"
+          exit 1
+        fi
+        
+        # Import certificate into truststore (skip if already exists)
+        if keytool -list -keystore "$truststore_path" -storepass "$truststore_password" -alias "$alias" >/dev/null 2>&1; then
+          echo "Certificate with alias $alias already exists in truststore, skipping"
+        else
+          echo "Importing certificate with alias $alias into truststore"
+          if ! keytool -import -noprompt -alias "$alias" -file "$cert_file" \
+               -keystore "$truststore_path" -storepass "$truststore_password" >/dev/null 2>&1; then
+            echo "ERROR: Failed to import certificate with alias $alias into truststore for plugin $plugin_name"
+            exit 1
+          fi
+        fi
+      fi
+    fi
+  done <<< "$hostnames"
+  
 
-# Start Kafka Connect in the background
-nohup /opt/bitnami/kafka/bin/connect-distributed.sh /opt/bitnami/kafka/config/connect-distributed.properties > /proc/1/fd/1 2>&1 &
+  
+  echo "Multi-domain truststore setup completed for $plugin_name at: $truststore_path"
+}
 
-# Wait for Kafka Connect to start
-echo "Waiting for Kafka Connect to start..."
-until curl -s http://localhost:8083/ > /dev/null; do
-  echo "Waiting for Kafka Connect REST API..."
-  sleep 5
-done
+# Function to setup connectors in the background
+setup_connectors() {
+  echo "Starting connector setup process..."
+  
+  # Wait for Kafka Connect to start
+  echo "Waiting for Kafka Connect to start..."
+  until curl -s http://localhost:8083/ > /dev/null; do
+    echo "Waiting for Kafka Connect REST API..."
+    sleep 5
+  done
 
-echo "Kafka Connect started. Waiting 10 seconds..."
-sleep 10
+  echo "Kafka Connect started. Waiting 10 seconds for full initialization..."
+  sleep 10
 
-# Create/update connectors
-{{- range .plugins }}
-echo "Processing connector: {{ .name }}"
-{{- if hasKey . "enabled" }}
-{{- if not .enabled }}
-echo "Connector {{ .name }} is disabled. Removing if it exists..."
-curl -s -X DELETE "http://localhost:8083/connectors/{{ .name }}" || true
-{{- else }}
-echo "Creating/updating connector: {{ .name }}"
+  # Create/update connectors
+  {{- range .plugins }}
+  echo "Processing connector: {{ .name }}"
+  {{- if hasKey . "enabled" }}
+  {{- if not .enabled }}
+  echo "Connector {{ .name }} is disabled. Removing if it exists..."
+  curl -s -X DELETE "http://localhost:8083/connectors/{{ .name }}" || true
+  {{- else }}
+  echo "Creating/updating connector: {{ .name }}"
 
+{{- if hasKey . "ssl_truststore" }}
+# Setup multi-domain truststore if configured
+SSL_TRUSTSTORE_CONFIG='{"generate":{{ if hasKey .ssl_truststore "generate" }}{{ .ssl_truststore.generate }}{{ else }}false{{ end }}{{- if hasKey .ssl_truststore "truststore_path" }},"truststore_path":"{{ .ssl_truststore.truststore_path }}"{{- end }}{{- if hasKey .ssl_truststore "truststore_password_env" }},"truststore_password_env":"{{ .ssl_truststore.truststore_password_env }}"{{- end }}{{- if hasKey .ssl_truststore "hostnames" }},"hostnames":[{{- range $i, $hostname := .ssl_truststore.hostnames }}{{- if $i }},{{- end }}"{{ $hostname }}"{{- end }}]{{- end }}}'
+setup_multi_domain_truststore "{{ .name }}" "$SSL_TRUSTSTORE_CONFIG"
+{{- end }}
 
 {{- if and (hasKey .config "ssl") (eq .config.ssl "true") }}
 # Check if SSL is enabled
@@ -374,6 +528,23 @@ if [[ -n "${SSL_TRUSTSTORE_PASSWORD}" && ! "{{ if hasKey .config "ssl.truststore
   CONFIG=$(echo "$CONFIG" | sed "s|\${SSL_TRUSTSTORE_PASSWORD}|${SSL_TRUSTSTORE_PASSWORD}|g")
 fi
 
+  {{- if hasKey . "ssl_truststore" }}
+  {{- if hasKey .ssl_truststore "truststore_password_env" }}
+  # Replace plugin-specific truststore password if it exists
+  PLUGIN_PASSWORD_VAR="{{ .ssl_truststore.truststore_password_env }}"
+  echo "DEBUG: Looking for password in environment variable: $PLUGIN_PASSWORD_VAR"
+  echo "DEBUG: Password value: ${!PLUGIN_PASSWORD_VAR}"
+  if [[ -n "${!PLUGIN_PASSWORD_VAR}" ]]; then
+    echo "DEBUG: Replacing \${${PLUGIN_PASSWORD_VAR}} with password in config"
+    CONFIG=$(echo "$CONFIG" | sed "s|\${${PLUGIN_PASSWORD_VAR}}|${!PLUGIN_PASSWORD_VAR}|g")
+    echo "DEBUG: Config after replacement:"
+    echo "$CONFIG"
+  else
+    echo "DEBUG: No password found in $PLUGIN_PASSWORD_VAR"
+  fi
+  {{- end }}
+  {{- end }}
+
 # Try to create connector with retry logic
 max_retries=5
 retry_count=0
@@ -392,23 +563,23 @@ while [ $retry_count -lt $max_retries ]; do
   fi
 done
 {{- end }}
-{{- else }}
-echo "Creating/updating connector: {{ .name }}"
-{{- if and (hasKey .config "ssl") (eq .config.ssl "true") }}
-# Check if SSL is enabled
-# Export ssl.truststore.location if it exists
-{{- if hasKey .config "ssl.truststore.location" }}
-export SSL_TRUSTSTORE_LOCATION={{ index .config "ssl.truststore.location" | quote }}
-{{- end }}
-# Export ssl.truststore.password if it exists
-{{- if hasKey .config "ssl.truststore.password" }}
-export SSL_TRUSTSTORE_PASSWORD={{ index .config "ssl.truststore.password" | quote }}
-{{- end }}
-# Setup truststore
-truststore_init "{{ .config.hostname }}" "{{ .config.port }}" "{{ .name }}" "{{ default "" .config.jdbcConnectionProperties }}"
-{{- end }}
+  {{- else }}
+  echo "Creating/updating connector: {{ .name }}"
+  {{- if and (hasKey .config "ssl") (eq .config.ssl "true") }}
+  # Check if SSL is enabled
+  # Export ssl.truststore.location if it exists
+  {{- if hasKey .config "ssl.truststore.location" }}
+  export SSL_TRUSTSTORE_LOCATION={{ index .config "ssl.truststore.location" | quote }}
+  {{- end }}
+  # Export ssl.truststore.password if it exists
+  {{- if hasKey .config "ssl.truststore.password" }}
+  export SSL_TRUSTSTORE_PASSWORD={{ index .config "ssl.truststore.password" | quote }}
+  {{- end }}
+  # Setup truststore
+  truststore_init "{{ .config.hostname }}" "{{ .config.port }}" "{{ .name }}" "{{ default "" .config.jdbcConnectionProperties }}"
+  {{- end }}
 
-CONFIG=$(cat << 'EOF'
+  CONFIG=$(cat << 'EOF'
 {
   "name": "{{ .name }}",
   "config": {
@@ -426,12 +597,29 @@ CONFIG=$(cat << 'EOF'
 EOF
 )
 
-# If we have a generated password, replace it in the config
-if [[ -n "${SSL_TRUSTSTORE_PASSWORD}" && ! "{{ if hasKey .config "ssl.truststore.password" }}true{{ else }}false{{ end }}" == "true" ]]; then
-  CONFIG=$(echo "$CONFIG" | sed "s|\${SSL_TRUSTSTORE_PASSWORD}|${SSL_TRUSTSTORE_PASSWORD}|g")
-fi
+  # If we have a generated password, replace it in the config
+  if [[ -n "${SSL_TRUSTSTORE_PASSWORD}" && ! "{{ if hasKey .config "ssl.truststore.password" }}true{{ else }}false{{ end }}" == "true" ]]; then
+    CONFIG=$(echo "$CONFIG" | sed "s|\${SSL_TRUSTSTORE_PASSWORD}|${SSL_TRUSTSTORE_PASSWORD}|g")
+  fi
 
-# Try to create connector with retry logic
+  {{- if hasKey . "ssl_truststore" }}
+{{- if hasKey .ssl_truststore "truststore_password_env" }}
+# Replace plugin-specific truststore password if it exists
+PLUGIN_PASSWORD_VAR="{{ .ssl_truststore.truststore_password_env }}"
+echo "DEBUG: Looking for password in environment variable: $PLUGIN_PASSWORD_VAR"
+echo "DEBUG: Password value: ${!PLUGIN_PASSWORD_VAR}"
+if [[ -n "${!PLUGIN_PASSWORD_VAR}" ]]; then
+  echo "DEBUG: Replacing \${${PLUGIN_PASSWORD_VAR}} with password in config"
+  CONFIG=$(echo "$CONFIG" | sed "s|\${${PLUGIN_PASSWORD_VAR}}|${!PLUGIN_PASSWORD_VAR}|g")
+  echo "DEBUG: Config after replacement:"
+  echo "$CONFIG"
+else
+  echo "DEBUG: No password found in $PLUGIN_PASSWORD_VAR"
+fi
+{{- end }}
+{{- end }}
+
+  # Try to create connector with retry logic
 max_retries=5
 retry_count=0
 while [ $retry_count -lt $max_retries ]; do
@@ -448,9 +636,36 @@ while [ $retry_count -lt $max_retries ]; do
     fi
   fi
 done
-{{- end }}
-{{- end }}
+  {{- end }}
+  {{- end }}
 
-echo "All Kafka connectors have been configured and started."
-sleep infinity
+  echo "All Kafka connectors have been configured and started."
+}
+
+# Signal handler for graceful shutdown
+cleanup() {
+  echo "Received shutdown signal, stopping Kafka Connect..."
+  if [[ -n $KAFKA_PID ]]; then
+    kill -TERM $KAFKA_PID
+    wait $KAFKA_PID
+  fi
+  exit 0
+}
+
+# Set up signal handlers
+trap cleanup SIGTERM SIGINT
+
+echo "Starting Kafka Connect distributed worker..."
+
+# Start the connector setup process in the background
+setup_connectors &
+SETUP_PID=$!
+
+# Start Kafka Connect in the foreground
+echo "Starting Kafka Connect in foreground mode..."
+exec /opt/bitnami/kafka/bin/connect-distributed.sh /opt/bitnami/kafka/config/connect-distributed.properties &
+KAFKA_PID=$!
+
+# Wait for either process to finish
+wait $KAFKA_PID
 {{- end }}
