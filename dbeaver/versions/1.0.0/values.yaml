@@ -2,18 +2,6 @@ admin:
   name: adminusername
   password: Password123
 
-##ADJUST THIS
-database:
-  user: username
-  password: password
-  driver: postgresql
-  url: jdbc:postgresql://postgres-db.test-gvc.cpln.local:5432/test
-  #example url jdbc:<db_driver>://<host>:<port>/<database_name>
-
 resources:
   cpu: 500m
   memory: 512Mi
-
-#REMOVE THIS
-gvc:
-  name: test-gvc
