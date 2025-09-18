@@ -55,7 +55,7 @@ spec:
     internal:
       inboundAllowType: none
       inboundAllowWorkload: []
-  identityLink: //gvc/{{ .Values.gvc.name }}/identity/dbeaver-identity
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/dbeaver-identity
   loadBalancer:
     direct:
       enabled: false
