@@ -1,5 +1,20 @@
-replicas: 2
+gvc:
+  name: clickhouse-gvc
+  # Replica count will only affect the server workload
+  locations:
+    - name: aws-us-east-2
+      replicas: 1
+    - name: aws-eu-central-1
+      replicas: 1
+    - name: gcp-us-west1
+      replicas: 1
 
-resources:
+clickhouse-server:
+  resources:
   cpu: 1
   memory: 1Gi
+
+clickhouse-keeper:
+  resources:
+    cpu: 1
+    memory: 1Gi

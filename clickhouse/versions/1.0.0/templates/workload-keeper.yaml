@@ -1,0 +1,73 @@
+kind: workload
+name: {{ .Release.Name }}-keeper
+description: clickhouse-server
+tags: {}
+spec:
+  type: stateful
+  containers:
+    - name: {{ .Release.Name }}-server
+      cpu: {{ .Values.clickhouse-keeper.resources.cpu }}
+      image: clickhouse/clickhouse-server:25.8
+      inheritEnv: false
+      memory: {{ .Values.clickhouse-keeper.resources.memory }}
+      command: "/bin/bash"
+      args:
+        - "/scripts/keeper-startup.sh"
+      ports:
+        - number: 9181
+          protocol: tcp
+        - number: 9234
+          protocol: tcp
+      volumes:
+        - path: /var/lib/clickhouse
+          recoveryPolicy: retain
+          uri: cpln://volumeset/clickhouse-keeper-vs
+        - path: /scripts/keeper-startup.sh
+          uri: cpln://secret/clickhouse-keeper-startup.payload
+  defaultOptions:
+    autoscaling:
+      keda: {}
+      maxConcurrency: 0
+      maxScale: 3
+      metric: cpu
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  {{- $locs := .Values.gvc.locations }}
+  {{- $numLocs := len $locs }}
+  {{- if eq (mod $numLocs 2) 0 }}
+  localOptions:
+    - autoscaling:
+        maxConcurrency: 0
+        metric: cpu
+        minScale: 2
+        maxScale: 2
+        scaleToZeroDelay: 300
+        target: 100
+      capacityAI: false
+      debug: false
+      location: //location/{{ (index $locs 0).name }}
+      suspend: false
+      timeoutSeconds: 5
+  {{- end }}
+  firewallConfig:
+    external:
+      inboundAllowCIDR: []
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: same-gvc
+      inboundAllowWorkload: []
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: true
+  supportDynamicTags: false
