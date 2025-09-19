@@ -1,15 +1,15 @@
 kind: workload
 name: {{ .Release.Name }}-keeper
-description: clickhouse-server
+description: clickhouse keeper
 tags: {}
 spec:
   type: stateful
   containers:
-    - name: {{ .Release.Name }}-server
-      cpu: {{ .Values.clickhouse-keeper.resources.cpu }}
+    - name: {{ .Release.Name }}-keeper
+      cpu: "{{ .Values.keeper.resources.cpu }}"
       image: clickhouse/clickhouse-server:25.8
       inheritEnv: false
-      memory: {{ .Values.clickhouse-keeper.resources.memory }}
+      memory: {{ .Values.keeper.resources.memory }}
       command: "/bin/bash"
       args:
         - "/scripts/keeper-startup.sh"
@@ -24,6 +24,7 @@ spec:
           uri: cpln://volumeset/clickhouse-keeper-vs
         - path: /scripts/keeper-startup.sh
           uri: cpln://secret/clickhouse-keeper-startup.payload
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/clickhouse-identity
   defaultOptions:
     autoscaling:
       keda: {}

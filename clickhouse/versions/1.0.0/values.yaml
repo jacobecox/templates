@@ -9,12 +9,12 @@ gvc:
     - name: gcp-us-west1
       replicas: 1
 
-clickhouse-server:
+server:
   resources:
-  cpu: 1
-  memory: 1Gi
+    cpu: 1
+    memory: 1Gi
 
-clickhouse-keeper:
+keeper:
   resources:
     cpu: 1
     memory: 1Gi

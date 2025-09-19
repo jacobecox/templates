@@ -8,11 +8,11 @@ spec:
     - name: {{ .Release.Name }}-pd
       cpu: "{{ .Values.resources.pd.cpu }}"
       image: pingcap/pd:v8.5.3
+      inheritEnv: false
+      memory: {{ .Values.resources.pd.memory }}
       command: "/bin/bash"
       args:
         - "/scripts/pd-startup.sh"
-      inheritEnv: false
-      memory: {{ .Values.resources.pd.memory }}
       ports:
         - number: 2379
           protocol: tcp
