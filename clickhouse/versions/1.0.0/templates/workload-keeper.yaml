@@ -9,6 +9,9 @@ spec:
       cpu: "{{ .Values.keeper.resources.cpu }}"
       image: clickhouse/clickhouse-server:25.8
       inheritEnv: false
+      env:
+      - name: LOCATIONS_STR
+        value: "{{- range $i, $loc := .Values.gvc.locations -}}{{ $loc.name }}:{{ $loc.replicas }}{{ if lt $i (sub (len $.Values.gvc.locations) 1) }},{{ end }}{{- end }}"
       memory: {{ .Values.keeper.resources.memory }}
       command: "/bin/bash"
       args:
@@ -16,7 +19,7 @@ spec:
       ports:
         - number: 9181
           protocol: tcp
-        - number: 9234
+        - number: 9444
           protocol: tcp
       volumes:
         - path: /var/lib/clickhouse
@@ -59,7 +62,8 @@ spec:
     external:
       inboundAllowCIDR: []
       inboundBlockedCIDR: []
-      outboundAllowCIDR: []
+      outboundAllowCIDR: 
+        - 0.0.0.0/0
       outboundAllowHostname: []
       outboundAllowPort: []
       outboundBlockedCIDR: []
