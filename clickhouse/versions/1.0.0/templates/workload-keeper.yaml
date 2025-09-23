@@ -19,7 +19,7 @@ spec:
       ports:
         - number: 9181
           protocol: tcp
-        - number: 9444
+        - number: 9234
           protocol: tcp
       volumes:
         - path: /var/lib/clickhouse
@@ -32,7 +32,7 @@ spec:
     autoscaling:
       keda: {}
       maxConcurrency: 0
-      maxScale: 3
+      maxScale: 1
       metric: cpu
       minScale: 1
       scaleToZeroDelay: 300
@@ -60,7 +60,8 @@ spec:
   {{- end }}
   firewallConfig:
     external:
-      inboundAllowCIDR: []
+      inboundAllowCIDR:
+        - 0.0.0.0/0
       inboundBlockedCIDR: []
       outboundAllowCIDR: 
         - 0.0.0.0/0
@@ -68,7 +69,7 @@ spec:
       outboundAllowPort: []
       outboundBlockedCIDR: []
     internal:
-      inboundAllowType: same-gvc
+      inboundAllowType: same-org
       inboundAllowWorkload: []
   loadBalancer:
     direct:
