@@ -60,8 +60,7 @@ spec:
   {{- end }}
   firewallConfig:
     external:
-      inboundAllowCIDR:
-        - 0.0.0.0/0
+      inboundAllowCIDR: []
       inboundBlockedCIDR: []
       outboundAllowCIDR: 
         - 0.0.0.0/0
