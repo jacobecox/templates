@@ -16,5 +16,5 @@ server:
 
 keeper:
   resources:
-    cpu: 1
+    cpu: 2
     memory: 1Gi

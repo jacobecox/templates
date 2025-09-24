@@ -29,7 +29,7 @@ spec:
     autoscaling:
       keda: {}
       maxConcurrency: 0
-      maxScale: 3
+      maxScale: 1
       metric: cpu
       minScale: 1
       scaleToZeroDelay: 300
@@ -57,12 +57,13 @@ spec:
     external:
       inboundAllowCIDR: []
       inboundBlockedCIDR: []
-      outboundAllowCIDR: []
+      outboundAllowCIDR:
+        - 0.0.0.0/0
       outboundAllowHostname: []
       outboundAllowPort: []
       outboundBlockedCIDR: []
     internal:
-      inboundAllowType: same-gvc
+      inboundAllowType: same-org
       inboundAllowWorkload: []
   loadBalancer:
     direct:
