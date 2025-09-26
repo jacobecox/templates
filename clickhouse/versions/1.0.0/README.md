@@ -1,7 +1,5 @@
 TODO
-1. Get Keeper to connect as cluster (TCP works, firewall is good, config files are accurate)
-2. Handle edge case for even number of locations (add replica or maybe just always 3 replicas?)
-3. Learn how to insert db preferences for user
-
-Docs
-https://clickhouse.com/docs/architecture/cluster-deployment
+1. Handle suspension of extra keeper replicas (added locations)
+2. Learn how to insert db preferences for user
+3. Test restarts on everything, data transferred across nodes, handling heavy queries
+4. Create helper variables file and README

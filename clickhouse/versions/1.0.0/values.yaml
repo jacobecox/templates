@@ -3,18 +3,20 @@ gvc:
   # Replica count will only affect the server workload
   locations:
     - name: aws-us-east-2
-      replicas: 1
+      replicas: 2
     - name: aws-eu-central-1
-      replicas: 1
+      replicas: 2
     - name: aws-us-west-2
-      replicas: 1
+      replicas: 2
+    - name: gcp-us-west1
+      replicas: 2
 
 server:
   resources:
-    cpu: 1
-    memory: 1Gi
+    cpu: 2
+    memory: 2Gi
 
 keeper:
   resources:
     cpu: 2
-    memory: 1Gi
+    memory: 2Gi

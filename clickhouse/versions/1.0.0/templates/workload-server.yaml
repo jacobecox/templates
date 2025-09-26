@@ -9,6 +9,9 @@ spec:
       cpu: "{{ .Values.server.resources.cpu }}"
       image: clickhouse/clickhouse-server:25.8
       inheritEnv: false
+      env:
+      - name: LOCATIONS_STR
+        value: "{{- range $i, $loc := .Values.gvc.locations -}}{{ $loc.name }}:{{ $loc.replicas }}{{ if lt $i (sub (len $.Values.gvc.locations) 1) }},{{ end }}{{- end }}"
       memory: {{ .Values.server.resources.memory }}
       command: "/bin/bash"
       args:
