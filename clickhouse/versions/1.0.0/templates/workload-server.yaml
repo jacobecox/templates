@@ -32,7 +32,7 @@ spec:
     autoscaling:
       keda: {}
       maxConcurrency: 0
-      maxScale: 1
+      maxScale: 5
       metric: cpu
       minScale: 1
       scaleToZeroDelay: 300

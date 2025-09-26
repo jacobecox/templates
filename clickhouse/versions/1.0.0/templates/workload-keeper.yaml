@@ -42,20 +42,19 @@ spec:
     suspend: false
     timeoutSeconds: 5
   {{- $locs := .Values.gvc.locations }}
-  {{- $numLocs := len $locs }}
-  {{- if eq (mod $numLocs 2) 0 }}
   localOptions:
+  {{- range $i, $loc := $locs }}
     - autoscaling:
         maxConcurrency: 0
         metric: cpu
-        minScale: 2
-        maxScale: 2
+        minScale: 1
+        maxScale: 1
         scaleToZeroDelay: 300
         target: 100
       capacityAI: false
       debug: false
-      location: //location/{{ (index $locs 0).name }}
-      suspend: false
+      location: //location/{{ $loc.name }}
+      suspend: {{ if ge $i 3 }}true{{ else }}false{{ end }}
       timeoutSeconds: 5
   {{- end }}
   firewallConfig:

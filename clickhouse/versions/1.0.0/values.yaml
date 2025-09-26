@@ -1,6 +1,7 @@
 gvc:
   name: clickhouse-gvc
   # Replica count will only affect the server workload
+  # Keeper will always have 3 total replicas (1 per location)
   locations:
     - name: aws-us-east-2
       replicas: 2
@@ -8,15 +9,13 @@ gvc:
       replicas: 2
     - name: aws-us-west-2
       replicas: 2
-    - name: gcp-us-west1
-      replicas: 2
 
 server:
   resources:
-    cpu: 2
-    memory: 2Gi
+    cpu: 4
+    memory: 4Gi
 
 keeper:
   resources:
-    cpu: 2
-    memory: 2Gi
+    cpu: 4
+    memory: 4Gi
