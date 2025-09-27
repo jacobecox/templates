@@ -10,5 +10,6 @@ bindings:
       - //gvc/{{ .Values.gvc.name }}/identity/clickhouse-identity
 targetKind: secret
 targetLinks:
+  - //secret/clickhouse-database
   - //secret/clickhouse-keeper-startup
   - //secret/clickhouse-server-startup
