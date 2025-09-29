@@ -5,22 +5,31 @@ gvc:
   locations:
     - name: aws-us-east-2
       replicas: 2
-    - name: aws-eu-central-1
+    - name: gcp-us-west1
       replicas: 2
-    - name: aws-us-west-2
+    - name: gcp-us-east1
       replicas: 2
 
 database:
   name: mydb
-  user: myuser
   password: mypw
 
 server:
   resources:
-    cpu: 3
-    memory: 4Gi
+    cpu: 2
+    memory: 2Gi
+  internal_access:
+    type: same-gvc # options: same-gvc, same-org, workload-list
+    workloads:  # Note: can only be used if type is same-gvc or workload-list
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
 
 keeper:
   resources:
     cpu: 2
     memory: 2Gi
+  internal_access:
+    type: same-gvc # options: same-gvc, same-org, workload-list
+    workloads:  # Note: can only be used if type is same-gvc or workload-list
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME

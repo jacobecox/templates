@@ -12,8 +12,6 @@ spec:
       env:
       - name: LOCATIONS_STR
         value: "{{- range $i, $loc := .Values.gvc.locations -}}{{ $loc.name }}:{{ $loc.replicas }}{{ if lt $i (sub (len $.Values.gvc.locations) 1) }},{{ end }}{{- end }}"
-      - name: CLICKHOUSE_USER
-        value: cpln://secret/clickhouse-database.user
       - name: CLICKHOUSE_PASSWORD
         value: cpln://secret/clickhouse-database.password
       - name: CLICKHOUSE_DATABASE
@@ -74,7 +72,7 @@ spec:
       outboundAllowPort: []
       outboundBlockedCIDR: []
     internal:
-      inboundAllowType: same-org
+      inboundAllowType: {{ .Values.server.internal_access.type }}
       inboundAllowWorkload: []
   loadBalancer:
     direct:

@@ -67,7 +67,7 @@ spec:
       outboundAllowPort: []
       outboundBlockedCIDR: []
     internal:
-      inboundAllowType: same-org
+      inboundAllowType: {{ .Values.keeper.internal_access.type }}
       inboundAllowWorkload: []
   loadBalancer:
     direct:
