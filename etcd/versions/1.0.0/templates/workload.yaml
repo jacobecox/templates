@@ -1,0 +1,59 @@
+kind: workload
+name: {{ .Release.Name }}
+description: etcd
+tags: {}
+spec:
+  type: stateful
+  containers:
+    - name: etcd
+      args:
+        - '--name=etcd-0'
+        - '--data-dir=/var/lib/etcd'
+        - '--listen-client-urls=http://0.0.0.0:2379'
+        - '--advertise-client-urls=http://etcd-test:2379'
+      command: etcd
+      cpu: {{ .Values.resources.cpu }}
+      image: quay.io/coreos/etcd:v3.6.5
+      inheritEnv: false
+      memory: {{ .Values.resources.memory }}
+      ports:
+        - number: 2379
+          protocol: tcp
+        - number: 2380
+          protocol: tcp
+      volumes:
+        - path: /var/lib/etcd
+          recoveryPolicy: retain
+          uri: cpln://volumeset/etcd-vs
+  defaultOptions:
+    autoscaling:
+      keda: {}
+      maxConcurrency: 0
+      maxScale: 1
+      metric: cpu
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR: []
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: {{ .Values.internal_access.type }}
+      {{- if .Values.internal_access.workloads }}
+      inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
+      {{- end }}
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: false
+  supportDynamicTags: false
