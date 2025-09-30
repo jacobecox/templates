@@ -24,7 +24,7 @@ spec:
       volumes:
         - path: /var/lib/etcd
           recoveryPolicy: retain
-          uri: cpln://volumeset/etcd-vs
+          uri: cpln://volumeset/{{ .Release.Name }}-etcd-vs
   defaultOptions:
     autoscaling:
       keda: {}
