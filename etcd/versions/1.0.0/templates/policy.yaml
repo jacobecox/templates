@@ -1,0 +1,13 @@
+---
+kind: policy
+name: etcd-{{ .Values.global.cpln.gvc }}-policy
+description: etcd-{{ .Values.global.cpln.gvc }}-policy
+tags: {}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/etcd-identity
+targetKind: secret
+targetLinks:
+  - //secret/etcd-startup

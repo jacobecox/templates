@@ -6,14 +6,11 @@ spec:
   type: stateful
   containers:
     - name: etcd
+      command: "/bin/bash"
       args:
-        - '--name=etcd-0'
-        - '--data-dir=/var/lib/etcd'
-        - '--listen-client-urls=http://0.0.0.0:2379'
-        - '--advertise-client-urls=http://{{ .Release.Name }}.{{ .Values.global.cpln.gvc }}.cpln.local:2379'
-      command: etcd
-      cpu: {{ .Values.resources.cpu }}
-      image: quay.io/coreos/etcd:v3.6.5
+        - "/etcd/start.sh"
+      cpu: "{{ .Values.resources.cpu }}"
+      image: controlplanecorporation/etcd:0.1
       inheritEnv: false
       memory: {{ .Values.resources.memory }}
       ports:
@@ -25,13 +22,16 @@ spec:
         - path: /var/lib/etcd
           recoveryPolicy: retain
           uri: cpln://volumeset/{{ .Release.Name }}-etcd-vs
+        - path: /etcd/start.sh
+          uri: cpln://secret/etcd-startup.payload
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/etcd-identity
   defaultOptions:
     autoscaling:
       keda: {}
       maxConcurrency: 0
-      maxScale: 1
+      maxScale: {{ .Values.replicas }}
       metric: cpu
-      minScale: 1
+      minScale: {{ .Values.replicas }}
       scaleToZeroDelay: 300
       target: 100
     capacityAI: false
@@ -55,5 +55,5 @@ spec:
     direct:
       enabled: false
       ports: []
-    replicaDirect: false
+    replicaDirect: true
   supportDynamicTags: false

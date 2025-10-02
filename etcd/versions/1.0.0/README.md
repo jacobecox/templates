@@ -1,16 +1,16 @@
-## etcd App
+## etcd
 
 etcd is a distributed, reliable key-value store for the most critical data of a distributed system. It provides a reliable way to store data that needs to be accessed by a distributed system or cluster of machines. etcd is essential for maintaining cluster health by providing consistent coordination, service discovery, and configuration management across distributed systems.
 
-### Key Features
+### Configuring etcd
 
-- **Distributed**: etcd is designed to be distributed across multiple nodes for high availability
-- **Consistent**: Provides strong consistency guarantees for all operations
-- **Reliable**: Built-in leader election and automatic failover capabilities
+Update the `values.yaml` file with your settings:
 
-### Accessing etcd
-
-Workloads are allowed to access etcd based on the `internal-access` you specify in `values.yaml`. You can learn more about it in our [documentation](https://docs.controlplane.com/reference/workload#internal).
+- **`replicas`**: Number of etcd instances (default: 3, must be odd)
+- **`resources.cpu`**: CPU per instance (default: 1 vCPU)
+- **`resources.memory`**: Memory per instance (default: 2 GB RAM)
+- **`internal_access.type`**: Internal firewall access (`same-gvc`, `same-org`, or `workload-list`)
+- **`internal_access.workloads`**: Specific workloads (when using `workload-list` or `same-gvc`)
 
 ### Supported External Services
-- [etcd Docs](https://etcd.io/docs/v3.6/)
+- [etcd docs](https://etcd.io/docs/v3.6/)
