@@ -22,11 +22,11 @@ spec:
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
         - name: PGDATABASE
-          value: postgres
+          value: .Values.postgres.database
         - name: PGPASSWORD_SUPERUSER
-          value: password
+          value: cpln://secret/{{ .Release.Name }}-postgres-config.password
         - name: PGUSER_SUPERUSER
-          value: postgres
+          value: cpln://secret/{{ .Release.Name }}-postgres-config.username
       image: /org/jacob-cox/image/patroni:0.1
       inheritEnv: false
       memory: {{ .Values.resources.memory }}
@@ -39,6 +39,8 @@ spec:
         - path: /var/lib/postgresql/data
           recoveryPolicy: retain
           uri: cpln://volumeset/{{ .Release.Name }}-postgres-vs
+        - path: /patroni/start.sh
+          uri: cpln://secret/{{ .Release.Name }}-patroni-startup.payload
   defaultOptions:
     autoscaling:
       keda:
@@ -47,9 +49,9 @@ spec:
         pollingInterval: 1
         triggers: []
       maxConcurrency: 0
-      maxScale: 1
+      maxScale: {{ .Values.replicas }}
       metric: cpu
-      minScale: 1
+      minScale: {{ .Values.replicas }}
       scaleToZeroDelay: 300
       target: 100
     capacityAI: false

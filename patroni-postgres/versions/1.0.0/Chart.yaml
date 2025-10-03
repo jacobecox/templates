@@ -12,7 +12,6 @@ annotations:
   category: "database"
   createsGvc: false
 
-#UPDATE THIS
 dependencies:
   - name: etcd
     version: 1.0.0

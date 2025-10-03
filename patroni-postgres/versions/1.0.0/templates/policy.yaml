@@ -1,0 +1,13 @@
+kind: policy
+name: patroni-postgres-{{ .Values.global.cpln.gvc }}-policy
+description: patroni-postgres {{ .Values.global.cpln.gvc }} policy
+tags: {}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/patroni-postgres-identity
+targetKind: secret
+targetLinks:
+  - //secret/{{ Release.Name }}-patroni-startup
+  - //secret/{{ Release.Name }}-postgres-config
