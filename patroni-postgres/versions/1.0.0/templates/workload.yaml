@@ -1,0 +1,81 @@
+kind: workload
+name: patroni-postgres
+description: patroni-postgres
+tags: {}
+spec:
+  type: stateful
+  containers:
+    - name: spilo-17
+      cpu: "{{ .Values.resources.cpu }}"
+      env:
+        - name: ETCD3_HOSTS
+          value: >-
+            replica-0.test.aws-eu-central-1.test-gvc.cpln.local:2379,replica-1.test.aws-eu-central-1.test-gvc.cpln.local:2379,replica-2.test.aws-eu-central-1.test-gvc.cpln.local:2379
+        - name: PATRONI_NAME
+          value: patroni-0
+        - name: PATRONI_RESTAPI_CONNECT_ADDRESS
+          value: patroni-postgres.test-gvc.cpln.local:8008
+        - name: PATRONI_RESTAPI_LISTEN
+          value: 0.0.0.0:8008
+        - name: PATRONI_SCOPE
+          value: production-cluster
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: PGDATABASE
+          value: postgres
+        - name: PGPASSWORD_SUPERUSER
+          value: password
+        - name: PGUSER_SUPERUSER
+          value: postgres
+      image: /org/jacob-cox/image/patroni:0.1
+      inheritEnv: false
+      memory: {{ .Values.resources.memory }}
+      ports:
+        - number: 8008
+          protocol: tcp
+        - number: 5432
+          protocol: tcp
+      volumes:
+        - path: /var/lib/postgresql/data
+          recoveryPolicy: retain
+          uri: cpln://volumeset/{{ .Release.Name }}-postgres-vs
+  defaultOptions:
+    autoscaling:
+      keda:
+        cooldownPeriod: 1
+        initialCooldownPeriod: 1
+        pollingInterval: 1
+        triggers: []
+      maxConcurrency: 0
+      maxScale: 1
+      metric: cpu
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR: []
+      inboundBlockedCIDR: []
+      outboundAllowCIDR:
+        - 0.0.0.0/0
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: {{ .Values.internal_access.type }}
+      {{- if .Values.internal_access.workloads }}
+      inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
+      {{- end }}
+      inboundAllowWorkload: []
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: true
+  securityOptions:
+    filesystemGroupId: 1000
+  supportDynamicTags: false
