@@ -1,20 +1,16 @@
 kind: workload
-name: patroni-postgres
-description: patroni-postgres
+name: {{ .Release.Name }}-patroni-postgres
+description: {{ .Release.Name }} patroni-postgres
 tags: {}
 spec:
   type: stateful
   containers:
-    - name: spilo-17
+    - name: patroni-postgres
+      command: "/bin/bash"
+      args:
+        - "/patroni/start.sh"
       cpu: "{{ .Values.resources.cpu }}"
       env:
-        - name: ETCD3_HOSTS
-          value: >-
-            replica-0.test.aws-eu-central-1.test-gvc.cpln.local:2379,replica-1.test.aws-eu-central-1.test-gvc.cpln.local:2379,replica-2.test.aws-eu-central-1.test-gvc.cpln.local:2379
-        - name: PATRONI_NAME
-          value: patroni-0
-        - name: PATRONI_RESTAPI_CONNECT_ADDRESS
-          value: patroni-postgres.test-gvc.cpln.local:8008
         - name: PATRONI_RESTAPI_LISTEN
           value: 0.0.0.0:8008
         - name: PATRONI_SCOPE
@@ -27,7 +23,7 @@ spec:
           value: cpln://secret/{{ .Release.Name }}-postgres-config.password
         - name: PGUSER_SUPERUSER
           value: cpln://secret/{{ .Release.Name }}-postgres-config.username
-      image: /org/jacob-cox/image/patroni:0.1
+      image: controlplanecorporation/patroni-postgres:0.1
       inheritEnv: false
       memory: {{ .Values.resources.memory }}
       ports:
@@ -41,6 +37,7 @@ spec:
           uri: cpln://volumeset/{{ .Release.Name }}-postgres-vs
         - path: /patroni/start.sh
           uri: cpln://secret/{{ .Release.Name }}-patroni-startup.payload
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-patroni-postgres-identity
   defaultOptions:
     autoscaling:
       keda:

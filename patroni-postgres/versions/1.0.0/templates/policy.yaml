@@ -6,8 +6,8 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.global.cpln.gvc }}/identity/patroni-postgres-identity
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-patroni-postgres-identity
 targetKind: secret
 targetLinks:
-  - //secret/{{ Release.Name }}-patroni-startup
-  - //secret/{{ Release.Name }}-postgres-config
+  - //secret/{{ .Release.Name }}-patroni-startup
+  - //secret/{{ .Release.Name }}-postgres-config
