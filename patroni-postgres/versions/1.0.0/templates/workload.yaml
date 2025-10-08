@@ -23,7 +23,7 @@ spec:
           value: cpln://secret/{{ .Release.Name }}-postgres-config.password
         - name: PGUSER_SUPERUSER
           value: cpln://secret/{{ .Release.Name }}-postgres-config.username
-      image: controlplanecorporation/patroni-postgres:0.1
+      image: controlplanecorporation/patroni-postgres:0.2
       inheritEnv: false
       memory: {{ .Values.resources.memory }}
       ports:
