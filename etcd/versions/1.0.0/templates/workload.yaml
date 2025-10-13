@@ -1,5 +1,5 @@
 kind: workload
-name: {{ .Release.Name }}
+name: {{ .Release.Name }}-etcd
 description: etcd
 tags: {}
 spec:
