@@ -1,0 +1,80 @@
+kind: workload
+name: {{ .Release.Name }}-patroni-postgres
+description: {{ .Release.Name }} patroni-postgres
+tags: {}
+spec:
+  type: stateful
+  containers:
+    - name: patroni-postgres
+      command: "/bin/bash"
+      args:
+        - "/patroni/start.sh"
+      cpu: "{{ .Values.resources.cpu }}"
+      env:
+        - name: PATRONI_RESTAPI_LISTEN
+          value: 0.0.0.0:8008
+        - name: PATRONI_SCOPE
+          value: production-cluster
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: PGDATABASE
+          value: .Values.postgres.database
+        - name: PGPASSWORD_SUPERUSER
+          value: cpln://secret/{{ .Release.Name }}-postgres-config.password
+        - name: PGUSER_SUPERUSER
+          value: cpln://secret/{{ .Release.Name }}-postgres-config.username
+      image: controlplanecorporation/patroni-postgres:0.6
+      inheritEnv: false
+      memory: {{ .Values.resources.memory }}
+      ports:
+        - number: 8008
+          protocol: tcp
+        - number: 5432
+          protocol: tcp
+      volumes:
+        - path: /var/lib/postgresql/data
+          recoveryPolicy: retain
+          uri: cpln://volumeset/{{ .Release.Name }}-postgres-vs
+        - path: /patroni/start.sh
+          uri: cpln://secret/{{ .Release.Name }}-patroni-startup.payload
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-patroni-postgres-identity
+  defaultOptions:
+    autoscaling:
+      keda:
+        cooldownPeriod: 1
+        initialCooldownPeriod: 1
+        pollingInterval: 1
+        triggers: []
+      maxConcurrency: 0
+      maxScale: {{ .Values.replicas }}
+      metric: cpu
+      minScale: {{ .Values.replicas }}
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR: []
+      inboundBlockedCIDR: []
+      outboundAllowCIDR:
+        - 0.0.0.0/0
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: {{ .Values.internal_access.type }}
+      {{- if .Values.internal_access.workloads }}
+      inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
+      {{- end }}
+      inboundAllowWorkload: []
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: true
+  securityOptions:
+    filesystemGroupId: 999
+  supportDynamicTags: false
