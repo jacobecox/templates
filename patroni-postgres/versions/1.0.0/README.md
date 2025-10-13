@@ -1,5 +1,5 @@
 TODO
-1. Test failover for leader replica and see if it rejoins cluster
+1. Change etcd to use -etcd for workload name and adjust here
 2. Update helpers file and README
 
 sources

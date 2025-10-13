@@ -23,7 +23,7 @@ spec:
           value: cpln://secret/{{ .Release.Name }}-postgres-config.password
         - name: PGUSER_SUPERUSER
           value: cpln://secret/{{ .Release.Name }}-postgres-config.username
-      image: controlplanecorporation/patroni-postgres:0.2
+      image: controlplanecorporation/patroni-postgres:0.6
       inheritEnv: false
       memory: {{ .Values.resources.memory }}
       ports:
@@ -76,5 +76,5 @@ spec:
       ports: []
     replicaDirect: true
   securityOptions:
-    filesystemGroupId: 1000
+    filesystemGroupId: 999
   supportDynamicTags: false
