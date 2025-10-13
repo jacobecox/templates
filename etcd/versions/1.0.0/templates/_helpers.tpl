@@ -2,7 +2,7 @@
 etcd Workload Name
 */}}
 {{- define "etcd.name" -}}
-{{- printf "%s" .Release.Name }}
+{{- printf "%s-etcd" .Release.Name }}
 {{- end }}
 
 {{/*
