@@ -2,7 +2,7 @@ kind: volumeset
 name: {{ .Release.Name }}-etcd-vs
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
-  workload: {{ .Release.Name }}
+  workload: {{ .Release.Name }}-etcd
 spec:
   autoscaling:
     maxCapacity: 1000
