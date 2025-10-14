@@ -1,0 +1,6 @@
+---
+kind: identity
+gvc: {{ .Values.gvc.name }}
+name: {{ .Release.Name }}-cassandra-identity
+description: {{ .Release.Name }}-cassandra-identity
+tags: {}

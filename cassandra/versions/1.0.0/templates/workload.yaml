@@ -1,0 +1,55 @@
+kind: workload
+name: {{ .Release.Name }}
+description: {{ .Release.Name }} cassandra
+tags: {}
+spec:
+  type: stateful
+  containers:
+    - name: cassandra
+      cpu: "{{ .Values.resources.cpu }}"
+      image: cassandra:4.1
+      inheritEnv: false
+      memory: {{ .Values.resources.memory }}
+      ports:
+        - number: 7000
+          protocol: tcp
+        - number: 9042
+          protocol: tcp
+        - number: 7199
+          protocol: tcp
+      volumes:
+        - path: /var/lib/cassandra/data
+          recoveryPolicy: retain
+          uri: cpln://volumeset/{{ .Release.Name }}-cassandra-vs
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-cassandra-identity
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 0
+      maxScale: 3
+      metric: cpu
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR: []
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: {{ .Values.internal_access.type }}
+      {{- if .Values.internal_access.workloads }}
+      inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
+      {{- end }}
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: true
+  supportDynamicTags: false

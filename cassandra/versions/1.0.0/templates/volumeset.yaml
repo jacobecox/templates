@@ -1,0 +1,12 @@
+kind: volumeset
+name: {{ .Release.Name }}-cassandra-vs
+description: cassandra volumeset
+tags:
+  workload: {{ .Release.Name }}
+spec:
+  fileSystemType: ext4
+  initialCapacity: 10
+  performanceClass: general-purpose-ssd
+  snapshots:
+    createFinalSnapshot: true
+    retentionDuration: 7d

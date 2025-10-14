@@ -1,0 +1,13 @@
+apiVersion: v2
+name: cassandra
+description: Cassandra DB Cluster for Control Plane
+
+type: application
+version: 1.0.0
+appVersion: "4.1"
+
+annotations:
+  created: "2025-10-14"
+  lastModified: "2025-10-14"
+  category: "database"
+  createsGvc: true
