@@ -13,9 +13,9 @@ spec:
       - name: LOCATIONS_STR
         value: "{{- range $i, $loc := .Values.gvc.locations -}}{{ $loc.name }}:{{ $loc.replicas }}{{ if lt $i (sub (len $.Values.gvc.locations) 1) }},{{ end }}{{- end }}"
       - name: CLICKHOUSE_PASSWORD
-        value: cpln://secret/clickhouse-database.password
+        value: cpln://secret/{{ .Release.Name }}-clickhouse-database.password
       - name: CLICKHOUSE_DATABASE
-        value: cpln://secret/clickhouse-database.db
+        value: cpln://secret/{{ .Release.Name }}-clickhouse-database.db
       memory: {{ .Values.server.resources.memory }}
       command: "/bin/bash"
       args:
@@ -30,10 +30,10 @@ spec:
       volumes:
         - path: /var/lib/clickhouse
           recoveryPolicy: retain
-          uri: cpln://volumeset/clickhouse-server-vs
+          uri: cpln://volumeset/{{ .Release.Name }}-clickhouse-server-vs
         - path: /scripts/server-startup.sh
-          uri: cpln://secret/clickhouse-server-startup.payload
-  identityLink: //gvc/{{ .Values.gvc.name }}/identity/clickhouse-identity
+          uri: cpln://secret/{{ .Release.Name }}-clickhouse-server-startup.payload
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-clickhouse-identity
   defaultOptions:
     autoscaling:
       keda: {}

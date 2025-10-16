@@ -1,6 +1,6 @@
 kind: volumeset
-name: clickhouse-server-vs
-description: clickhouse-server-vs
+name: {{ .Release.Name }}-clickhouse-server-vs
+description: {{ .Release.Name }}-clickhouse-server-vs
 tags:
   workload: {{ .Release.Name }}-server
 spec:
@@ -13,8 +13,8 @@ spec:
 
 ---
 kind: volumeset
-name: clickhouse-keeper-vs
-description: clickhouse-keeper-vs
+name: {{ .Release.Name }}-clickhouse-keeper-vs
+description: {{ .Release.Name }}-clickhouse-keeper-vs
 tags:
   workload: {{ .Release.Name }}-keeper
 spec:

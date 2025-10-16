@@ -24,10 +24,10 @@ spec:
       volumes:
         - path: /var/lib/clickhouse
           recoveryPolicy: retain
-          uri: cpln://volumeset/clickhouse-keeper-vs
+          uri: cpln://volumeset/{{ .Release.Name }}-clickhouse-keeper-vs
         - path: /scripts/keeper-startup.sh
-          uri: cpln://secret/clickhouse-keeper-startup.payload
-  identityLink: //gvc/{{ .Values.gvc.name }}/identity/clickhouse-identity
+          uri: cpln://secret/{{ .Release.Name }}-clickhouse-keeper-startup.payload
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-clickhouse-identity
   defaultOptions:
     autoscaling:
       keda: {}
