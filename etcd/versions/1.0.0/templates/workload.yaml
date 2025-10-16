@@ -26,6 +26,8 @@ spec:
           uri: cpln://secret/etcd-startup.payload
   identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/etcd-identity
   defaultOptions:
+    multiZone:
+      enabled: {{ .Values.multiZone }}
     autoscaling:
       keda: {}
       maxConcurrency: 0
