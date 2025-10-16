@@ -1,8 +1,8 @@
 kind: volumeset
-name: cockroach-vs
+name: {{ .Release.Name }}-cockroach-vs
 gvc: {{ .Values.gvc.name }}
 tags:
-  workload: cockroach
+  workload: {{ .Release.Name }}
 spec:
   autoscaling:
     maxCapacity: 1000

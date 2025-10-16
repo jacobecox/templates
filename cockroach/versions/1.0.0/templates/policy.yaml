@@ -1,14 +1,14 @@
 ---
 kind: policy
-name: cockroach-{{ .Values.gvc.name }}-policy
-description: cockroach-{{ .Values.gvc.name }}-policy
+name: {{ .Release.Name }}-cockroach-{{ .Values.gvc.name }}-policy
+description: {{ .Release.Name }}-cockroach-{{ .Values.gvc.name }}-policy
 tags: {}
 bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.gvc.name }}/identity/cockroach-identity
+      - //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-cockroach-identity
 targetKind: secret
 targetLinks:
-  - //secret/cockroach-startup
-  - //secret/cockroach-user
+  - //secret/{{ .Release.Name }}-cockroach-startup
+  - //secret/{{ .Release.Name }}-cockroach-user

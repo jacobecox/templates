@@ -15,13 +15,13 @@ spec:
       inheritEnv: false
       env:
         - name: ROOT_PW
-          value: cpln://secret/tidb-user.rootPassword
+          value: cpln://secret/{{ .Release.Name }}-tidb-user.rootPassword
         - name: APP_DB
-          value: cpln://secret/tidb-user.db
+          value: cpln://secret/{{ .Release.Name }}-tidb-user.db
         - name: APP_USER
-          value: cpln://secret/tidb-user.user
+          value: cpln://secret/{{ .Release.Name }}-tidb-user.user
         - name: APP_PW
-          value: cpln://secret/tidb-user.password
+          value: cpln://secret/{{ .Release.Name }}-tidb-user.password
       memory: {{ .Values.resources.server.memory }}
       ports:
         - number: 10080
@@ -30,8 +30,8 @@ spec:
           protocol: tcp
       volumes:
         - path: /scripts/server-startup.sh
-          uri: cpln://secret/tidb-server-startup.payload
-  identityLink: //gvc/{{ .Values.gvc.name }}/identity/tidb-identity
+          uri: cpln://secret/{{ .Release.Name }}-tidb-server-startup.payload
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-tidb-identity
   defaultOptions:
     autoscaling:
       keda: {}

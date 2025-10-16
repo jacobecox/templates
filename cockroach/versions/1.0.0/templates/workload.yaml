@@ -1,11 +1,11 @@
 ---
 kind: workload
-name: {{ .Values.cockroach_defaults.workload_name }}
+name: {{ .Release.Name }}
 description: CockroachDB cluster across multiple locations
 spec:
   type: stateful
   containers:
-    - name: {{ .Values.cockroach_defaults.workload_name }}
+    - name: {{ .Release.Name }}
       cpu: {{ .Values.resources.cpu }}
       memory: {{ .Values.resources.memory }}
       image: cockroachdb/cockroach:latest-v25.2
@@ -17,7 +17,7 @@ spec:
         - name: DB_NAME
           value: {{ .Values.database.name }}
         - name: DB_USER
-          value: cpln://secret/cockroach-user.payload
+          value: cpln://secret/{{ .Release.Name }}-cockroach-user.payload
       ports:
         - number: {{ .Values.cockroach_defaults.http_port }}
           protocol: http
@@ -26,9 +26,9 @@ spec:
       volumes:
         - path: /cockroach/cockroach-data
           recoveryPolicy: retain
-          uri: cpln://volumeset/cockroach-vs
+          uri: cpln://volumeset/{{ .Release.Name }}-cockroach-vs
         - path: /cockroach/start.sh
-          uri: cpln://secret/cockroach-startup.payload
+          uri: cpln://secret/{{ .Release.Name }}-cockroach-startup.payload
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
@@ -50,7 +50,7 @@ spec:
       {{- if .Values.internal_access.workloads }}
       inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
       {{- end }}
-  identityLink: //gvc/{{ .Values.gvc.name }}/identity/cockroach-identity
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-cockroach-identity
   loadBalancer:
     replicaDirect: true
   localOptions:
