@@ -1,5 +1,5 @@
 kind: workload
-name: {{ .Release.Name }}
+name: {{ .Release.Name }}-dbeaver
 description: dbeaver
 tags: {}
 spec:
@@ -11,9 +11,9 @@ spec:
       inheritEnv: false
       env:
         - name: CB_ADMIN_NAME
-          value: cpln://secret/dbeaver-admin-config.admin_name
+          value: cpln://secret/{{ .Release.Name }}-dbeaver-admin-config.admin_name
         - name: CB_ADMIN_PASSWORD
-          value: cpln://secret/dbeaver-admin-config.admin_password
+          value: cpln://secret/{{ .Release.Name }}-dbeaver-admin-config.admin_password
         - name: CB_SERVER_NAME
           value: {{ .Release.Name }}
         - name: CB_SERVER_URL
@@ -25,7 +25,7 @@ spec:
       volumes:
         - path: /opt/cloudbeaver/workspace
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-vs
+          uri: cpln://volumeset/{{ .Release.Name }}-dbeaver-vs
   defaultOptions:
     autoscaling:
       keda:
@@ -55,7 +55,7 @@ spec:
     internal:
       inboundAllowType: none
       inboundAllowWorkload: []
-  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/dbeaver-identity
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-dbeaver-identity
   loadBalancer:
     direct:
       enabled: false

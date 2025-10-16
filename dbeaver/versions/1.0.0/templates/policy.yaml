@@ -7,7 +7,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.global.cpln.gvc }}/identity/dbeaver-identity
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-dbeaver-identity
 targetKind: secret
 targetLinks:
-  - //secret/dbeaver-admin-config
+  - //secret/{{ .Release.Name }}-dbeaver-admin-config
