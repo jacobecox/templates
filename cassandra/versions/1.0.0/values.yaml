@@ -14,7 +14,7 @@ database:
 
 resources:
   cpu: 1
-  memory: 4Gi
+  memory: 2Gi
 
 multiZone:
   enabled: true
