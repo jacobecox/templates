@@ -23,8 +23,8 @@ spec:
           recoveryPolicy: retain
           uri: cpln://volumeset/{{ .Release.Name }}-etcd-vs
         - path: /etcd/start.sh
-          uri: cpln://secret/etcd-startup.payload
-  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/etcd-identity
+          uri: cpln://secret/{{ .Release.Name }}-etcd-startup.payload
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-etcd-identity
   defaultOptions:
     multiZone:
       enabled: {{ .Values.multiZone }}
