@@ -11,6 +11,7 @@ Update the `values.yaml` file with your settings:
 - **`resources.memory`**: Memory per instance (default: 2 GB RAM)
 - **`internal_access.type`**: Internal firewall access (`same-gvc`, `same-org`, or `workload-list`)
 - **`internal_access.workloads`**: Specific workloads (when using `workload-list` or `same-gvc`)
+- **`multiZone`**: Distributes replicas equally across available zones
 
 ### Supported External Services
 - [etcd docs](https://etcd.io/docs/v3.6/)
