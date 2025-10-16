@@ -1,8 +1,8 @@
 kind: volumeset
-name: tidb-pd-vs
+name: {{ .Release.Name }}-tidb-pd-vs
 gvc: {{ .Values.gvc.name }}
 tags:
-  workload: tidb
+  workload: {{ .Release.Name }}-pd
 spec:
   autoscaling:
     maxCapacity: 1000
@@ -17,10 +17,10 @@ spec:
     
 ---
 kind: volumeset
-name: tidb-tikv-vs
+name: {{ .Release.Name }}-tidb-tikv-vs
 gvc: {{ .Values.gvc.name }}
 tags:
-  workload: tidb
+  workload: {{ .Release.Name }}-tikv
 spec:
   autoscaling:
     maxCapacity: 1000

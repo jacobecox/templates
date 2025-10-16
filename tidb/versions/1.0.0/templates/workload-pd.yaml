@@ -21,10 +21,10 @@ spec:
       volumes:
         - path: /data
           recoveryPolicy: retain
-          uri: cpln://volumeset/tidb-pd-vs
+          uri: cpln://volumeset/{{ .Release.Name }}-tidb-pd-vs
         - path: /scripts/pd-startup.sh
-          uri: cpln://secret/tidb-pd-startup.payload
-  identityLink: //gvc/{{ .Values.gvc.name }}/identity/tidb-identity
+          uri: cpln://secret/{{ .Release.Name }}-tidb-pd-startup.payload
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-tidb-identity
   defaultOptions:
     autoscaling:
       maxConcurrency: 0

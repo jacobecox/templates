@@ -37,7 +37,7 @@ Identity Name
 Policy Name
 */}}
 {{- define "patroni.policyName" -}}
-{{- printf "patroni-postgres-%s-policy" .Values.global.cpln.gvc }}
+{{- printf "%s-patroni-postgres-%s-policy" .Release.Name .Values.global.cpln.gvc }}
 {{- end }}
 
 {{/*
