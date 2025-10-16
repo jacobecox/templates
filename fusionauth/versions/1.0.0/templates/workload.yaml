@@ -1,8 +1,7 @@
 kind: workload
 name: {{ include "fusionauth.name" . }}-auth
 gvc: {{ .Values.global.cpln.gvc }}
-tags:
-  {{- include "fusionauth.tags" . | nindent 2 }}
+tags: {}
 spec:
   type: serverless
   identityLink: //identity/{{ include "postgres.pg.name" . }}
