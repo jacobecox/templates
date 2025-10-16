@@ -14,7 +14,10 @@ database:
 
 resources:
   cpu: 1
-  memory: 2Gi
+  memory: 4Gi
+
+multiZone:
+  enabled: true
 
 internal_access:
   type: same-gvc # options: same-gvc, same-org, workload-list

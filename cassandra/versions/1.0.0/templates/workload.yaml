@@ -10,6 +10,9 @@ spec:
       image: cassandra:4.1
       inheritEnv: false
       memory: {{ .Values.resources.memory }}
+      command: "/bin/bash"
+      args:
+        - "/scripts/cassandra-startup.sh"
       ports:
         - number: 7000
           protocol: tcp
@@ -21,11 +24,15 @@ spec:
         - path: /var/lib/cassandra/data
           recoveryPolicy: retain
           uri: cpln://volumeset/{{ .Release.Name }}-cassandra-vs
+        - path: /scripts/cassandra-startup.sh
+          uri: cpln://secret/{{ .Release.Name }}-cassandra-startup.payload
   identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-cassandra-identity
   defaultOptions:
+    multiZone:
+      enabled: {{ .Values.multiZone.enabled }}
     autoscaling:
       maxConcurrency: 0
-      maxScale: 3
+      maxScale: {{ (index .Values.gvc.locations 0).replicas | int }}
       metric: cpu
       minScale: 1
       scaleToZeroDelay: 300
@@ -34,6 +41,21 @@ spec:
     debug: false
     suspend: false
     timeoutSeconds: 5
+  localOptions:
+  {{- range $location := .Values.gvc.locations }}
+  - autoscaling:
+      maxConcurrency: 0
+      maxScale: {{ if eq ($location.replicas | int) 0 }}1{{ else }}{{ $location.replicas | int }}{{ end }}
+      metric: disabled
+      minScale: {{ if eq ($location.replicas | int) 0 }}0{{ else }}{{ $location.replicas | int }}{{ end }}
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    location: //location/{{ $location.name }}
+    suspend: {{ if eq ($location.replicas | int) 0 }}true{{ else }}false{{ end }}
+    timeoutSeconds: 10
+  {{- end }}
   firewallConfig:
     external:
       inboundAllowCIDR: []
