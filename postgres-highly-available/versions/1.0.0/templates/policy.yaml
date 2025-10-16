@@ -1,5 +1,5 @@
 kind: policy
-name: patroni-postgres-{{ .Values.global.cpln.gvc }}-policy
+name: {{ .Release.Name }}-patroni-postgres-{{ .Values.global.cpln.gvc }}-policy
 description: patroni-postgres {{ .Values.global.cpln.gvc }} policy
 tags: {}
 bindings:
