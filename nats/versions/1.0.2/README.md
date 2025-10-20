@@ -5,7 +5,9 @@ NATS is an open-source, high-performance, lightweight messaging system optimized
 
 You can also add any valid NATS configuration in the values file under nats_extra_config
 
+**Note on GVC Naming**
 
+This template creates a GVC with a default name defined in the `values.yaml`. If you plan to deploy multiple instances of this template, you **must assign a unique GVC name** for each deployment.
 
 ### Supported External Services
 - [NATS Documentation](https://docs.nats.io/)
