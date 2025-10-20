@@ -25,5 +25,9 @@ Once deployed, CockroachDB will be available on Port 26257 (default)
 
 The cluster automatically handles data distribution and replication across your configured locations.
 
+**Note on GVC Naming**
+
+- This template creates a GVC with a default name defined in the `values.yaml`. If you plan to deploy multiple instances of this template, you **must assign a unique GVC name** for each deployment.
+
 ### Supported External Services
 - [CockroachDB Documentation](https://www.cockroachlabs.com/docs/stable/)
