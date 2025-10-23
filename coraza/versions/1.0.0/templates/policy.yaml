@@ -11,4 +11,4 @@ bindings:
 targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-coraza-startup
-  - //secret/{{ .Release.Name }}-coraza-conf
+  - //secret/{{ .Release.Name }}-coraza-custom-rules
