@@ -1,0 +1,12 @@
+# MUST BE EDITED
+targetWorkload: WORKLOAD_NAME.GVC_NAME.cpln.local # Workload internal name of the workload to proxy traffic to
+
+targetPort: 8080 # Port of the workload to proxy traffic to
+
+WAFPort: 80 # Port on the WAF workload to expose to the internet
+
+resources:
+  cpu: 50m
+  memory: 128Mi
+
+multiZone: true
