@@ -3,4 +3,4 @@ kind: identity
 gvc: {{ .Values.gvc.name }}
 name: {{ .Release.Name }}-cockroach-identity
 description: {{ .Release.Name }}-cockroach-identity
-tags: {}
+tags: {{- include "cockroach.tags" . | nindent 4 }}
