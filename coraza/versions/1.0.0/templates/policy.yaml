@@ -2,7 +2,7 @@
 kind: policy
 name: {{ .Release.Name }}-coraza-{{ .Values.global.cpln.gvc }}-policy
 description: {{ .Release.Name }} Coraza WAF {{ .Values.global.cpln.gvc }} policy
-tags: {}
+tags: {{- include "coraza.tags" . | nindent 4 }}
 bindings:
   - permissions:
       - reveal

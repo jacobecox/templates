@@ -1,7 +1,7 @@
 kind: workload
 name: {{ .Release.Name }}-coraza-waf
 description: Coraza-waf
-tags: {}
+tags: {{- include "coraza.tags" . | nindent 4 }}
 spec:
   type: standard
   containers:
