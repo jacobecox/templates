@@ -1,25 +1,4 @@
 {{/*
-FusionAuth Workload Name
-*/}}
-{{- define "fusionauth.name" -}}
-{{- printf "%s" .Release.Name }}
-{{- end }}
-
-{{/*
-PostgreSQL Workload Name (for database connection)
-*/}}
-{{- define "postgres.pg.name" -}}
-{{- printf "%s" .Release.Name }}
-{{- end }}
-
-{{/*
-Secret Name for PostgreSQL Configuration
-*/}}
-{{- define "postgres.pg.secretName" -}}
-{{- printf "%s-conf" (include "postgres.pg.name" .) }}
-{{- end }}
-
-{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "fusionauth.chart" -}}
@@ -27,15 +6,29 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-PostgreSQL Host Name
+Common labels
 */}}
-{{- define "fusionauth.postgresHost" -}}
-{{- printf "%s-db" .Release.Name }}
+{{- define "fusionauth.tags" -}}
+helm.sh/chart: {{ include "fusionauth.chart" . }}
+{{ include "fusionauth.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.cpln.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.cpln.io/managed-by: {{ .Release.Service }}
+app.cpln.io/postgres-host: {{ include "fusionauth.postgresHost" . }}
 {{- end }}
 
 {{/*
-Database URL
+Selector labels
 */}}
-{{- define "fusionauth.databaseURL" -}}
-{{- printf "jdbc:postgresql://%s.%s.cpln.local:5432/%s" (include "fusionauth.postgresHost" .) .Values.global.cpln.gvc .Values.postgres.config.database }}
+{{- define "fusionauth.selectorLabels" -}}
+app.cpln.io/name: {{ .Release.Name }}
+app.cpln.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+PostgreSQL Host Name
+*/}}
+{{- define "fusionauth.postgresHost" -}}
+{{- printf "%s-pg-db" .Release.Name }}
 {{- end }}

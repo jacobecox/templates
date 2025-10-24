@@ -1,5 +1,5 @@
 kind: workload
-name: {{ include "pg.name" . }}-db
+name: {{ .Release.Name }}-pg-db
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "pg.tags" . | nindent 2 }}

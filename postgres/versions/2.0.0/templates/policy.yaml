@@ -1,5 +1,5 @@
 kind: policy
-name: {{ include "pg.name" . }}
+name: {{ .Release.Name }}-pg-policy
 tags:
   {{- include "pg.tags" . | nindent 4 }}
 bindings:
