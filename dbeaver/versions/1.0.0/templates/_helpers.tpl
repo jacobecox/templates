@@ -1,18 +1,4 @@
 {{/*
-DBeaver Workload Name
-*/}}
-{{- define "dbeaver.name" -}}
-{{- printf "%s-dbeaver" .Release.Name }}
-{{- end }}
-
-{{/*
-Secret Name for DBeaver Admin Configuration
-*/}}
-{{- define "dbeaver.secretName" -}}
-{{- printf "%s-admin-config" .Release.Name }}
-{{- end }}
-
-{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "dbeaver.chart" -}}
@@ -20,8 +6,21 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-VolumeSet Name
+Common labels
 */}}
-{{- define "dbeaver.volumeSetName" -}}
-{{- printf "%s-dbeaver-vs" .Release.Name }}
+{{- define "dbeaver.tags" -}}
+helm.sh/chart: {{ include "dbeaver.chart" . }}
+{{ include "dbeaver.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.cpln.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.cpln.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "dbeaver.selectorLabels" -}}
+app.cpln.io/name: {{ .Release.Name }}
+app.cpln.io/instance: {{ .Release.Name }}
 {{- end }}

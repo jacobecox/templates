@@ -2,6 +2,7 @@ kind: volumeset
 name: {{ .Release.Name }}-dbeaver-vs
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
+  {{- include "dbeaver.tags" . | nindent 2 }}
   workload: {{ .Release.Name }}
 spec:
   autoscaling:
