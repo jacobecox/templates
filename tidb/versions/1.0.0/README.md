@@ -51,5 +51,9 @@ Replace:
 
 The cluster automatically handles data distribution and replication across your configured locations.
 
+**Note on GVC Naming**
+
+This template creates a GVC with a default name defined in the `values.yaml`. If you plan to deploy multiple instances of this template, you **must assign a unique GVC name** for each deployment.
+
 ### Supported External Services
 - [TiDB Documentation](https://docs.pingcap.com/tidb/stable/)
