@@ -21,6 +21,9 @@ Before installing, update the values file with your desired configuration:
   - ClickHouse Server: 8123 (HTTP for client), 9000 (TCP), 9009 (HTTP between server nodes)
   - ClickHouse Keeper: 9181 (TCP for servers), 9234 (TCP between keeper nodes)
 
+- **Note on GVC Naming**
+  - This template creates a GVC with a default name defined in the `values.yaml`. If you plan to deploy multiple instances of this template, you **must assign a unique GVC name** for each deployment.
+
 ### Supported External Services
 
 [ClickHouse Documentation](https://clickhouse.com/docs/).
