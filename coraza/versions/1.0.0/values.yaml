@@ -1,5 +1,5 @@
-# CHANGE THIS BEFORE COMMITTING
-targetWorkload: test-app.test-gvc.cpln.local # Workload internal name of the workload to proxy traffic to
+# MUST BE EDITED
+targetWorkload: WORKLOAD_NAME.GVC_NAME.cpln.local # Workload internal name of the workload to proxy traffic to
 
 targetPort: 8080 # Port of the workload to proxy traffic to
 
