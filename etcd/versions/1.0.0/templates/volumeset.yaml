@@ -2,6 +2,7 @@ kind: volumeset
 name: {{ .Release.Name }}-etcd-vs
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
+  {{- include "etcd.tags" . | nindent 2 }}
   workload: {{ .Release.Name }}-etcd
 spec:
   autoscaling:
