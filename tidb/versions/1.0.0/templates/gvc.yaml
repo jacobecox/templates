@@ -1,7 +1,7 @@
 kind: gvc
 name: {{ .Values.gvc.name }}
 description: {{ .Values.gvc.name }}
-tags: {}
+tags: {{- include "tidb.tags" . | nindent 4 }}
 spec:
   endpointNamingFormat: org
   staticPlacement:

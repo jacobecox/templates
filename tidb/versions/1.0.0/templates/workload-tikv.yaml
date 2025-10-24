@@ -2,7 +2,7 @@
 kind: workload
 name: {{ .Release.Name }}-tikv
 description: tikv storage
-tags: {}
+tags: {{- include "tidb.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:

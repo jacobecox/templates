@@ -2,7 +2,7 @@
 kind: workload
 name: {{ .Release.Name }}-server
 description: tidb server
-tags: {}
+tags: {{- include "tidb.tags" . | nindent 4 }}
 spec:
   type: standard
   containers:

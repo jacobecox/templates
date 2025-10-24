@@ -1,7 +1,7 @@
 kind: workload
 name: {{ .Release.Name }}-pd
 description: tidb placement driver
-tags: {}
+tags: {{- include "tidb.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:
