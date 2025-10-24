@@ -8,7 +8,7 @@ appVersion: "17"
 
 annotations:
   created: "2024-11-11"
-  lastModified: "2025-08-13"
+  lastModified: "2025-10-24"
   category: "database"
   postgresVersion: "17"
   createsGvc: false

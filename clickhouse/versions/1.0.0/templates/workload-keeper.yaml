@@ -1,7 +1,7 @@
 kind: workload
 name: {{ .Release.Name }}-keeper
 description: clickhouse keeper
-tags: {}
+tags: {{- include "clickhouse.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:

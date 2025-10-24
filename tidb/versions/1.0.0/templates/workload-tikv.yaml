@@ -2,11 +2,11 @@
 kind: workload
 name: {{ .Release.Name }}-tikv
 description: tikv storage
-tags: {}
+tags: {{- include "tidb.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:
-    - name: {{ .Release.Name }}-tikv
+    - name: tidb-tikv
       cpu: "{{ .Values.resources.tikv.cpu }}"
       image: pingcap/tikv:v8.5.3
       command: "/bin/bash"

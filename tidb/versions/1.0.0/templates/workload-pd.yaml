@@ -1,11 +1,11 @@
 kind: workload
 name: {{ .Release.Name }}-pd
 description: tidb placement driver
-tags: {}
+tags: {{- include "tidb.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:
-    - name: {{ .Release.Name }}-pd
+    - name: tidb-pd
       cpu: "{{ .Values.resources.pd.cpu }}"
       image: pingcap/pd:v8.5.3
       inheritEnv: false

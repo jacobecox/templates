@@ -1,11 +1,11 @@
 kind: workload
 name: {{ .Release.Name }}-dbeaver
 description: dbeaver
-tags: {}
+tags: {{- include "dbeaver.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:
-    - name: {{ .Release.Name }}
+    - name: dbeaver
       cpu: {{ .Values.resources.cpu }}
       image: dbeaver/cloudbeaver:25.2.0
       inheritEnv: false

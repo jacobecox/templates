@@ -1,7 +1,8 @@
 kind: policy
 name: {{ .Release.Name }}-patroni-postgres-{{ .Values.global.cpln.gvc }}-policy
 description: patroni-postgres {{ .Values.global.cpln.gvc }} policy
-tags: {}
+tags:
+  {{- include "pg-ha.tags" . | nindent 4 }}
 bindings:
   - permissions:
       - reveal

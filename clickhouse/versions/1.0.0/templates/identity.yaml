@@ -3,4 +3,4 @@ kind: identity
 gvc: {{ .Values.gvc.name }}
 name: {{ .Release.Name }}-clickhouse-identity
 description: {{ .Release.Name }}-clickhouse-identity
-tags: {}
+tags: {{- include "clickhouse.tags" . | nindent 4 }}

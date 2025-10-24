@@ -2,10 +2,11 @@
 kind: workload
 name: {{ .Release.Name }}
 description: CockroachDB cluster across multiple locations
+tags: {{- include "cockroach.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:
-    - name: {{ .Release.Name }}
+    - name: cockroach
       cpu: {{ .Values.resources.cpu }}
       memory: {{ .Values.resources.memory }}
       image: cockroachdb/cockroach:latest-v25.2

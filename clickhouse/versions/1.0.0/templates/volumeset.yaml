@@ -1,7 +1,8 @@
 kind: volumeset
 name: {{ .Release.Name }}-clickhouse-server-vs
 description: {{ .Release.Name }}-clickhouse-server-vs
-tags:
+tags: 
+  {{- include "clickhouse.tags" . | nindent 2 }}
   workload: {{ .Release.Name }}-server
 spec:
   fileSystemType: ext4
@@ -16,6 +17,7 @@ kind: volumeset
 name: {{ .Release.Name }}-clickhouse-keeper-vs
 description: {{ .Release.Name }}-clickhouse-keeper-vs
 tags:
+  {{- include "clickhouse.tags" . | nindent 2 }}
   workload: {{ .Release.Name }}-keeper
 spec:
   fileSystemType: ext4

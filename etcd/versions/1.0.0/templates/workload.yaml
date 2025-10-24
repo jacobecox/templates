@@ -1,7 +1,7 @@
 kind: workload
 name: {{ .Release.Name }}-etcd
 description: etcd
-tags: {}
+tags: {{- include "etcd.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:

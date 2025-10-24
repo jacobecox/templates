@@ -1,7 +1,8 @@
 kind: workload
 name: {{ .Release.Name }}-patroni-postgres
 description: {{ .Release.Name }} patroni-postgres
-tags: {}
+tags:
+  {{- include "pg-ha.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:

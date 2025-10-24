@@ -2,7 +2,7 @@
 kind: policy
 name: {{ .Release.Name }}-clickhouse-{{ .Values.gvc.name }}-policy
 description: {{ .Release.Name }}-clickhouse-{{ .Values.gvc.name }}-policy
-tags: {}
+tags: {{- include "clickhouse.tags" . | nindent 4 }}
 bindings:
   - permissions:
       - reveal
