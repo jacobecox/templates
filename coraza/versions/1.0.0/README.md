@@ -12,6 +12,14 @@ The following values can be configured in your values file:
 - `resources`: Reserved resources for the workload
 - `multiZone`: Deploys replicas across multiple zones
 
+### Logging
+
+All Coraza logging is currently sent to `/dev/stdout` to be readable in the Control Plane built-in logging interface. Logging can be redirected by using the existing environment variables in the workload configuration.
+
+### Advanced Configuration
+
+Coraza configuration is largely specified through environment variables and can be customized by the user once installed. You can modify these environment variables in the workload configuration to adjust Coraza's behavior, logging levels, and security policies according to your specific requirements.
+
 ### Usage
 
 The Coraza WAF will act as a reverse proxy, filtering incoming requests before forwarding them to your target workload. Configure the `targetWorkload` and `targetPort` values to point to your application, then the WAF will be accessible on the specified `WAFPort`.
