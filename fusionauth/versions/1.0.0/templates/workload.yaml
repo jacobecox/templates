@@ -13,7 +13,7 @@ spec:
       inheritEnv: false
       env:
         - name: DATABASE_PASSWORD
-          value: 'cpln://secret/{{ include "postgres.pg.secretName" . }}.password'
+          value: 'cpln://secret/{{ .Release.Name }}-pg-config.password'
         - name: DATABASE_URL
           value: jdbc:postgresql://{{ .Release.Name }}-pg-db.{{ .Values.global.cpln.gvc }}.cpln.local:5432/{{ .Values.postgres.config.database }}
         - name: DATABASE_USERNAME
