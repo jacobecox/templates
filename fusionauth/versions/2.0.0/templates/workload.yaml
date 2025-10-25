@@ -1,0 +1,66 @@
+kind: workload
+name: {{ .Release.Name }}-auth
+gvc: {{ .Values.global.cpln.gvc }}
+tags: {{- include "fusionauth.tags" . | nindent 4 }}
+spec:
+  type: serverless
+  identityLink: //identity/{{ .Release.Name }}-auth-identity
+  containers:
+    - name: fusionauth
+      cpu: 512m
+      memory: 1024Mi
+      image: fusionauth/fusionauth-app:1.60.2
+      inheritEnv: false
+      env:
+        - name: DATABASE_PASSWORD
+          value: 'cpln://secret/{{ .Release.Name }}-pg-config.password'
+        - name: DATABASE_URL
+          value: jdbc:postgresql://{{ .Release.Name }}-pg-db.{{ .Values.global.cpln.gvc }}.cpln.local:5432/{{ .Values.postgres.config.database }}
+        - name: DATABASE_USERNAME
+          value: 'cpln://secret/{{ .Release.Name }}-pg-config.username'
+        - name: fusionauth-app.runtime-mode
+          value: 'production'
+        - name: fusionauth-app.silent-mode
+          value: 'true'
+        - name: fusionauth-app.http.port
+          value: '9011'
+      ports:
+        - number: 9011
+          protocol: http
+      command: /bin/bash
+      args:
+        - /opt/fusionauth/start-fusionauth.sh
+      volumes:
+        - path: /opt/fusionauth/start-fusionauth.sh
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Release.Name }}-auth-startup.payload
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 1000
+      maxScale: 3
+      metric: concurrency
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: true
+    debug: false
+    suspend: false
+    timeoutSeconds: 30
+  firewallConfig:
+    external:
+      inboundAllowCIDR:
+        - 0.0.0.0/0
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname:
+{{- if .Values.identityProviders.google.enabled }}
+        - oauth2.googleapis.com
+        - www.googleapis.com
+        - accounts.google.com
+{{- end }}
+      outboundAllowPort:
+{{- if .Values.identityProviders.google.enabled }}
+        - number: 443
+          protocol: tcp
+{{- end }}
+      outboundBlockedCIDR: []
