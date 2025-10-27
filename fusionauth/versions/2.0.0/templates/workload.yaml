@@ -9,7 +9,7 @@ spec:
     - name: fusionauth
       cpu: 512m
       memory: 1024Mi
-      image: fusionauth/fusionauth-app:1.60.2
+      image: controlplanecorporation/fusionauth:0.2
       inheritEnv: false
       env:
         - name: DATABASE_PASSWORD
