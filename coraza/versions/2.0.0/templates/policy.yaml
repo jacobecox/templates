@@ -1,0 +1,13 @@
+---
+kind: policy
+name: {{ .Release.Name }}-coraza-{{ .Values.global.cpln.gvc }}-policy
+description: {{ .Release.Name }} Coraza WAF {{ .Values.global.cpln.gvc }} policy
+tags: {{- include "coraza.tags" . | nindent 4 }}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-coraza-identity
+targetKind: secret
+targetLinks:
+  - //secret/{{ .Release.Name }}-coraza-custom-rules
