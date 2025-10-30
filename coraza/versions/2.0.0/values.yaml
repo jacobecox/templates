@@ -1,7 +1,12 @@
-# MUST BE EDITED
-targetWorkload: WORKLOAD_NAME.GVC_NAME.cpln.local # Workload internal name of the workload to proxy traffic to
-
-targetPort: 8080 # Port of the workload to proxy traffic to
+endpoints:  # Endpoints to proxy traffic to
+  - name: app1
+    workload: app1.test-gvc.cpln.local
+    port: 8080
+    path: /app1
+  - name: app2
+    workload: app2.test-gvc.cpln.local
+    port: 8081
+    path: /app2
 
 WAFPort: 80 # Port on the WAF workload to expose to the internet
 
@@ -20,12 +25,8 @@ redis:
       minMemory: 128Mi
     replicas: 2
     auth:
-      fromSecret: # If you have a pre-existing secret for the redis password, you can use it here
-        enabled: true
-        name: redis-auth
-        passwordKey: password
       password:
-        enabled: false
+        enabled: true
         value: password # Set a password for the redis
     firewall:
       internal_inboundAllowType: same-gvc
@@ -39,10 +40,6 @@ redis:
       minMemory: 128Mi
     replicas: 3
     auth:
-      fromSecret: # If you have a pre-existing secret for the sentinel password, you can use it here
-        enabled: false
-        name: sentinel-auth
-        passwordKey: password
       password:
         enabled: true
         value: password # Set a password for the sentinel

@@ -11,7 +11,7 @@ spec:
         - name: ACCESSLOG
           value: /dev/stdout
         - name: BACKEND
-          value: http://{{ .Values.targetWorkload }}:{{ .Values.targetPort }}
+          value: http://localhost:8080
         - name: CORAZA_AUDIT_LOG
           value: /dev/stdout
         - name: CORAZA_AUDIT_LOG_PARTS
@@ -35,6 +35,35 @@ spec:
         - path: /opt/coraza/rules.d/custom.conf
           recoveryPolicy: retain
           uri: cpln://secret/{{ .Release.Name }}-coraza-custom-rules.payload
+    - name: tyk-gateway
+      cpu: 100m
+      env:
+        - name: TYK_GW_LISTENPORT
+          value: '8080'
+        - name: TYK_GW_STORAGE_ADDRS
+          value: {{ .Release.Name }}-sentinel.{{ .Values.global.cpln.gvc }}.cpln.local:26379
+        - name: TYK_GW_STORAGE_ENABLECLUSTER
+          value: 'false'
+        - name: TYK_GW_STORAGE_MASTERNAME
+          value: mymaster
+        - name: TYK_GW_STORAGE_PASSWORD
+          value: cpln://secret/{{ .Release.Name }}-redis-auth-password.password
+        - name: TYK_GW_STORAGE_SENTINELPASSWORD
+          value: cpln://secret/{{ .Release.Name }}-sentinel-auth-password.password
+        - name: TYK_GW_STORAGE_TYPE
+          value: redis
+      image: tykio/tyk-gateway:v5.10.0
+      inheritEnv: false
+      memory: 256Mi
+      ports:
+        - number: 8080
+          protocol: http
+      volumes:
+        {{- range .Values.endpoints }}
+        - path: /opt/tyk-gateway/apps/{{ .name }}.json
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ $.Release.Name }}-gateway-endpoints.{{ .name }}
+        {{- end }}
   defaultOptions:
     multiZone:
       enabled: {{ .Values.multiZone }}

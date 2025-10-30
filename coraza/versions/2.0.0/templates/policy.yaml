@@ -11,3 +11,6 @@ bindings:
 targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-coraza-custom-rules
+  - //secret/{{ .Release.Name }}-gateway-endpoints
+  - //secret/{{ .Release.Name }}-redis-auth-password
+  - //secret/{{ .Release.Name }}-sentinel-auth-password
