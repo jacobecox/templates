@@ -1,0 +1,15 @@
+---
+kind: policy
+name: {{ .Release.Name }}-tyk-{{ .Values.global.cpln.gvc }}-policy
+description: {{ .Release.Name }} Tyk {{ .Values.global.cpln.gvc }} policy
+tags: {{- include "tyk.tags" . | nindent 4 }}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-tyk-identity
+targetKind: secret
+targetLinks:
+  - //secret/{{ .Release.Name }}-gateway-endpoints
+  - //secret/{{ .Release.Name }}-redis-auth-password
+  - //secret/{{ .Release.Name }}-sentinel-auth-password
