@@ -1,0 +1,104 @@
+kind: workload
+name: {{ .Release.Name }}-coraza-waf
+description: Coraza-waf
+tags: {{- include "coraza.tags" . | nindent 4 }}
+spec:
+  type: standard
+  containers:
+    - name: coraza-crs
+      cpu: 50m
+      env:
+        - name: ACCESSLOG
+          value: /dev/stdout
+        - name: BACKEND
+          value: http://localhost:8080
+        - name: CORAZA_AUDIT_LOG
+          value: /dev/stdout
+        - name: CORAZA_AUDIT_LOG_PARTS
+          value: ABDEFHIJZ
+        - name: CORAZA_DEBUG_LOG
+          value: /dev/stdout
+        - name: CORAZA_DEBUG_LOGLEVEL
+          value: '1'
+        - name: CORAZA_RULE_ENGINE
+          value: 'On'
+        - name: PORT
+          value: "{{ .Values.WAFPort }}"
+      image: >-
+        ghcr.io/coreruleset/coraza-crs@sha256:eed7280e0de4820507b500b1ee10de820c175165d5cce329609bf34f32977af8
+      inheritEnv: false
+      memory: 128Mi
+      ports:
+        - number: {{ .Values.WAFPort }}
+          protocol: http
+      volumes:
+        - path: /opt/coraza/rules.d/custom.conf
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Release.Name }}-coraza-custom-rules.payload
+    - name: tyk-gateway
+      cpu: 100m
+      env:
+        - name: TYK_GW_LISTENPORT
+          value: '8080'
+        - name: TYK_GW_STORAGE_ADDRS
+          value: {{ .Release.Name }}-sentinel.{{ .Values.global.cpln.gvc }}.cpln.local:26379
+        - name: TYK_GW_STORAGE_ENABLECLUSTER
+          value: 'false'
+        - name: TYK_GW_STORAGE_MASTERNAME
+          value: mymaster
+        - name: TYK_GW_STORAGE_PASSWORD
+          value: cpln://secret/{{ .Release.Name }}-redis-auth-password.password
+        - name: TYK_GW_STORAGE_SENTINELPASSWORD
+          value: cpln://secret/{{ .Release.Name }}-sentinel-auth-password.password
+        - name: TYK_GW_STORAGE_TYPE
+          value: redis
+      image: tykio/tyk-gateway:v5.10.0
+      inheritEnv: false
+      memory: 256Mi
+      ports:
+        - number: 8080
+          protocol: http
+      volumes:
+        {{- range .Values.endpoints }}
+        - path: /opt/tyk-gateway/apps/{{ .name }}.json
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ $.Release.Name }}-gateway-endpoints.{{ .name }}
+        {{- end }}
+  defaultOptions:
+    multiZone:
+      enabled: {{ .Values.multiZone }}
+    autoscaling:
+      keda:
+        cooldownPeriod: 1
+        initialCooldownPeriod: 1
+        pollingInterval: 1
+        triggers: []
+      maxConcurrency: 0
+      maxScale: 3
+      metric: cpu
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR:
+        - 0.0.0.0/0
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: same-gvc
+      inboundAllowWorkload: []
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-coraza-identity
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: false
+  supportDynamicTags: false

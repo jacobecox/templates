@@ -1,0 +1,49 @@
+endpoints:  # Endpoints to proxy traffic to
+  - name: app1
+    workload: WORKLOAD_NAME.GVC_NAME.cpln.local
+    port: 8080
+    path: /app1
+  #- name: app2
+  #  workload: WORKLOAD_NAME.GVC_NAME.cpln.local
+  #  port: 8080
+  #  path: /app2
+
+WAFPort: 80 # Port on the WAF workload to expose to the internet
+
+resources:
+  cpu: 50m
+  memory: 128Mi
+
+multiZone: true
+
+redis:
+  redis:
+    resources:
+      cpu: 200m
+      memory: 256Mi
+      minCpu: 80m
+      minMemory: 128Mi
+    replicas: 2
+    auth:
+      password:
+        enabled: true
+        value: password # Set a password for the redis
+    firewall:
+      internal_inboundAllowType: same-gvc
+    persistence:
+      enabled: true
+  sentinel:
+    resources:
+      cpu: 200m
+      memory: 256Mi
+      minCpu: 80m
+      minMemory: 128Mi
+    replicas: 3
+    auth:
+      password:
+        enabled: true
+        value: password # Set a password for the sentinel
+    firewall:
+      internal_inboundAllowType: same-gvc
+    persistence:
+      enabled: true
