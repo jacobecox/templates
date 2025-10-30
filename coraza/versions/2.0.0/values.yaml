@@ -1,12 +1,12 @@
 endpoints:  # Endpoints to proxy traffic to
   - name: app1
-    workload: app1.test-gvc.cpln.local
+    workload: WORKLOAD_NAME.GVC_NAME.cpln.local
     port: 8080
     path: /app1
-  - name: app2
-    workload: app2.test-gvc.cpln.local
-    port: 8081
-    path: /app2
+  #- name: app2
+  #  workload: WORKLOAD_NAME.GVC_NAME.cpln.local
+  #  port: 8080
+  #  path: /app2
 
 WAFPort: 80 # Port on the WAF workload to expose to the internet
 
