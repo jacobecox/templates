@@ -1,7 +1,7 @@
 ---
 kind: policy
-name: {{ .Release.Name }}-tyk-{{ .Values.global.cpln.gvc }}-policy
-description: {{ .Release.Name }} Tyk {{ .Values.global.cpln.gvc }} policy
+name: {{ .Release.Name }}-tyk-api-gateway-policy
+description: {{ .Release.Name }} Tyk API Gateway policy
 tags: {{- include "tyk.tags" . | nindent 4 }}
 bindings:
   - permissions:
