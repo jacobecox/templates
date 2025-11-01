@@ -12,6 +12,8 @@ endpoints:  # Endpoints to proxy traffic to
 
 listenPort: 8080 # Port on the API Gateway workload to listen on
 
+gatewaySecret: mysecret # Set a secret for Tyk API Gateway
+
 resources:
   cpu: 50m
   memory: 128Mi

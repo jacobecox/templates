@@ -22,6 +22,16 @@ spec:
           value: cpln://secret/{{ .Release.Name }}-sentinel-auth-password.password
         - name: TYK_GW_STORAGE_TYPE
           value: redis
+        - name: TYK_GW_ALLOWMASTERKEYS
+          value: 'true'
+        - name: TYK_GW_LOGLEVEL
+          value: 'debug' #CHANGE ME BEFORE COMMITTING
+        - name: TYK_GW_POLICIES_POLICYRECORDNAME
+          value: /opt/tyk-gateway/policies/policies.json
+        - name: TYK_GW_POLICIES_POLICYSOURCE
+          value: 'file'
+        - name: TYK_GW_SECRET
+          value: cpln://secret/{{ .Release.Name }}-gateway-secret.secret
       image: tykio/tyk-gateway:v5.10.0
       inheritEnv: false
       memory: 256Mi
@@ -29,11 +39,12 @@ spec:
         - number: {{ .Values.listenPort }}
           protocol: http
       volumes:
-        {{- range .Values.endpoints }}
-        - path: /opt/tyk-gateway/apps/{{ .name }}.json
+        - path: /opt/tyk-gateway/apps
           recoveryPolicy: retain
-          uri: cpln://secret/{{ $.Release.Name }}-gateway-endpoints.{{ .name }}
-        {{- end }}
+          uri: cpln://volumeset/{{ .Release.Name }}-tyk-endpoints-vs
+        - path: /opt/tyk-gateway/policies
+          recoveryPolicy: retain
+          uri: cpln://volumeset/{{ .Release.Name }}-tyk-policy-vs
   defaultOptions:
     multiZone:
       enabled: {{ .Values.multiZone }}

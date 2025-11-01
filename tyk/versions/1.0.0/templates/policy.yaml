@@ -10,6 +10,6 @@ bindings:
       - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-tyk-identity
 targetKind: secret
 targetLinks:
-  - //secret/{{ .Release.Name }}-gateway-endpoints
   - //secret/{{ .Release.Name }}-redis-auth-password
   - //secret/{{ .Release.Name }}-sentinel-auth-password
+  - //secret/{{ .Release.Name }}-gateway-secret
