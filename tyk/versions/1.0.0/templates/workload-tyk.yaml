@@ -41,10 +41,10 @@ spec:
       volumes:
         - path: /opt/tyk-gateway/apps
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-tyk-endpoints-vs
+          uri: cpln://volumeset/{{ .Release.Name }}-tyk-apis-vs
         - path: /opt/tyk-gateway/policies
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-tyk-policy-vs
+          uri: cpln://volumeset/{{ .Release.Name }}-tyk-policies-vs
   defaultOptions:
     multiZone:
       enabled: {{ .Values.multiZone }}
