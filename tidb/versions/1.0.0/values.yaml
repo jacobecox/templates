@@ -6,8 +6,6 @@ gvc:
       replicas: 2
     - name: aws-eu-central-1
       replicas: 2
-    - name: gcp-us-west1
-      replicas: 2
 
 resources:
   pd:
