@@ -19,6 +19,22 @@ spec:
           protocol: tcp
         - number: 20180
           protocol: tcp
+      readinessProbe:
+        exec:
+          command:
+            - /bin/sh
+            - '-c'
+            - >-
+              for loc in {{ range .Values.gvc.locations }}{{ .name }} {{ end }};
+              do endpoint="replica-0.{{ .Release.Name }}-pd.${loc}.{{ .Values.gvc.name }}.cpln.local:2379";
+              if curl -sf "http://$endpoint/pd/health" | grep -q '"health":[[:space:]]*true';
+              then exit 0; fi; done;
+              echo "no healthy PDs"; exit 1
+        failureThreshold: 3
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 2
       volumes:
         - path: /data
           recoveryPolicy: retain
