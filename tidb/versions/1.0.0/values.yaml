@@ -6,8 +6,10 @@ gvc:
       replicas: 2
     - name: aws-eu-central-1
       replicas: 2
+    - name: gcp-us-west1
+      replicas: 2
 
-exposeServer: true # Set to true to expose TIDB status and metrics report
+exposeServer: false # Set to true to expose TIDB status and metrics report
 
 resources:
   pd:
