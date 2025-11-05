@@ -6,7 +6,7 @@ TiDB is a distributed SQL database that provides horizontal scalability, strong 
 
 To configure your TiDB cluster across multiple locations, update the `gvc.locations` section in the `values.yaml` file:
 
-**Note:** It is recommended to have at least 3 replicas of Placement Driver (PD) and TiKV and at least 2 replicas of TiDB Server.
+**Note:** It is recommended to have at least 3 replicas of Placement Driver (PD) and TiKV and at least 2 replicas of TiDB Server. In order to achieve proper cluster size, be sure to have a minimum of 2 locations specified.
 
 ### Resource Configuration
 
@@ -36,7 +36,7 @@ Once deployed, TiDB will be available on Port 4000 (default)
 
 ### Connecting to TiDB
 
-To connect to your TiDB cluster using the MySQL client, use the following command:
+To connect to your TiDB cluster using a MySQL client, use the following command:
 
 ```bash
 mysql -h <TIDB_SERVER_WORKLOAD_INTERNAL_NAME> -P 4000 -u <USER> -p
