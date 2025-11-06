@@ -4,7 +4,7 @@ description: Tyk API Gateway for Control Plane
 
 type: application
 version: 1.0.0
-appVersion: "5.10.0"
+appVersion: "alpha"
 
 dependencies:
   - name: redis

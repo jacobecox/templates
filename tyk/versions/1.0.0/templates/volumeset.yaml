@@ -1,6 +1,6 @@
 ---
 kind: volumeset
-name: {{ .Release.Name }}-tyk-endpoints-vs
+name: {{ .Release.Name }}-tyk-apis-vs
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "tyk.tags" . | nindent 4 }}
@@ -18,7 +18,7 @@ spec:
 
 ---
 kind: volumeset
-name: {{ .Release.Name }}-tyk-policy-vs
+name: {{ .Release.Name }}-tyk-policies-vs
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "tyk.tags" . | nindent 4 }}

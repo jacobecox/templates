@@ -1,3 +1,7 @@
+# Important
+
+This version is still under development and is not intended for production use.
+
 ## Coraza WAF with Tyk API Gateway
 
 Creates a Coraza Web Application Firewall (WAF) with OWASP Core Rule Set (CRS) integration that proxies traffic to a target workload, providing comprehensive security filtering and protection. This template also includes a fully configured Tyk API Gateway for path-based API routing. Incoming traffic flows through Coraza first (WAF), then to the Tyk Gateway, and finally to your target workloads.

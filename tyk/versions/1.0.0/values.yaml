@@ -1,15 +1,3 @@
-#CHANGE THIS BEFORE COMMITTING👇
-
-endpoints:  # Endpoints to proxy traffic to
-  - name: app1
-    workload: app1.test-gvc.cpln.local
-    port: 8080
-    path: /app1
-  - name: home
-    workload: app2.test-gvc.cpln.local
-    port: 8081
-    path: /
-
 listenPort: 8080 # Port on the API Gateway workload to listen on
 
 gatewaySecret: mysecret # Set a secret for Tyk API Gateway
