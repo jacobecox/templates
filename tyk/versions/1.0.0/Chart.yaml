@@ -10,9 +10,6 @@ dependencies:
   - name: redis
     version: 3.0.2
     repository: "https://controlplane-com.github.io/helm-packages"
-  - name: ollama
-    version: 1.0.0
-    repository: "https://controlplane-com.github.io/helm-packages"
 
 annotations:
   created: "2025-10-30"

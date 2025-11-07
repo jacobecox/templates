@@ -1,6 +1,7 @@
 # Important
 
 This version is still under development and is not intended for production use.
+This README is not up to date on the most recent changes.
 
 ## Coraza WAF with Tyk API Gateway
 

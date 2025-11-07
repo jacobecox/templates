@@ -12,4 +12,4 @@ targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-redis-auth-password
   - //secret/{{ .Release.Name }}-sentinel-auth-password
-  - //secret/{{ .Release.Name }}-gateway-secret
+  - //secret/{{ .Release.Name }}-tyk-gateway-secret

@@ -1,6 +1,6 @@
 listenPort: 8080 # Port on the API Gateway workload to listen on
 
-gatewaySecret: mysecret # Set a secret for Tyk API Gateway
+adminSecret: mysecret # Set a secret for Tyk API Gateway
 
 resources:
   cpu: 50m
@@ -15,6 +15,12 @@ internal_access:
     #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
     #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
 
+aiConfigurator:
+  enabled: true # Enable AI Configurator workload
+  anthropicApiKey: test-key
+
+uiConfigurator:
+  enabled: true # Enable UI Configurator workload
 
 redis:
   redis:
@@ -47,51 +53,3 @@ redis:
       internal_inboundAllowType: same-gvc
     persistence:
       enabled: true
-
-
-ollama:
-  workload:
-    containers:
-      api:
-        image: ollama/ollama:0.3.13
-        resources:
-          cpu: 3500m
-          memory: 7Gi
-        gpu:
-          nvidia:
-            model: t4
-            quantity: 1
-  model: llama3
-  internal_access:
-    type: same-gvc # options: same-gvc, same-org, workload-list
-    workloads:  # Note: can only be used if type is same-gvc or workload-list
-      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
-      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
-  entrypoint:
-    payload: |
-      #!/bin/bash
-      # Define the model directory
-      MODEL_DIR="/root/.ollama/models/manifests/registry.ollama.ai/library/$DEFAULT_MODELS/"
-      export OLLAMA_HOST=0.0.0.0:11434
-      export DEFAULT_MODELS=${DEFAULT_MODELS:-llama3}
-      # Start Ollama and listen on all interfaces
-      /bin/ollama serve &
-      # Wait for Ollama to be ready before pulling the model
-      for i in {1..10}; do
-        if curl -sf http://localhost:11434/api/version >/dev/null 2>&1; then
-          echo "Ollama API is ready."
-          break
-        fi
-        echo "Waiting for Ollama to start... ($i)"
-        sleep 3
-      done
-      # Pull the model if not already present
-      if [ ! -d "$MODEL_DIR" ]; then
-          echo "Model directory not found. Pulling the $DEFAULT_MODELS model..."
-          apt-get update -qq && apt-get install -y -qq curl
-          curl -s -X POST http://localhost:11434/api/pull -d "{\"name\":\"${DEFAULT_MODELS}\"}"
-      else
-          echo "Model directory exists. No action required."
-      fi
-      # Keep container running
-      while true; do sleep 86400; done
