@@ -1,5 +1,8 @@
 listenPort: 8080 # Port on the API Gateway workload to listen on
 
+apiSecretName: # example: my-apis
+policySecretName: # example:my-policies
+
 adminSecret: mysecret # Set a secret for Tyk API Gateway
 
 resources:
@@ -8,19 +11,12 @@ resources:
 
 multiZone: true
 
-external_access: true # expose the API Gateway to the internet
-internal_access:
+externalAccess: true # expose the API Gateway to the internet
+internalAccess:
   type: same-gvc # options: same-gvc, same-org, workload-list
   workloads:  # Note: can only be used if type is same-gvc or workload-list
     #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
     #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
-
-aiConfigurator:
-  enabled: true # Enable AI Configurator workload
-  anthropicApiKey: test-key
-
-uiConfigurator:
-  enabled: true # Enable UI Configurator workload
 
 redis:
   redis:
@@ -33,7 +29,7 @@ redis:
     auth:
       password:
         enabled: true
-        value: password # Set a password for the redis
+        value: myRedisPassword # Set a password for the redis
     firewall:
       internal_inboundAllowType: same-gvc
     persistence:
@@ -48,7 +44,7 @@ redis:
     auth:
       password:
         enabled: true
-        value: password # Set a password for the sentinel
+        value: mySentinelPassword # Set a password for the sentinel
     firewall:
       internal_inboundAllowType: same-gvc
     persistence:

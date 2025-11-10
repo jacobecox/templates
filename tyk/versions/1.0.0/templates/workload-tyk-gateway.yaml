@@ -28,21 +28,27 @@ spec:
           value: 'info'
         - name: TYK_GW_POLICIES_POLICYSOURCE
           value: 'file'
+        - name: TYK_GW_POLICIES_POLICYRECORDNAME
+          value: /opt/tyk-gateway/policies/policies.json
         - name: TYK_GW_SECRET
           value: cpln://secret/{{ .Release.Name }}-tyk-gateway-secret.admin-secret
+      volumes:
+{{- if .Values.apiSecretName }}
+        - path: /opt/tyk-gateway/apps
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Values.apiSecretName }}
+{{- end }}
+{{- if .Values.policySecretName }}
+        - path: /opt/tyk-gateway/policies/policies.json
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Values.policySecretName }}.payload
+{{- end }}
       image: tykio/tyk-gateway:v5.10.0
       inheritEnv: false
       memory: 256Mi
       ports:
         - number: {{ .Values.listenPort }}
           protocol: http
-      volumes:
-        - path: /opt/tyk-gateway/apps
-          recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-tyk-apis-vs
-        - path: /opt/tyk-gateway/policies
-          recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-tyk-policies-vs
   defaultOptions:
     multiZone:
       enabled: {{ .Values.multiZone }}
@@ -64,7 +70,7 @@ spec:
     timeoutSeconds: 5
   firewallConfig:
     external:
-      {{- if .Values.external_access }}
+      {{- if .Values.externalAccess }}
       inboundAllowCIDR:
         - 0.0.0.0/0
       {{- else }}
@@ -76,9 +82,9 @@ spec:
       outboundAllowPort: []
       outboundBlockedCIDR: []
     internal:
-      inboundAllowType: {{ .Values.internal_access.type }}
-      {{- if .Values.internal_access.workloads }}
-      inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
+      inboundAllowType: {{ .Values.internalAccess.type }}
+      {{- if .Values.internalAccess.workloads }}
+      inboundAllowWorkload: {{ .Values.internalAccess.workloads | toYaml | nindent 8 }}
       {{- end }}
   identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-tyk-identity
   loadBalancer:

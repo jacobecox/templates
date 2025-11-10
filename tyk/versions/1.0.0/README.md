@@ -1,67 +1,78 @@
-# Important
+# Tyk API Gateway
 
-This version is still under development and is not intended for production use.
-This README is not up to date on the most recent changes.
+This template creates a Tyk API Gateway for centralized API configuration. It also provisions Redis with Redis Sentinel to store gateway state, rate limits, and analytics with high availability.
 
-## Coraza WAF with Tyk API Gateway
+## Important
+Please read the instructions below carefully before configuring and installing.
 
-Creates a Coraza Web Application Firewall (WAF) with OWASP Core Rule Set (CRS) integration that proxies traffic to a target workload, providing comprehensive security filtering and protection. This template also includes a fully configured Tyk API Gateway for path-based API routing. Incoming traffic flows through Coraza first (WAF), then to the Tyk Gateway, and finally to your target workloads.
+## How This Template Works
 
-### Configuration
+Tyk stores APIs and policies as JSON files, so you must create the secrets that hold those files before or shortly after installation.
 
-The following values can be configured in your values file:
+When you provide both `apiSecretName` and `policySecretName`, the template mounts those secrets into the workload and updates the identity policy accordingly. You can then manage the secrets independently, as long as the names stay consistent. If you omit either value, the associated configuration is skipped.
 
-- `endpoints`: A list of API routes for Tyk to proxy
-  - `name`: Unique endpoint name
-  - `workload`: Target workload DNS (`WORKLOAD_NAME.GVC_NAME.cpln.local`)
-  - `port`: Target workload port
-  - `path`: Public listen path (e.g., `/app1`)
-- `WAFPort`: The port on the WAF workload to expose to the internet
+## Configuration
+
+The following values should be configured in your values file:
+
+Tyk Gateway
+- `listenPort`: Port exposed on the workload
+- `apiSecretName`: Secret name containing your API JSON files
+- `policySecretName`: Secret name containing your policy JSON files
+- `adminSecret`: Admin API Key for management of Tyk
 - `resources`: Reserved resources for the workload
-- `multiZone`: Deploys replicas across multiple zones
+- `multiZone`: Deploys replicas across multiple zones (confirm availability in your location)
+- `externalAccess`: Set to `true` to expose the workload to the internet; set to `false` for internal-only access
+- `internalAccess`: Sets the internal firewall scope
   
-Redis and Sentinel (required; defaults provided):
+Redis and Sentinel (defaults provided):
 - `redis.redis`: Internal Redis for Tyk state (resources, auth, persistence)
 - `redis.sentinel`: Internal Redis Sentinel (resources, auth, persistence)
 
-**Important**: You must set strong passwords for both Redis and Sentinel:
+**Important**: You must set strong passwords for both Redis and Sentinel
 
-### Logging
+## Creating the Secrets
 
-All Coraza logging is currently sent to `/dev/stdout` to be readable in the Control Plane built-in logging interface. Logging can be redirected by using the existing environment variables in the workload configuration.
+Follow these steps to create a secret for both the APIs and policies. This can be done after the template is installed, but it is preferred the secrets already exist when the template is installed.
 
-### Advanced Configuration
+### API Secret
 
-Coraza configuration is largely specified through environment variables and can be customized by the user once installed. You can modify these environment variables in the workload configuration to adjust Coraza's behavior, logging levels, and security policies according to your specific requirements. For details on the environment variables, see the resources below.
+1. Using the console, navigate to Secrets and create a new secret.
 
-### Usage
+2. Name this secret the exact name you will give to the `apiSecretName` value.
 
-The Coraza WAF will act as a reverse proxy, filtering incoming requests before forwarding them to the Tyk Gateway, which routes to your target workloads. Configure `endpoints` to define path-based routes that map to your internal workloads. The WAF will be accessible on the specified `WAFPort`.
+3. Select type `Dictionary`.
 
-**Important**: The target workloads must be configured with internal firewall access set to `same-gvc`, `same-org`, or specifically allow this workload in order for the WAF to reach it.
+4. For the `Key` be sure the name you give it ends with `.json` so Tyk will pick it up
 
-### Security Features
+5. For the `Value` insert your JSON object for your desired API.
 
-Coraza provides web application firewall capabilities including:
-- Automatic integration of OWASP Core Rule Set (CRS) for comprehensive protection
-- Request filtering and validation
-- Protection against common web attacks
-- Custom rule configuration
-- Traffic monitoring and logging
+    **Note**: For more help on creating the API JSON object, see the [Tyk API JSON Object](https://tyk.io/docs/5.0/tyk-gateway-api/api-definition-objects/) page.
 
-### Custom Rules
+6. Enter as many key/values for each API and click save.
 
-After installation, you can add custom rules by editing the created secret with the suffix `coraza-custom-rules`. The secret contains an example rule that blocks requests containing "attack" in the URI:
+**Note**: If the template was installed before the secrets existed, redeploy the workload after creating them.
 
-```
-SecRule REQUEST_URI "@rx attack" "id:1001,phase:1,deny,msg:'Blocked attack attempt'"
-```
+### Policy Secret
 
-**Note**: After modifying the custom rules secret, you must restart the workload replicas for the changes to take effect. See the Coraza and CRS documentation below for instructions on creating custom rules.
+1. Using the console, navigate to Secrets and create a new secret.
+
+2. Name this secret the exact name you will give to the `policySecretName` value.
+
+3. Select type `Opaque`.
+
+4. Insert your JSON object for your desired policies.
+
+    **Note**: For more help on creating the Policies JSON object, see the [Tyk Policy Guide](https://tyk.io/docs/5.1/basic-config-and-security/security/security-policies/policies-guide/) page.
+
+6. Click save.
+
+    **Note**: If the template was installed before the secrets existed, redeploy the workload after creating them.
+
+Once the secrets are in place, Tyk automatically loads the files as APIs and policies. Restart the workload whenever you update, remove, or add API or policy definitions.
 
 ## Additional Resources
 
-- [OWASP Coraza Docs](https://coraza.io/docs/tutorials/introduction/)
-- [OWASP CRS Docs](https://coreruleset.org/docs/)
-- [Coraza Caddy README](https://github.com/coreruleset/coraza-crs-docker#)
 - [Tyk Docs](https://tyk.io/docs)
+- [Tyk API JSON Object](https://tyk.io/docs/5.0/tyk-gateway-api/api-definition-objects/)
+- [Tyk Policy Guide](https://tyk.io/docs/5.1/basic-config-and-security/security/security-policies/policies-guide/)
