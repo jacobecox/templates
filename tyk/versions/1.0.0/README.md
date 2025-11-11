@@ -1,39 +1,46 @@
 # Tyk API Gateway
 
-This template creates a Tyk API Gateway for centralized API configuration. It also provisions Redis with Redis Sentinel to store gateway state, rate limits, and analytics with high availability.
+Tyk API Gateway is an open-source API management platform that controls, secures, and monitors API traffic.
+
+This template creates a Tyk API Gateway workload, the entry point that routes and manages API traffic. It also provisions Redis which operates as the backing store for tokens, analytics, rate-limits, and state, and Redis Sentinel which provides automatic Redis failover and high availability.
 
 ## Important
 Please read the instructions below carefully before configuring and installing.
 
 ## How This Template Works
 
-Tyk stores APIs and policies as JSON files, so you must create the secrets that hold those files before or shortly after installation.
+Tyk organizes configuration into two key components:
 
-When you provide both `apiSecretName` and `policySecretName`, the template mounts those secrets into the workload and updates the identity policy accordingly. You can then manage the secrets independently, as long as the names stay consistent. If you omit either value, the associated configuration is skipped.
+**API Definitions** - describe individual APIs, including routes, rate limits, authentication, and upstream targets
+
+**Policies** - define higher-level access rules and rate limits that can apply across multiple APIs
+
+Both of these are provided to Tyk as JSON files, which this template expects to be mounted from Control Plane secrets.
+
+You must pre-configure each of these and store them as Control Plane secrets (see directions below).
+
+When you provide both `apiSecretName` and `policySecretName` (the names of your pre-configured Control Plane secrets) in the values file, the template mounts those secrets into the workload and updates the workload identity's policy. You can then manage the secrets independently, as long as the names stay consistent. If you use the default values, be sure the secrets you create use the same name.
 
 ## Configuration
 
 The following values should be configured in your values file:
 
-Tyk Gateway
-- `listenPort`: Port exposed on the workload
-- `apiSecretName`: Secret name containing your API JSON files
-- `policySecretName`: Secret name containing your policy JSON files
-- `adminSecret`: Admin API Key for management of Tyk
-- `resources`: Reserved resources for the workload
+### Tyk Gateway:
+- `listenPort`: The port exposed on the Tyk workload
+- `apiSecretName`: The name of the Control Plane secret containing your API definitions
+- `policySecretName`: The name of the Control Plane secret containing your policies
+- `adminSecret`: The value you set to be the admin API key for management of Tyk
+- `resources`: Desired CPU and memory reserved for the workload
 - `multiZone`: Deploys replicas across multiple zones (confirm availability in your location)
 - `externalAccess`: Set to `true` to expose the workload to the internet; set to `false` for internal-only access
 - `internalAccess`: Sets the internal firewall scope
   
-Redis and Sentinel (defaults provided):
-- `redis.redis`: Internal Redis for Tyk state (resources, auth, persistence)
-- `redis.sentinel`: Internal Redis Sentinel (resources, auth, persistence)
-
-**Important**: You must set strong passwords for both Redis and Sentinel
+### Redis and Sentinel:
+- `redis.redis`: Configuration for the Redis workload including resources (CPU and memory), replica count, password, and firewall settings
+- `redis.sentinel`: Configuration for the Sentinel workload including resources (CPU and memory), replica count, password, and firewall settings
+**Note**: The defaults provided for both Redis and Sentinel are sufficient for this template's purpose.
 
 ## Creating the Secrets
-
-Follow these steps to create a secret for both the APIs and policies. This can be done after the template is installed, but it is preferred the secrets already exist when the template is installed.
 
 ### API Secret
 
@@ -49,7 +56,11 @@ Follow these steps to create a secret for both the APIs and policies. This can b
 
     **Note**: For more help on creating the API JSON object, see the [Tyk API JSON Object](https://tyk.io/docs/5.0/tyk-gateway-api/api-definition-objects/) page.
 
-6. Enter as many key/values for each API and click save.
+6. Repeat for each API and click save.
+
+Example secret:
+
+<img src="https://github.com/jacobecox/images/raw/13ccbab70f0abfc795b097fa25c40fac95b92bd6/tyk-api-example.png" alt="tyk-api-secret-example" width="400"/>
 
 **Note**: If the template was installed before the secrets existed, redeploy the workload after creating them.
 
@@ -69,7 +80,7 @@ Follow these steps to create a secret for both the APIs and policies. This can b
 
     **Note**: If the template was installed before the secrets existed, redeploy the workload after creating them.
 
-Once the secrets are in place, Tyk automatically loads the files as APIs and policies. Restart the workload whenever you update, remove, or add API or policy definitions.
+Once the secrets are in place, Tyk automatically loads the files as APIs and policies. Restart the workload whenever you update, remove, or add API definitions or policies.
 
 ## Additional Resources
 
