@@ -1,9 +1,9 @@
 listenPort: 8080 # Port on the API Gateway workload to listen on
 
-apiSecretName: # example: my-apis
-policySecretName: # example:my-policies
+apiSecretName: my-tyk-apis # The name of the pre-configured Control Plane secret that contains the API definitions
+policySecretName: my-tyk-policies # The name of the pre-configured Control Plane secret that contains the policies
 
-adminSecret: mysecret # Set a secret for Tyk API Gateway
+adminSecret: mysecret # The secret for the Tyk API Gateway admin API
 
 resources:
   cpu: 50m
@@ -29,7 +29,7 @@ redis:
     auth:
       password:
         enabled: true
-        value: myRedisPassword # Set a password for the redis
+        value: myRedisPassword
     firewall:
       internal_inboundAllowType: same-gvc
     persistence:
@@ -44,7 +44,7 @@ redis:
     auth:
       password:
         enabled: true
-        value: mySentinelPassword # Set a password for the sentinel
+        value: mySentinelPassword
     firewall:
       internal_inboundAllowType: same-gvc
     persistence:
