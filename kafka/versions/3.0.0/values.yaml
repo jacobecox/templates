@@ -24,8 +24,8 @@ kafka:
         scalingFactor: 1.2
     customEncryption:
       enabled: false
-      region: aws-us-east-2
-      keyId: 1234567890
+      region: aws-us-east-2 # Replace with the appropriate region
+      keyId: 1234567890 # Replace with your AWS KMS key ID
   cpu: 1000m # For millicores us 'm' like 500m
   memory: 2000Mi # Gi / Mi
   minCpu: 250m # For millicores us 'm' like 500m
