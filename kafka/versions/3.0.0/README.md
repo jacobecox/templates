@@ -42,6 +42,24 @@ kafka-console-producer.sh --bootstrap-server {kafka-cluster-workload-name}:9092 
 kafka-console-consumer.sh --bootstrap-server {kafka-cluster-workload-name}:9092 --topic controlplane --from-beginning --consumer.config ./client.properties
 ```
 
+### Enable Custom Encryption using AWS Key Management Service (KMS)
+
+Custom encryption for volumes can be configured by setting the values under `kafka.volumes.customEncryption`.
+
+A key must be created in AWS before proceeding with the template.
+
+In the values file, set `enabled` to `true` and add the proper `region` and `keyId`.
+
+**Important** - To finish configuring in AWS once the template is installed:
+
+1. Navigate in the console to the created volume
+
+2. Click on `spec`
+
+3. Follow the `AWS Custom Encryption Instructions`
+
+4. Repeat for each encrypted volume created
+
 ### Kafbat configuration example
 
 Full configuration Docs: https://ui.docs.kafbat.io/configuration/configuration-file
