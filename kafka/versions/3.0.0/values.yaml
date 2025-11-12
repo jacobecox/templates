@@ -22,6 +22,10 @@ kafka:
         maxCapacity: 1000 # In GB
         minFreePercentage: 20
         scalingFactor: 1.2
+    customEncryption:
+      enabled: false
+      region: aws-us-east-2
+      keyId: 1234567890
   cpu: 1000m # For millicores us 'm' like 500m
   memory: 2000Mi # Gi / Mi
   minCpu: 250m # For millicores us 'm' like 500m
