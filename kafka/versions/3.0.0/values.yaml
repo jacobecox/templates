@@ -25,7 +25,7 @@ kafka:
     customEncryption:
       enabled: false
       region: aws-us-east-2 # Replace with the appropriate region
-      keyId: 1234567890 # Replace with your AWS KMS key ID
+      keyId: arn:aws:kms:us-east-2:1234567890:key/d411f35a-1d31-4515-9934-4f193e042d80 # Replace with your AWS KMS key ARN
   cpu: 1000m # For millicores us 'm' like 500m
   memory: 2000Mi # Gi / Mi
   minCpu: 250m # For millicores us 'm' like 500m
