@@ -2,7 +2,7 @@
 
 Tyk API Gateway is an open-source API management platform that controls, secures, and monitors API traffic.
 
-This template creates a Tyk API Gateway workload, the entry point that routes and manages API traffic. It also provisions Redis which operates as the backing store for tokens, analytics, rate-limits, and state, and Redis Sentinel which provides automatic Redis failover and high availability.
+In addition to creating a Tyk API Gateway workload, the template also provisions Redis which operates as the backing store for tokens, analytics, rate-limits, and state, and Redis Sentinel which provides automatic Redis failover and high availability.
 
 ## Important
 Please read the instructions below carefully before configuring and installing.
@@ -15,72 +15,74 @@ Tyk organizes configuration into two key components:
 
 **Policies** - define higher-level access rules and rate limits that can apply across multiple APIs
 
-Both of these are provided to Tyk as JSON files, which this template expects to be mounted from Control Plane secrets.
+Both of these are provided to Tyk as JSON files, which this template expects to be mounted from Control Plane secrets. You must pre-configure each of these secrets.
 
-You must pre-configure each of these and store them as Control Plane secrets (see directions below).
-
-When you provide both `apiSecretName` and `policySecretName` (the names of your pre-configured Control Plane secrets) in the values file, the template mounts those secrets into the workload and updates the workload identity's policy. You can then manage the secrets independently, as long as the names stay consistent. If you use the default values, be sure the secrets you create use the same name.
-
-## Configuration
-
-The following values should be configured in your values file:
-
-### Tyk Gateway:
-- `listenPort`: The port exposed on the Tyk workload
-- `apiSecretName`: The name of the Control Plane secret containing your API definitions
-- `policySecretName`: The name of the Control Plane secret containing your policies
-- `adminSecret`: The value you set to be the admin API key for management of Tyk
-- `resources`: Desired CPU and memory reserved for the workload
-- `multiZone`: Deploys replicas across multiple zones (confirm availability in your location)
-- `externalAccess`: Set to `true` to expose the workload to the internet; set to `false` for internal-only access
-- `internalAccess`: Sets the internal firewall scope
-  
-### Redis and Sentinel:
-- `redis.redis`: Configuration for the Redis workload including resources (CPU and memory), replica count, password, and firewall settings
-- `redis.sentinel`: Configuration for the Sentinel workload including resources (CPU and memory), replica count, password, and firewall settings
-**Note**: The defaults provided for both Redis and Sentinel are sufficient for this template's purpose.
+Once you specify both `apiSecretName` and `policySecretName` in the values file, you can manage the secrets independently, as long as the names stay consistent.
 
 ## Creating the Secrets
 
+Use the example `yaml` files below to properly configure the secrets. You can create these secrets using `cpln apply`.
+
 ### API Secret
 
-1. Using the console, navigate to Secrets and create a new secret.
-
-2. Name this secret the exact name you will give to the `apiSecretName` value.
-
-3. Select type `Dictionary`.
-
-4. For the `Key` be sure the name you give it ends with `.json` so Tyk will pick it up
-
-5. For the `Value` insert your JSON object for your desired API.
-
-    **Note**: For more help on creating the API JSON object, see the [Tyk API JSON Object](https://tyk.io/docs/5.0/tyk-gateway-api/api-definition-objects/) page.
-
-6. Repeat for each API and click save.
-
-Example secret:
-
-<img src="https://github.com/jacobecox/images/raw/13ccbab70f0abfc795b097fa25c40fac95b92bd6/tyk-api-example.png" alt="tyk-api-secret-example" width="400"/>
-
-**Note**: If the template was installed before the secrets existed, redeploy the workload after creating them.
+```YAML
+kind: secret
+name: example-tyk-apis
+description: example-tyk-apis
+tags: {}
+type: dictionary
+data:
+  app1.json: >-
+    { "api_id": "app1", "name": "app1", "org_id": "default", "use_keyless":
+    true, "use_jwt": false, "disable_rate_limit": true, "definition": {
+    "location": "header", "key": "version" }, "version_data": { "not_versioned":
+    true, "versions": { "Default": { "name": "Default", "use_extended_paths":
+    true } } }, "proxy": { "listen_path": "/app1", "target_url":
+    "http://app1.example-gvc.cpln.local:80", "strip_listen_path": true },
+    "active": true}
+  app2.json: >-
+    { "api_id": "app2", "name": "app2", "org_id": "default", "use_keyless":
+    true, "active": true, "version_data": { "not_versioned": true, "versions": {
+    "Default": { "name": "Default", "use_extended_paths": true } } }, "proxy": {
+    "listen_path": "/app2", "target_url":
+    "http://app2.example-gvc.cpln.local:8080", "strip_listen_path": true,
+    "preserve_host_header": false, "enable_load_balancing": false,
+    "check_host_against_uptime_tests": false }}
+```
 
 ### Policy Secret
 
-1. Using the console, navigate to Secrets and create a new secret.
+```YAML
+kind: secret
+name: example-tyk-policies
+description: example-tyk-policies
+tags: {}
+type: opaque
+data:
+  encoding: plain
+  payload: |-
+    {
+          "app1-rate-limit": {
+            "org_id": "default",
+            "active": true,
 
-2. Name this secret the exact name you will give to the `policySecretName` value.
+            "rate": 20,
+            "per": 100,
 
-3. Select type `Opaque`.
+            "quota_max": 0,
+            "quota_renewal_rate": 0,
+            "quota_remaining": 0,
 
-4. Insert your JSON object for your desired policies.
-
-    **Note**: For more help on creating the Policies JSON object, see the [Tyk Policy Guide](https://tyk.io/docs/5.1/basic-config-and-security/security/security-policies/policies-guide/) page.
-
-6. Click save.
-
-    **Note**: If the template was installed before the secrets existed, redeploy the workload after creating them.
-
-Once the secrets are in place, Tyk automatically loads the files as APIs and policies. Restart the workload whenever you update, remove, or add API definitions or policies.
+            "access_rights": {
+              "tetris": {
+                "api_id": "app1",
+                "api_name": "app1",
+                "versions": ["Default"]
+              }
+            }
+          }
+        }
+```
 
 ## Additional Resources
 
