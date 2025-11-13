@@ -1,23 +1,25 @@
-listenPort: 8080 # Port on the API Gateway workload to listen on
+listenPort: 8080 # REQUIRED - The port exposed on the Tyk workload
 
-apiSecretName: my-tyk-apis # The name of the pre-configured Control Plane secret that contains the API definitions
-policySecretName: my-tyk-policies # The name of the pre-configured Control Plane secret that contains the policies
+apiSecretName: my-tyk-apis # REQUIRED - The name of the pre-configured Control Plane secret that contains your API definitions
+policySecretName: my-tyk-policies # REQUIRED - The name of the pre-configured Control Plane secret that contains your policies
+# Note: if you wish to omit one of these secrets, leave the value empty and it will be omitted from the workload's configuration
 
-adminSecret: mysecret # The secret for the Tyk API Gateway admin API
+adminSecret: mysecret # REQUIRED - The value you set to be the admin API key for management of Tyk
 
-resources:
+resources: # OPTIONAL - Desired CPU and memory reserved for the workload
   cpu: 50m
   memory: 128Mi
 
-multiZone: true
+multiZone: false # OPTIONAL - Deploys replicas across multiple zones (confirm availability in your location)
 
-externalAccess: true # expose the API Gateway to the internet
-internalAccess:
-  type: same-gvc # options: same-gvc, same-org, workload-list
+externalAccess: true # OPTIONAL - Set to true to expose the workload to the internet; set to false for internal-only access
+internalAccess: # OPTIONAL - Sets the internal firewall scope
+  type: none # options: none, same-gvc, same-org, workload-list
   workloads:  # Note: can only be used if type is same-gvc or workload-list
     #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
     #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
 
+# OPTIONAL - Redis and Sentinel configuration is sufficient for this template's purpose
 redis:
   redis:
     resources:

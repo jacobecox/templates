@@ -33,12 +33,12 @@ spec:
         - name: TYK_GW_SECRET
           value: cpln://secret/{{ .Release.Name }}-tyk-gateway-secret.admin-secret
       volumes:
-{{- if .Values.apiSecretName }}
+{{- if and .Values.apiSecretName (ne .Values.apiSecretName "") }}
         - path: /opt/tyk-gateway/apps
           recoveryPolicy: retain
           uri: cpln://secret/{{ .Values.apiSecretName }}
 {{- end }}
-{{- if .Values.policySecretName }}
+{{- if and .Values.policySecretName (ne .Values.policySecretName "") }}
         - path: /opt/tyk-gateway/policies/policies.json
           recoveryPolicy: retain
           uri: cpln://secret/{{ .Values.policySecretName }}.payload
