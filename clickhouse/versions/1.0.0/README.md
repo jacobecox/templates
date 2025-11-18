@@ -30,20 +30,6 @@ If connecting via `clickhouse-client`, use the following command:
 
 `clickhouse-client --host $WORKLOAD_NAME --user $USERNAME$ --password $PASSWORD`
 
-## Creating a Table
-
-- To create a table that supports replication and sharding, use a command similar to this one
-
-```SQL
-CREATE TABLE <table_name> (
-    <columns>
-)
-ENGINE = ReplicatedMergeTree('<keeper_path>/<shard>', '<replica_name>')
-ORDER BY <primary_key>;
-```
-
-**Note**: Creating a table across all replicas using distributed DDL is not supported. Once a table is created across each replica, sharding and replication of data will be automatic.
-
 ### Supported External Services
 
 [ClickHouse Documentation](https://clickhouse.com/docs/).
