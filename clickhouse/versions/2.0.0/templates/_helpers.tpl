@@ -24,3 +24,9 @@ Selector labels
 app.cpln.io/name: {{ .Release.Name }}
 app.cpln.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{- define "clickhouse.validateStorage" -}}
+{{- if not .Values.aws.enabled -}}
+  {{- fail "A storage option must be selected. Please enable either AWS or GCP." -}}
+{{- end -}}
+{{- end -}}

@@ -1,3 +1,4 @@
+{{ include "clickhouse.validateStorage" . }}
 kind: workload
 name: {{ .Release.Name }}-server
 description: clickhouse server
@@ -36,9 +37,11 @@ spec:
         - path: /var/lib/clickhouse_cache
           recoveryPolicy: retain
           uri: scratch://cache-vol
+        {{- if .Values.aws.enabled }}
         - path: /etc/clickhouse-server/config.d/s3-storage.xml
           recoveryPolicy: retain
           uri: cpln://secret/{{ .Release.Name }}-clickhouse-s3-config.payload
+        {{- end }}
   identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-clickhouse-identity
   defaultOptions:
     autoscaling:

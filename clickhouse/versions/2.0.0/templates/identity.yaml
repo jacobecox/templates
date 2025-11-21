@@ -1,12 +1,15 @@
+{{ include "clickhouse.validateStorage" . }}
 ---
 kind: identity
 gvc: {{ .Values.gvc.name }}
 name: {{ .Release.Name }}-clickhouse-identity
 description: Clickhouse identity
 tags: {{- include "clickhouse.tags" . | nindent 4 }}
+{{- if .Values.aws.enabled }}
 aws:
   cloudAccountLink: //cloudaccount/{{ .Release.Name }}-clickhouse-s3
   policyRefs:
     - cpln-connector
     - aws::ReadOnlyAccess
-    - {{ .Values.aws.policyName }}
+    - "{{ .Values.aws.s3.policyName }}"
+{{- end }}
