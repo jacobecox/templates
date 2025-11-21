@@ -1,0 +1,11 @@
+{{ include "clickhouse.validateStorage" . }}
+---
+{{- if .Values.aws.enabled }}
+kind: cloudaccount
+name: {{ .Release.Name }}-clickhouse-s3
+description: Clickhouse s3 cloudaccount
+tags: {{- include "clickhouse.tags" . | nindent 4 }}
+provider: aws
+data:
+  roleArn: {{ .Values.aws.s3.roleArn }}
+{{- end }}
