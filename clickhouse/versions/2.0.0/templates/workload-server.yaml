@@ -33,6 +33,12 @@ spec:
           uri: cpln://volumeset/{{ .Release.Name }}-clickhouse-server-vs
         - path: /scripts/server-startup.sh
           uri: cpln://secret/{{ .Release.Name }}-clickhouse-server-startup.payload
+        - path: /var/lib/clickhouse_cache
+          recoveryPolicy: retain
+          uri: scratch://cache-vol
+        - path: /etc/clickhouse-server/config.d/s3-storage.xml
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Release.Name }}-clickhouse-s3-config.payload
   identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-clickhouse-identity
   defaultOptions:
     autoscaling:

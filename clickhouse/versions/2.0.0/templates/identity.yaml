@@ -2,5 +2,11 @@
 kind: identity
 gvc: {{ .Values.gvc.name }}
 name: {{ .Release.Name }}-clickhouse-identity
-description: {{ .Release.Name }}-clickhouse-identity
+description: Clickhouse identity
 tags: {{- include "clickhouse.tags" . | nindent 4 }}
+aws:
+  cloudAccountLink: //cloudaccount/{{ .Release.Name }}-clickhouse-s3
+  policyRefs:
+    - cpln-connector
+    - aws::ReadOnlyAccess
+    - {{ .Values.aws.policyName }}

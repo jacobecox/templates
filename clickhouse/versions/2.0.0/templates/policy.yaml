@@ -1,7 +1,7 @@
 ---
 kind: policy
 name: {{ .Release.Name }}-clickhouse-{{ .Values.gvc.name }}-policy
-description: {{ .Release.Name }}-clickhouse-{{ .Values.gvc.name }}-policy
+description: Clickhouse policy
 tags: {{- include "clickhouse.tags" . | nindent 4 }}
 bindings:
   - permissions:
@@ -13,3 +13,4 @@ targetLinks:
   - //secret/{{ .Release.Name }}-clickhouse-database
   - //secret/{{ .Release.Name }}-clickhouse-keeper-startup
   - //secret/{{ .Release.Name }}-clickhouse-server-startup
+  - //secret/{{ .Release.Name }}-clickhouse-s3-config

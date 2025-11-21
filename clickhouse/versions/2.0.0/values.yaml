@@ -10,7 +10,15 @@ gvc:
     - name: gcp-us-west1
       replicas: 2
 
-database:
+aws:
+  enabled: true # Enable to use AWS S3 for storage
+  s3: # If enabled, all fields below are required
+    bucket: cpln-clickhouse # Name of your S3 bucket
+    region: us-east-1 # Region of your S3 bucket
+    roleArn: arn:aws:iam::047719631682:role/cpln-jacob-cox # Name of your pre-created role for this cloud account (see README)
+    policyName: clickhouse-s3-policy # Name of your pre-created policy to allow access to the S3 bucket (see README)
+
+database: # Automatically create a database on initialization using the default user
   name: mydb
   password: mypw
 
