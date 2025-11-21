@@ -6,5 +6,6 @@ A major update due to the deprecation of Bitnami public images support and migra
 
 - Deprecated support for Bitnami images for Kafka and Kafka Connect. The template now supports and has been tested with Apache Kafka upstream images.
 - Kafka Connect improvement: updating configurations of existing plugins results in faster startup of Kafka Connect.
+- Custom encryption setting for Kafka volume set
 
 
