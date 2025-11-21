@@ -2,7 +2,7 @@ gvc:
   name: clickhouse-gvc
   # Replica count will only affect the server workload
   # Keeper will always have 3 total replicas (1 per location)
-  locations:
+  locations: # Minimum of 3 locations are required
     - name: aws-us-west-2
       replicas: 2
     - name: aws-us-east-2
@@ -12,15 +12,17 @@ gvc:
 
 aws:
   enabled: true # Enable to use AWS S3 for storage
-  s3: # If enabled, all fields below are required
-    bucket: cpln-clickhouse # Name of your S3 bucket
+  s3: # If enabled, all fields below are required - See README for guidance
+    bucket: clickhouse-s3-bucket # Name of your S3 bucket
     region: us-east-1 # Region of your S3 bucket
-    roleArn: arn:aws:iam::047719631682:role/cpln-jacob-cox # Name of your pre-created role for this cloud account (see README)
-    policyName: clickhouse-s3-policy # Name of your pre-created policy to allow access to the S3 bucket (see README)
+    roleArn: arn:aws:iam::123456789012:role/cpln-my-org # Name of your pre-created role for this cloud account
+    policyName: clickhouse-s3-policy # Name of your pre-created policy to allow access to the S3 bucket
+
+clusterName: my_cluster # Name of ClickHouse cluster
 
 database: # Automatically create a database on initialization using the default user
-  name: mydb
-  password: mypw
+  name: mydatabase
+  password: mypassword
 
 server:
   resources:
