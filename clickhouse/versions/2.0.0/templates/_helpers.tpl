@@ -44,3 +44,9 @@ app.cpln.io/instance: {{ .Release.Name }}
   {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "clickhouse.validateLocations" -}}
+{{- if lt (len .Values.gvc.locations) 3 -}}
+  {{- fail "3 or more locations must be specified." -}}
+{{- end -}}
+{{- end -}}

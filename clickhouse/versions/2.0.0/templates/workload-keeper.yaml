@@ -1,3 +1,4 @@
+{{ include "clickhouse.validateLocations" . }}
 kind: workload
 name: {{ .Release.Name }}-keeper
 description: clickhouse keeper
