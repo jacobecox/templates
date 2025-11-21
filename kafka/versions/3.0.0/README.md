@@ -95,4 +95,4 @@ server:
 ```
 
 ### Release Notes
-See [RELEASE.md](RELEASES.md)
+See [RELEASE.md](https://github.com/controlplane-com/templates/blob/main/kafka/versions/3.0.0/RELEASES.md)
