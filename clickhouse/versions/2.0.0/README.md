@@ -72,7 +72,17 @@ cpln cloudaccount create-aws --org ORG_NAME --how
 
 ### GCS
 
-GCS support will be available in a future release.
+For ClickHouse to have access to a GCS bucket, ensure the following prerequisites are completed in your GCP account before installing:
+
+1. Create your bucket. Update the value `bucket` to include it's name.
+
+2. Navigate to Settings > Interoperability and click `Create a key for a service account`.
+
+3. Click `Create new account` and name your service account.
+
+4. Under `Permissions`, assign the role `Storage Object Admin` and click `Done`.
+
+5. You will be provided a new HMAC key, update `accessKeyId` and `secretAccessKey` with the values provided.
 
 ## Connecting to ClickHouse
 
@@ -86,3 +96,5 @@ clickhouse-client --host $WORKLOAD_NAME --password $PASSWORD
 
 [ClickHouse Documentation](https://clickhouse.com/docs/).
 [Cloud Accounts Documentation](https://docs.controlplane.com/guides/create-cloud-account#overview)
+[Clickhouse with S3](https://clickhouse.com/docs/integrations/s3)
+[Clickhouse with GCS](https://clickhouse.com/docs/integrations/gcs)
