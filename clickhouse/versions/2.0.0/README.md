@@ -33,14 +33,13 @@ For ClickHouse to have access to a S3 bucket, ensure the following prerequisites
 
 1. Create your bucket. Update the value `bucket` to include it's name and `region` to include it's region.
 
-2. Run the following CLI command for guidance on setting up required AWS resources.
+2. Run the following CLI command for guidance on setting up required AWS resources and creating a [Cloud Account](https://docs.controlplane.com/guides/create-cloud-account).
 
-**Important**: For the steps given from the command, skip step 2 from the generated instructions — this template automatically creates the Cloud Account. In the trust policy (step 4), add your role ARN in addition to the `controlplane-driver` entries. 
+**Important**: In the trust policy (step 4), add your role ARN in addition to the `controlplane-driver` entries. 
 
 ```SH
 cpln cloudaccount create-aws --org ORG_NAME --how
 ```
-
 
 3. Create a new policy with the following JSON and attach it to the role (replace `YOUR_BUCKET_NAME`)
 
@@ -67,7 +66,7 @@ cpln cloudaccount create-aws --org ORG_NAME --how
 }
 ```
 
-4. Update `roleArn` in your values file with the IAM role ARN you created.
+4. Update `cloudAccountName` in your values file with the name of your Cloud Account.
 
 5. Set `policyName` to match the policy created in step 3.
 

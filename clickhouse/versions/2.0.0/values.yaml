@@ -15,7 +15,7 @@ aws:
   s3: # If enabled, all fields below are required - See README for guidance
     bucket: clickhouse-s3-bucket # Name of your S3 bucket
     region: us-east-1 # Region of your S3 bucket
-    roleArn: arn:aws:iam::123456789012:role/cpln-my-org # Name of your pre-created role for this cloud account
+    cloudAccountName: clickhouse-s3-cloudaccount # Name of your Cloud Account
     policyName: clickhouse-s3-policy # Name of your pre-created policy to allow access to the S3 bucket
 
 clusterName: my_cluster # Name of ClickHouse cluster
