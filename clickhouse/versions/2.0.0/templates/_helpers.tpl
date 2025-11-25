@@ -36,8 +36,8 @@ app.cpln.io/instance: {{ .Release.Name }}
   {{- if not .Values.aws.s3.region -}}
     {{- fail "All fields are required for S3 when enabled. Missing: region" -}}
   {{- end -}}
-  {{- if not .Values.aws.s3.roleArn -}}
-    {{- fail "All fields are required for S3 when enabled. Missing: roleArn" -}}
+  {{- if not .Values.aws.s3.cloudAccountName -}}
+    {{- fail "All fields are required for S3 when enabled. Missing: cloudAccountName" -}}
   {{- end -}}
   {{- if not .Values.aws.s3.policyName -}}
     {{- fail "All fields are required for S3 when enabled. Missing: policyName" -}}

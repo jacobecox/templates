@@ -11,7 +11,7 @@ gvc:
       replicas: 2
 
 aws:
-  enabled: false # Enable to use AWS S3 for storage
+  enabled: true # Enable to use AWS S3 for storage
   s3: # If enabled, all fields below are required - See README for guidance
     bucket: clickhouse-s3-bucket # Name of your S3 bucket
     region: us-east-1 # Region of your S3 bucket
