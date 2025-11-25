@@ -26,10 +26,15 @@ app.cpln.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "clickhouse.validateStorage" -}}
-{{- if not .Values.aws.enabled -}}
+{{- $awsEnabled := .Values.aws.enabled -}}
+{{- $gcpEnabled := .Values.gcp.enabled -}}
+{{- if and $awsEnabled $gcpEnabled -}}
+  {{- fail "Only one storage option can be enabled. Please enable either AWS or GCP, not both." -}}
+{{- end -}}
+{{- if and (not $awsEnabled) (not $gcpEnabled) -}}
   {{- fail "A storage option must be selected. Please enable either AWS or GCP." -}}
 {{- end -}}
-{{- if .Values.aws.enabled -}}
+{{- if $awsEnabled -}}
   {{- if not .Values.aws.s3.bucket -}}
     {{- fail "All fields are required for S3 when enabled. Missing: bucket" -}}
   {{- end -}}
@@ -41,6 +46,17 @@ app.cpln.io/instance: {{ .Release.Name }}
   {{- end -}}
   {{- if not .Values.aws.s3.policyName -}}
     {{- fail "All fields are required for S3 when enabled. Missing: policyName" -}}
+  {{- end -}}
+{{- end -}}
+{{- if $gcpEnabled -}}
+  {{- if not .Values.gcp.gcs.bucket -}}
+    {{- fail "All fields are required for GCS when enabled. Missing: bucket" -}}
+  {{- end -}}
+  {{- if not .Values.gcp.gcs.accessKeyId -}}
+    {{- fail "All fields are required for GCS when enabled. Missing: accessKeyId" -}}
+  {{- end -}}
+  {{- if not .Values.gcp.gcs.secretAccessKey -}}
+    {{- fail "All fields are required for GCS when enabled. Missing: secretAccessKey" -}}
   {{- end -}}
 {{- end -}}
 {{- end -}}
