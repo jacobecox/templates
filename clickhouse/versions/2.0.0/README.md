@@ -31,7 +31,7 @@ Before installing, update `values.yaml` with the parameters relevant to your env
 
 For ClickHouse to have access to a S3 bucket, ensure the following prerequisites are completed in your AWS account before installing:
 
-1. Create your bucket. Update the value `bucket` to include it's name and `region` to include it's region.
+1. Create your bucket. Update the value `bucket` to include its name and `region` to include its region.
 
 2. Run the following CLI command for guidance on setting up required AWS resources and creating a [Cloud Account](https://docs.controlplane.com/guides/create-cloud-account).
 
@@ -74,7 +74,7 @@ cpln cloudaccount create-aws --org ORG_NAME --how
 
 For ClickHouse to have access to a GCS bucket, ensure the following prerequisites are completed in your GCP account before installing:
 
-1. Create your bucket. Update the value `bucket` to include it's name.
+1. Create your bucket. Update the value `bucket` to include its name.
 
 2. Navigate to Settings > Interoperability and click `Create a key for a service account`.
 
@@ -83,6 +83,24 @@ For ClickHouse to have access to a GCS bucket, ensure the following prerequisite
 4. Under `Permissions`, assign the role `Storage Object Admin` and click `Done`.
 
 5. You will be provided a new HMAC key, update `accessKeyId` and `secretAccessKey` with the values provided.
+
+**Note**: ClickHouse requires S3-compatible HMAC authentication, so even when using a GCP Cloud Account identity, you must provide an interoperability HMAC key.
+
+To configure using the CLI:
+
+```BASH
+gcloud config set project YOUR_PROJECT_ID
+
+gsutil mb -l YOUR_REGION gs://YOUR_BUCKET_NAME
+
+gcloud iam service-accounts create clickhouse-storage
+
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+  --member="serviceAccount:clickhouse-storage@$(gcloud config get-value project).iam.gserviceaccount.com" \
+  --role="roles/storage.objectAdmin"
+
+gsutil hmac create clickhouse-storage@$(gcloud config get-value project).iam.gserviceaccount.com
+```
 
 ## Connecting to ClickHouse
 
