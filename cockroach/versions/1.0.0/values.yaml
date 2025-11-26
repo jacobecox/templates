@@ -4,9 +4,9 @@ gvc:
     - name: aws-us-east-2
       replicas: 2
     - name: aws-eu-central-1
-      replicas: 3
+      replicas: 2
     - name: gcp-us-west1
-      replicas: 4
+      replicas: 2
 
 resources:
   cpu: 2000m
