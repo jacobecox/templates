@@ -4,7 +4,9 @@ CockroachDB is a distributed SQL database built on a transactional and strongly-
 
 ## Configuration
 
-To configure your CockroachDB cluster across multiple locations, update the `gvc.locations` section in the `values.yaml` file:
+To configure your CockroachDB cluster across multiple locations, update the `gvc.locations` section in the `values.yaml` file.
+
+**Note**: While CockroachDB can run on 2 locations, a minimum of 3 locations is recommended for high resilience.
 
 ### Database Initialization
 
@@ -21,7 +23,11 @@ To specify which workloads can access this CockroachDB cluster internally, confi
 - `same-org`: Allow access from all workloads in the same organization
 - `workload-list`: Allow access only from specific workloads listed in `outside_workloads` and can be used in conjunction with `same-gvc`
 
-Once deployed, CockroachDB will be available on Port 26257 (default)
+Once deployed, CockroachDB will be available on Port 26257 (default). You can connect using:
+
+```BASH
+cockroach sql --insecure
+```
 
 The cluster automatically handles data distribution and replication across your configured locations.
 

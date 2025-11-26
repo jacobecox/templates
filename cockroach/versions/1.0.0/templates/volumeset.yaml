@@ -3,7 +3,7 @@ name: {{ .Release.Name }}-cockroach-vs
 gvc: {{ .Values.gvc.name }}
 tags:
   {{- include "cockroach.tags" . | nindent 2 }}
-  workload: {{ .Release.Name }}
+  workload: {{ .Release.Name }}-cockroach
 spec:
   autoscaling:
     maxCapacity: 1000

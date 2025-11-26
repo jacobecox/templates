@@ -112,7 +112,7 @@ clickhouse-client --host $WORKLOAD_NAME --password $PASSWORD
 
 ### Supported External Services
 
-[ClickHouse Documentation](https://clickhouse.com/docs/).
-[Cloud Accounts Documentation](https://docs.controlplane.com/guides/create-cloud-account#overview)
-[Clickhouse with S3](https://clickhouse.com/docs/integrations/s3)
-[Clickhouse with GCS](https://clickhouse.com/docs/integrations/gcs)
+- [ClickHouse Documentation](https://clickhouse.com/docs/).
+- [Cloud Accounts Documentation](https://docs.controlplane.com/guides/create-cloud-account#overview)
+- [Clickhouse with S3](https://clickhouse.com/docs/integrations/s3)
+- [Clickhouse with GCS](https://clickhouse.com/docs/integrations/gcs)

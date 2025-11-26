@@ -1,13 +1,13 @@
 apiVersion: v2
 name: cockroach
-description: CockroachDB for Control Plane
+description: Distributed PostgreSQL-compatible database for Control Plane
 
 type: application
 version: 1.0.0
-appVersion: "25.3.0"
+appVersion: "25.4.0"
 
 annotations:
   created: "2025-08-25"
-  lastModified: "2025-10-16"
+  lastModified: "2025-11-26"
   category: "database"
   createsGvc: true
