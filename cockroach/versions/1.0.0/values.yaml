@@ -20,12 +20,8 @@ cockroach_defaults:
   sql_port: 26257
   http_port: 8080
 
-<<<<<<< HEAD
-allow_clients:
-=======
 internal_access:
   type: same-gvc # options: same-gvc, same-org, workload-list
   workloads:  # Note: can only be used if type is same-gvc or workload-list
     #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
     #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
->>>>>>> 63ef2df60bdeca211a1e3510e5163d11f3758cb9

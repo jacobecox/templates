@@ -9,24 +9,16 @@ spec:
     - name: cockroach
       cpu: {{ .Values.resources.cpu }}
       memory: {{ .Values.resources.memory }}
-<<<<<<< HEAD
-      image: controlplanecorporation/cockroachdb:0.2
-=======
       image: cockroachdb/cockroach:latest-v25.2
       command: "/bin/bash"
       args:
         - "/cockroach/start.sh"
->>>>>>> 63ef2df60bdeca211a1e3510e5163d11f3758cb9
       inheritEnv: false
       env:
         - name: DB_NAME
           value: {{ .Values.database.name }}
         - name: DB_USER
-<<<<<<< HEAD
-          value: 'cpln://secret/cockroach-user.payload'
-=======
           value: cpln://secret/{{ .Release.Name }}-cockroach-user.payload
->>>>>>> 63ef2df60bdeca211a1e3510e5163d11f3758cb9
       ports:
         - number: {{ .Values.cockroach_defaults.http_port }}
           protocol: http
@@ -35,16 +27,9 @@ spec:
       volumes:
         - path: /cockroach/cockroach-data
           recoveryPolicy: retain
-<<<<<<< HEAD
-          uri: cpln://volumeset/cockroach-vs
-        - path: /etc/cockroach/cockroach.yaml
-          recoveryPolicy: retain
-          uri: cpln://secret/cockroach-config.payload
-=======
           uri: cpln://volumeset/{{ .Release.Name }}-cockroach-vs
         - path: /cockroach/start.sh
           uri: cpln://secret/{{ .Release.Name }}-cockroach-startup.payload
->>>>>>> 63ef2df60bdeca211a1e3510e5163d11f3758cb9
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
@@ -59,19 +44,6 @@ spec:
     timeoutSeconds: 10
   firewallConfig:
     external:
-<<<<<<< HEAD
-      {{- if .Values.allow_clients }}
-      inboundAllowCIDR:
-        {{- range $client := .Values.allow_clients }}
-        - {{ $client }}
-        {{- end }}
-      {{- end }}
-      outboundAllowCIDR:
-      - 0.0.0.0/0
-    internal:
-      inboundAllowType: same-gvc
-  identityLink: //gvc/{{ .Values.gvc.name }}/identity/cockroach-identity
-=======
       outboundAllowCIDR:
       - 0.0.0.0/0
     internal:
@@ -80,7 +52,6 @@ spec:
       inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
       {{- end }}
   identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-cockroach-identity
->>>>>>> 63ef2df60bdeca211a1e3510e5163d11f3758cb9
   loadBalancer:
     replicaDirect: true
   localOptions:
