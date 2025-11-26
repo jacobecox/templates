@@ -1,0 +1,70 @@
+kind: workload
+name: {{ .Release.Name }}-minio
+description: MinIO
+tags: {{- include "minio.tags" . | nindent 4 }}
+spec:
+  type: stateful
+  containers:
+    - name: minio
+      command: "/bin/bash"
+      args:
+        - "/minio/start.sh"
+      cpu: "{{ .Values.resources.cpu }}"
+      env:
+        - name: LOCAL_IP
+          value: cpln://reference/status.podIP
+        - name: MINIO_ROOT_PASSWORD
+          value: cpln://secret/{{ .Release.Name }}-minio-admin.password
+        - name: MINIO_ROOT_USER
+          value: cpln://secret/{{ .Release.Name }}-minio-admin.username
+      image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+      inheritEnv: false
+      memory: {{ .Values.resources.memory }}
+      ports:
+        - number: 9000
+          protocol: http
+        - number: 9001
+          protocol: http
+      volumes:
+        - path: /data
+          recoveryPolicy: retain
+          uri: cpln://volumeset/{{ .Release.Name }}-minio-vs
+        - path: /minio/start.sh
+          uri: cpln://secret/{{ .Release.Name }}-minio-config.payload
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-minio-identity
+  defaultOptions:
+    autoscaling:
+      keda:
+        cooldownPeriod: 1
+        initialCooldownPeriod: 1
+        pollingInterval: 1
+        triggers: []
+      maxConcurrency: 0
+      maxScale: {{ .Values.replicas }}
+      metric: cpu
+      minScale: {{ .Values.replicas }}
+      scaleToZeroDelay: 300
+      target: 100
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR: []
+      inboundBlockedCIDR: []
+      outboundAllowCIDR: []
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: {{ .Values.internalAccess.type }}
+      {{- if .Values.internalAccess.workloads }}
+      inboundAllowWorkload: {{ .Values.internalAccess.workloads | toYaml | nindent 8 }}
+      {{- end }}
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: true
+  supportDynamicTags: false

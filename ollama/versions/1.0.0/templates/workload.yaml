@@ -98,4 +98,9 @@ spec:
         - 0.0.0.0/0
       outboundAllowCIDR:
         - 0.0.0.0/0
+    internal:
+      inboundAllowType: {{ .Values.internal_access.type }}
+      {{- if .Values.internal_access.workloads }}
+      inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
+      {{- end }}
   identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "ollama.name" . }}

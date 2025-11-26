@@ -1,14 +1,10 @@
 kind: workload
-name: {{ include "fusionauth.name" . }}-auth
+name: {{ .Release.Name }}-auth
 gvc: {{ .Values.global.cpln.gvc }}
-tags:
-  {{- include "fusionauth.tags" . | nindent 2 }}
+tags: {{- include "fusionauth.tags" . | nindent 4 }}
 spec:
   type: serverless
-  identityLink: //identity/{{ include "postgres.pg.name" . }}
-
-  {{- $postgresHost := printf "%s-%s" .Release.Name "db" }}
-
+  identityLink: //identity/{{ .Release.Name }}-pg-identity
   containers:
     - name: fusionauth
       cpu: 512m
@@ -17,11 +13,11 @@ spec:
       inheritEnv: false
       env:
         - name: DATABASE_PASSWORD
-          value: 'cpln://secret/{{ include "postgres.pg.secretName" . }}.password'
+          value: 'cpln://secret/{{ .Release.Name }}-pg-config.password'
         - name: DATABASE_URL
-          value: {{ include "fusionauth.databaseURL" . }}
+          value: jdbc:postgresql://{{ .Release.Name }}-pg-db.{{ .Values.global.cpln.gvc }}.cpln.local:5432/{{ .Values.postgres.config.database }}
         - name: DATABASE_USERNAME
-          value: 'cpln://secret/{{ include "postgres.pg.secretName" . }}.username'
+          value: 'cpln://secret/{{ .Release.Name }}-pg-config.username'
         - name: MAINTENANCE_MODE
           value: 'false'
         - name: FUSIONAUTH_APP_RUNTIME_MODE
@@ -30,7 +26,6 @@ spec:
           value: 'true'
         - name: FUSIONAUTH_APP_HTTP_PORT
           value: '443'
-
       ports:
         - number: 443
           protocol: http
@@ -45,7 +40,6 @@ spec:
         periodSeconds: 15
         successThreshold: 1
         timeoutSeconds: 5
-
   defaultOptions:
     autoscaling:
       maxConcurrency: 1000
@@ -58,7 +52,6 @@ spec:
     debug: false
     suspend: false
     timeoutSeconds: 30
-
   firewallConfig:
     external:
       inboundAllowCIDR:

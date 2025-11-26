@@ -1,29 +1,8 @@
 {{/*
-PostgreSQL Workload Name
-*/}}
-{{- define "pg.name" -}}
-{{- printf "%s" .Release.Name }}
-{{- end }}
-
-{{/*
-Secret Name for PostgreSQL Configuration
-*/}}
-{{- define "pg.secretName" -}}
-{{- printf "%s-conf" (include "pg.name" .) }}
-{{- end }}
-
-{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "pg.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
-Database Name for PostgreSQL
-*/}}
-{{- define "pg.database" -}}
-{{- default "postgres" .Values.config.database -}}
 {{- end }}
 
 {{/*
