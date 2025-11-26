@@ -7,7 +7,7 @@ description: Clickhouse identity
 tags: {{- include "clickhouse.tags" . | nindent 4 }}
 {{- if .Values.aws.enabled }}
 aws:
-  cloudAccountLink: //cloudaccount/{{ .Release.Name }}-clickhouse-s3
+  cloudAccountLink: //cloudaccount/{{ .Values.aws.s3.cloudAccountName }}
   policyRefs:
     - cpln-connector
     - aws::ReadOnlyAccess

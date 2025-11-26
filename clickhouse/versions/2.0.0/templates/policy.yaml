@@ -17,3 +17,6 @@ targetLinks:
   {{- if .Values.aws.enabled }}
   - //secret/{{ .Release.Name }}-clickhouse-s3-config
   {{- end }}
+  {{- if .Values.gcp.enabled }}
+  - //secret/{{ .Release.Name }}-clickhouse-gcs-config
+  {{- end }}
