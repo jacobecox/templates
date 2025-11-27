@@ -1,0 +1,4 @@
+kind: identity
+name: {{ .Release.Name }}
+gvc: {{ .Values.global.cpln.gvc }}
+description: {{ .Release.Name }}
