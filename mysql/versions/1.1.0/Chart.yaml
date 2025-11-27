@@ -1,0 +1,13 @@
+apiVersion: v2
+name: mysql
+description: MySQL app for Control Plane
+
+type: application
+version: 1.1.0
+appVersion: "9"
+
+annotations:
+  created: "2024-10-31"
+  lastModified: "2025-11-26"
+  category: "database"
+  createsGvc: false
