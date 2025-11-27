@@ -1,0 +1,10 @@
+admin:
+  name: adminusername
+  password: Password123
+
+resources:
+  cpu: 500m
+  memory: 512Mi
+
+volumeset:
+  capacity: 10 # initial capacity in GiB (minimum is 10)

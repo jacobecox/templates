@@ -1,0 +1,13 @@
+kind: volumeset
+name: {{ .Release.Name }}-minio-vs
+gvc: {{ .Values.global.cpln.gvc }}
+tags:
+  {{- include "minio.tags" . | nindent 2 }}
+  workload: {{ .Release.Name }}-minio
+spec:
+  fileSystemType: ext4
+  initialCapacity: {{ .Values.volumeset.capacity }}
+  performanceClass: general-purpose-ssd
+  snapshots:
+    createFinalSnapshot: true
+    retentionDuration: 7d

@@ -1,0 +1,32 @@
+replicas: 3
+
+resources:
+  cpu: 1
+  memory: 2Gi
+
+postgres:
+    username: username
+    password: password
+    database: test
+
+volumeset:
+  capacity: 10 # initial capacity in GiB (minimum is 10)
+  
+internal_access:
+  type: same-gvc # options: same-gvc, same-org, workload-list
+  workloads:  # Note: can only be used if type is same-gvc or workload-list
+    #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+    #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+
+etcd:
+  replicas: 3
+  resources:
+    cpu: 1
+    memory: 2Gi
+  volumeset:
+    capacity: 10 # initial capacity in GiB (minimum is 10)
+  internal_access:
+    type: same-gvc # options: same-gvc, same-org, workload-list
+    workloads:  # Note: can only be used if type is same-gvc or workload-list
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME

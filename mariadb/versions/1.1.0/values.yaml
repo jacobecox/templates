@@ -1,0 +1,16 @@
+resources:
+  cpu: 500m
+  memory: 1024Mi
+
+timeoutSeconds: 15
+
+config:
+  db: db
+  rootPassword: root-pw
+  user: user
+  password: pw
+
+volumeset:
+  capacity: 10 # initial capacity in GiB (minimum is 10)
+
+enablePhpMyAdmin: true
