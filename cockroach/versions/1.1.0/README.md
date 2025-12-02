@@ -6,7 +6,7 @@ CockroachDB is a distributed SQL database built on a transactional and strongly-
 
 To configure your CockroachDB cluster across multiple locations, update the `gvc.locations` section in the `values.yaml` file.
 
-**Note**: While CockroachDB can run on 2 locations, a minimum of 3 locations is recommended for high resilience.
+**Note**: While CockroachDB can run on 2 locations, a minimum of 3 locations and 3 replicas per location is recommended for high resilience.
 
 ### Database Initialization
 
