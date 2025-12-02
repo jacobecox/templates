@@ -166,4 +166,4 @@ server:
 ```
 
 ### Release Notes
-See [RELEASE.md](https://github.com/controlplane-com/templates/blob/main/kafka/versions/3.1.0/RELEASES.md)
+See [RELEASE.md](https://github.com/controlplane-com/templates/blob/main/kafka/versions/RELEASES.md)
