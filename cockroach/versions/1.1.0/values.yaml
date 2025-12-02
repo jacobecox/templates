@@ -2,11 +2,11 @@ gvc:
   name: cockroach-gvc
   locations:
     - name: aws-us-east-2
-      replicas: 2
+      replicas: 3
     - name: aws-eu-central-1
-      replicas: 2
+      replicas: 3
     - name: gcp-us-west1
-      replicas: 2
+      replicas: 3
 
 resources:
   cpu: 2000m
