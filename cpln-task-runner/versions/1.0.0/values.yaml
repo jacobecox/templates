@@ -5,23 +5,19 @@
 # Global Settings
 # =============================================================================
 global:
-  # GVC name (auto-populated by Control Plane)
-  gvc: ""
-  # Location for workloads
-  location: ""
   # Image repository and tag
   image:
-    repository: ""  # Required: your container registry path
-    tag: "1.0.0"
+    repository: "controlplanecorporation/cpln-task-runner"  # Required: your container registry path
+    tag: "0.1"
 
 # =============================================================================
 # Redis Configuration (External)
 # =============================================================================
 redis:
   # Redis connection address (e.g., redis:6379 or your-redis.example.com:6379)
-  address: "redis:6379"
+  address: "redis.test.cpln.local:6379"
   # Redis password (leave empty if no authentication)
-  password: ""
+  password: "testpassword"
 
 # =============================================================================
 # API Workload Configuration
@@ -55,7 +51,7 @@ api:
   # Environment variables
   env:
     # Log level (debug, info, warn, error)
-    logLevel: "info"
+    logLevel: "info" # DOES NOT WORK - ONLY INFO
     # Admin API key for protected endpoints (leave empty to disable admin auth)
     adminApiKey: ""
     # OpenTelemetry endpoint (leave empty to disable tracing)
@@ -87,7 +83,7 @@ worker:
   # Environment variables
   env:
     # Log level (debug, info, warn, error)
-    logLevel: "info"
+    logLevel: "info" # DOES NOT WORK - ONLY INFO
     # Number of concurrent workers per replica
     concurrency: 10
     # Task timeout in seconds (default: 30 minutes)

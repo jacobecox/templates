@@ -5,7 +5,7 @@ description: Task Runner API - HTTP endpoint for enqueuing tasks
 spec:
   type: serverless
 
-  identityLink: //gvc/{{ .Values.global.gvc }}/identity/{{ .Values.identity.name }}
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Values.identity.name }}
 
   containers:
     - name: api

@@ -1,0 +1,12 @@
+kind: policy
+name: {{ .Release.Name }}-task-runner-policy
+description: {{ .Release.Name }} Task Runner policy
+tags: {}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Values.identity.name }}
+targetKind: secret
+targetLinks:
+  - //secret/{{ .Values.secrets.name }}
