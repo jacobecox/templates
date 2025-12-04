@@ -1,7 +1,7 @@
 kind: policy
 name: {{ .Release.Name }}-task-runner-policy
 description: {{ .Release.Name }} Task Runner policy
-tags: {}
+tags: {{- include "cpln-task-runner.tags" . | nindent 4 }}
 bindings:
   - permissions:
       - reveal

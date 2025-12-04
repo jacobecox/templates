@@ -2,6 +2,7 @@
 kind: workload
 name: {{ .Values.api.name }}
 description: Task Runner API - HTTP endpoint for enqueuing tasks
+tags: {{- include "cpln-task-runner.tags" . | nindent 4 }}
 spec:
   type: serverless
 

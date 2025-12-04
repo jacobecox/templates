@@ -1,4 +1,4 @@
 kind: identity
 name: {{ .Values.identity.name }}
 description: Identity for Task Runner workloads
-tags: {}
+tags: {{- include "cpln-task-runner.tags" . | nindent 4 }}

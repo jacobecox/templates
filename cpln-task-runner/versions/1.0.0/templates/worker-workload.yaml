@@ -2,6 +2,7 @@
 kind: workload
 name: {{ .Values.worker.name }}
 description: Task Runner Worker - Processes tasks from the queue
+tags: {{- include "cpln-task-runner.tags" . | nindent 4 }}
 spec:
   type: serverless
 
