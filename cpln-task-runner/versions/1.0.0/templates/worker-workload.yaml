@@ -1,6 +1,6 @@
 {{- if .Values.worker.enabled }}
 kind: workload
-name: {{ .Values.worker.name }}
+name: {{ .Release.Name }}-task-runner-worker
 description: Task Runner Worker - Processes tasks from the queue
 tags: {{- include "cpln-task-runner.tags" . | nindent 4 }}
 spec:
@@ -10,7 +10,7 @@ spec:
 
   containers:
     - name: worker
-      image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
+      image: jacobcox/task-runner:0.1
       port: {{ .Values.worker.port }}
 
       cpu: {{ .Values.worker.resources.cpu | quote }}
@@ -21,12 +21,17 @@ spec:
           value: "worker"
         - name: PORT
           value: {{ .Values.worker.port | quote }}
-        - name: REDIS_ADDR
-          value: {{ .Values.redis.address | quote }}
-        {{- if .Values.redis.password }}
+
+        # Redis configuration
+        - name: REDIS_MASTER_NAME
+          value: {{ .Values.redis.masterName | quote }}
+        - name: REDIS_SENTINEL_ADDRS
+          value: {{ .Release.Name }}-sentinel.{{ .Values.global.cpln.gvc }}.cpln.local:26379
         - name: REDIS_PASSWORD
-          value: "cpln://secret/{{ .Values.secrets.name }}.redis-password"
-        {{- end }}
+          value: "cpln://secret/task-runner-secrets.redis-password"
+        - name: REDIS_SENTINEL_PASSWORD
+          value: "cpln://secret/task-runner-secrets.redis-sentinel-password"
+
         - name: LOG_LEVEL
           value: {{ .Values.worker.env.logLevel | quote }}
         - name: WORKER_CONCURRENCY
@@ -76,6 +81,9 @@ spec:
 
   # Worker is internal only - no public access
   firewallConfig:
+    external:
+      outboundAllowCIDR:
+        - 0.0.0.0/0
     internal:
       inboundAllowType: same-gvc
 {{- end }}

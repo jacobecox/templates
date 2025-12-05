@@ -1,6 +1,6 @@
 {{- if .Values.api.enabled }}
 kind: workload
-name: {{ .Values.api.name }}
+name: {{ .Release.Name }}-task-runner-api
 description: Task Runner API - HTTP endpoint for enqueuing tasks
 tags: {{- include "cpln-task-runner.tags" . | nindent 4 }}
 spec:
@@ -10,7 +10,7 @@ spec:
 
   containers:
     - name: api
-      image: {{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}
+      image: jacobcox/task-runner:0.1
       port: {{ .Values.api.port }}
 
       cpu: {{ .Values.api.resources.cpu | quote }}
@@ -21,12 +21,17 @@ spec:
           value: "api"
         - name: PORT
           value: {{ .Values.api.port | quote }}
-        - name: REDIS_ADDR
-          value: {{ .Values.redis.address | quote }}
-        {{- if .Values.redis.password }}
+
+        # Redis configuration
         - name: REDIS_PASSWORD
           value: "cpln://secret/{{ .Values.secrets.name }}.redis-password"
-        {{- end }}
+        - name: REDIS_MASTER_NAME
+          value: {{ .Values.redis.masterName | quote }}
+        - name: REDIS_SENTINEL_ADDRS
+          value: {{ .Values.redis.address | quote }}
+        - name: REDIS_SENTINEL_PASSWORD
+          value: "cpln://secret/{{ .Values.secrets.name }}.redis-sentinel-password"
+
         - name: LOG_LEVEL
           value: {{ .Values.api.env.logLevel | quote }}
         {{- if .Values.api.env.adminApiKey }}
