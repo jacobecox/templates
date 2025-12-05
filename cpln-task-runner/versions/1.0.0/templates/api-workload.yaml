@@ -6,11 +6,11 @@ tags: {{- include "cpln-task-runner.tags" . | nindent 4 }}
 spec:
   type: serverless
 
-  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Values.identity.name }}
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-task-runner-identity
 
   containers:
     - name: api
-      image: jacobcox/task-runner:0.1
+      image: jacobcox/cpln-task-runner:1.0
       port: {{ .Values.api.port }}
 
       cpu: {{ .Values.api.resources.cpu | quote }}
@@ -21,22 +21,19 @@ spec:
           value: "api"
         - name: PORT
           value: {{ .Values.api.port | quote }}
-
-        # Redis configuration
         - name: REDIS_PASSWORD
-          value: "cpln://secret/{{ .Values.secrets.name }}.redis-password"
+          value: "cpln://secret/task-runner-secrets.redis-password"
         - name: REDIS_MASTER_NAME
           value: {{ .Values.redis.masterName | quote }}
-        - name: REDIS_SENTINEL_ADDRS
-          value: {{ .Values.redis.address | quote }}
+        - name: REDIS_SENTINEL_ADDR
+          value: {{ .Release.Name }}-sentinel.{{ .Values.global.cpln.gvc }}.cpln.local:26379
         - name: REDIS_SENTINEL_PASSWORD
-          value: "cpln://secret/{{ .Values.secrets.name }}.redis-sentinel-password"
-
+          value: "cpln://secret/task-runner-secrets.redis-sentinel-password"
         - name: LOG_LEVEL
           value: {{ .Values.api.env.logLevel | quote }}
         {{- if .Values.api.env.adminApiKey }}
         - name: ADMIN_API_KEY
-          value: "cpln://secret/{{ .Values.secrets.name }}.admin-api-key"
+          value: "cpln://secret/task-runner-secrets.admin-api-key"
         {{- end }}
         {{- if .Values.api.env.otelEndpoint }}
         - name: OTEL_EXPORTER_OTLP_ENDPOINT

@@ -6,11 +6,11 @@ tags: {{- include "cpln-task-runner.tags" . | nindent 4 }}
 spec:
   type: serverless
 
-  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Values.identity.name }}
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-task-runner-identity
 
   containers:
     - name: worker
-      image: jacobcox/task-runner:0.1
+      image: jacobcox/cpln-task-runner:1.0
       port: {{ .Values.worker.port }}
 
       cpu: {{ .Values.worker.resources.cpu | quote }}
@@ -25,7 +25,7 @@ spec:
         # Redis configuration
         - name: REDIS_MASTER_NAME
           value: {{ .Values.redis.masterName | quote }}
-        - name: REDIS_SENTINEL_ADDRS
+        - name: REDIS_SENTINEL_ADDR
           value: {{ .Release.Name }}-sentinel.{{ .Values.global.cpln.gvc }}.cpln.local:26379
         - name: REDIS_PASSWORD
           value: "cpln://secret/task-runner-secrets.redis-password"

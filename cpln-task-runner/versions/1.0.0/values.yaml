@@ -72,17 +72,17 @@ redis:
   # If createSecret is true, do not change. If providing a secret, adjust secret values below to match the secret name and password key
   redis:
     auth:
-    fromSecret:
-      enabled: true
-      name: task-runner-secrets
-      passwordKey: redis-password
+      fromSecret:
+        enabled: true
+        name: task-runner-secrets
+        passwordKey: redis-password
     persistence:
       enabled: true
   sentinel:
     auth:
-    fromSecret:
-      enabled: true
-      name: task-runner-secrets
-      passwordKey: redis-sentinel-password
+      fromSecret:
+        enabled: true
+        name: task-runner-secrets
+        passwordKey: redis-sentinel-password
     persistence:
       enabled: true
