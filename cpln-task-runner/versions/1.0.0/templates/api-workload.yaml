@@ -10,7 +10,7 @@ spec:
 
   containers:
     - name: api
-      image: jacobcox/cpln-task-runner:1.0
+      image: controlplanecorporation/cpln-task-runner:0.3
       port: {{ .Values.api.port }}
 
       cpu: {{ .Values.api.resources.cpu | quote }}

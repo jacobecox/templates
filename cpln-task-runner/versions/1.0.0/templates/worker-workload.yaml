@@ -10,7 +10,7 @@ spec:
 
   containers:
     - name: worker
-      image: jacobcox/cpln-task-runner:1.0
+      image: controlplanecorporation/cpln-task-runner:0.3
       port: {{ .Values.worker.port }}
 
       cpu: {{ .Values.worker.resources.cpu | quote }}
