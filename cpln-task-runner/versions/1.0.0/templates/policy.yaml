@@ -9,4 +9,4 @@ bindings:
       - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-task-runner-identity
 targetKind: secret
 targetLinks:
-  - //secret/task-runner-secrets
+  - //secret/{{ .Values.secretName }}

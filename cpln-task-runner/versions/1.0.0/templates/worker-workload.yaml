@@ -21,17 +21,23 @@ spec:
           value: "worker"
         - name: PORT
           value: {{ .Values.worker.port | quote }}
-
         # Redis configuration
         - name: REDIS_MASTER_NAME
           value: {{ .Values.redis.masterName | quote }}
         - name: REDIS_SENTINEL_ADDR
           value: {{ .Release.Name }}-sentinel.{{ .Values.global.cpln.gvc }}.cpln.local:26379
+        # Secrets
+        {{- if .Values.createSecret }}
         - name: REDIS_PASSWORD
-          value: "cpln://secret/task-runner-secrets.redis-password"
+          value: "cpln://secret/{{ .Values.secretName }}.redis-password"
         - name: REDIS_SENTINEL_PASSWORD
-          value: "cpln://secret/task-runner-secrets.redis-sentinel-password"
-
+          value: "cpln://secret/{{ .Values.secretName }}.redis-sentinel-password"
+        {{- else }}
+        - name: REDIS_PASSWORD
+          value: "cpln://secret/{{ .Values.redis.redis.auth.fromSecret.name }}.{{ .Values.redis.redis.auth.fromSecret.passwordKey }}"
+        - name: REDIS_SENTINEL_PASSWORD
+          value: "cpln://secret/{{ .Values.redis.sentinel.auth.fromSecret.name }}.{{ .Values.redis.sentinel.auth.fromSecret.passwordKey }}"
+        {{- end }}
         - name: LOG_LEVEL
           value: {{ .Values.worker.env.logLevel | quote }}
         - name: WORKER_CONCURRENCY
@@ -46,6 +52,11 @@ spec:
           value: {{ .Values.worker.env.cbFailureThreshold | quote }}
         - name: CB_TIMEOUT_SEC
           value: {{ .Values.worker.env.cbTimeoutSec | quote }}
+        - name: REDIS_CONNECT_RETRIES
+          value: {{ .Values.worker.env.connectRetries | quote }}
+        - name: REDIS_RETRY_INTERVAL_SEC
+          value: {{ .Values.worker.env.retryIntervalSec | quote }}
+        # OpenTelemetry configuration
         {{- if .Values.worker.env.otelEndpoint }}
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: {{ .Values.worker.env.otelEndpoint | quote }}

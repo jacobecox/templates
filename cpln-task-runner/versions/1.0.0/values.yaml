@@ -25,6 +25,10 @@ api:
     adminApiKey: ""
     # OpenTelemetry endpoint (leave empty to disable tracing)
     otelEndpoint: ""
+    # Redis connection retries
+    connectRetries: 30
+    # Redis retry interval in seconds
+    retryIntervalSec: 2
 
 # Worker configuration
 worker:
@@ -56,11 +60,17 @@ worker:
     cbFailureThreshold: 5
     # Circuit breaker timeout in seconds
     cbTimeoutSec: 30
+    # Redis connection retries
+    connectRetries: 30
+    # Redis retry interval in seconds
+    retryIntervalSec: 2
     # OpenTelemetry endpoint (leave empty to disable tracing)
     otelEndpoint: ""
 
 # Creates a secret for redis + sentinel passwords and admin api key
 createSecret: true
+# Must match names below. Disregard if providing your own secret
+secretName: "task-runner-secrets"
 
 # Redis configuration
 redis:
@@ -70,11 +80,15 @@ redis:
   # Redis sentinel master name
   masterName: "mymaster"
   # If createSecret is true, do not change. If providing a secret, adjust secret values below to match the secret name and password key
+  admin:
+    fromSecret:
+      name: "task-runner-secrets"
+      apiKeyKey: admin-api-key
   redis:
     auth:
       fromSecret:
         enabled: true
-        name: task-runner-secrets
+        name: "task-runner-secrets"
         passwordKey: redis-password
     persistence:
       enabled: true
@@ -82,7 +96,7 @@ redis:
     auth:
       fromSecret:
         enabled: true
-        name: task-runner-secrets
+        name: "task-runner-secrets"
         passwordKey: redis-sentinel-password
     persistence:
       enabled: true
