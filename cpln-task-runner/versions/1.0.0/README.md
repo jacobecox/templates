@@ -1,4 +1,4 @@
-# Task Runner Template
+# Control Plane Task Runner
 
 A self-hosted task queue and scheduler service similar to Google Cloud Tasks, deployed on Control Plane.
 
@@ -10,39 +10,29 @@ Task Runner provides HTTP-based task enqueuing with automatic retry, delayed/sch
 
 This template deploys two workloads:
 
-- **API** (`task-runner-api`): HTTP endpoint for enqueuing tasks, managing clients, and health checks
-- **Worker** (`task-runner-worker`): Background processor that executes tasks from the queue
+- **API**: HTTP endpoint for enqueuing tasks, managing clients, and health checks
+- **Worker**: Background processor that executes tasks from the queue
 
-Both workloads connect to an external Redis instance for task persistence and coordination.
-
-## Prerequisites
-
-- A Redis instance accessible from Control Plane (deploy separately or use a managed Redis service)
-- Container image built and pushed to a registry accessible by Control Plane
+Both workloads connect to a Redis Sentinel cluster for high-availability task persistence and coordination. The template includes a Redis dependency that deploys a Redis Sentinel setup.
 
 ## Configuration
-
-### Required Values
-
-| Parameter | Description |
-|-----------|-------------|
-| `global.image.repository` | Container registry path for the task-runner image |
-| `redis.address` | Redis connection address (e.g., `redis:6379`) |
-
-### Optional Values
 
 #### API Configuration
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `api.enabled` | `true` | Enable/disable API workload |
+| `api.port` | `8080` | Container port |
 | `api.replicas.min` | `1` | Minimum replicas |
 | `api.replicas.max` | `3` | Maximum replicas |
 | `api.public.enabled` | `true` | Enable public internet access |
+| `api.public.pathPrefix` | `""` | Path prefix for public endpoint (empty for root) |
 | `api.resources.cpu` | `500m` | CPU allocation |
 | `api.resources.memory` | `512Mi` | Memory allocation |
 | `api.env.logLevel` | `info` | Log level (debug/info/warn/error) |
 | `api.env.adminApiKey` | `""` | Admin API key for protected endpoints |
+| `api.env.connectRetries` | `30` | Redis connection retry attempts |
+| `api.env.retryIntervalSec` | `2` | Redis retry interval in seconds |
 | `api.env.otelEndpoint` | `""` | OpenTelemetry collector endpoint |
 
 #### Worker Configuration
@@ -50,6 +40,7 @@ Both workloads connect to an external Redis instance for task persistence and co
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `worker.enabled` | `true` | Enable/disable Worker workload |
+| `worker.port` | `8082` | Container port (for health checks) |
 | `worker.replicas.min` | `1` | Minimum replicas |
 | `worker.replicas.max` | `5` | Maximum replicas |
 | `worker.resources.cpu` | `1000m` | CPU allocation |
@@ -61,13 +52,31 @@ Both workloads connect to an external Redis instance for task persistence and co
 | `worker.env.allowPrivateUrls` | `false` | Allow targeting private URLs |
 | `worker.env.cbFailureThreshold` | `5` | Circuit breaker failure threshold |
 | `worker.env.cbTimeoutSec` | `30` | Circuit breaker timeout |
+| `worker.env.connectRetries` | `30` | Redis connection retry attempts |
+| `worker.env.retryIntervalSec` | `2` | Redis retry interval in seconds |
+| `worker.env.otelEndpoint` | `""` | OpenTelemetry collector endpoint |
+
+#### Secret Configuration
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `createSecret` | `true` | Create a secret for Redis passwords and admin API key |
+| `secretName` | `task-runner-secrets` | Name of the secret to create (only used if `createSecret` is `true`) |
 
 #### Redis Configuration
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `redis.address` | `redis:6379` | Redis host:port |
-| `redis.password` | `""` | Redis password (if authenticated) |
+| `redis.redisPassword` | `mypassword` | Redis password (used if `createSecret` is `true`) |
+| `redis.sentinelPassword` | `mypassword` | Redis Sentinel password (used if `createSecret` is `true`) |
+| `redis.redis.auth.fromSecret.name` | `task-runner-secrets` | Secret name for Redis password (used if `createSecret` is `false`) |
+| `redis.redis.auth.fromSecret.passwordKey` | `redis-password` | Secret key for Redis password (used if `createSecret` is `false`) |
+| `redis.sentinel.auth.fromSecret.name` | `task-runner-secrets` | Secret name for Sentinel password (used if `createSecret` is `false`) |
+| `redis.sentinel.auth.fromSecret.passwordKey` | `redis-sentinel-password` | Secret key for Sentinel password (used if `createSecret` is `false`) |
+| `redis.admin.fromSecret.name` | `task-runner-secrets` | Secret name for admin API key (used if `createSecret` is `false`) |
+| `redis.admin.fromSecret.apiKeyKey` | `admin-api-key` | Secret key for admin API key (used if `createSecret` is `false`) |
+
+**Note**: When `createSecret` is `true`, the template automatically creates a secret with Redis passwords and admin API key. When `createSecret` is `false`, configure the `redis.*.fromSecret` values to match your existing secret structure.
 
 ## Usage
 
@@ -125,23 +134,14 @@ curl -X POST https://your-api-endpoint/admin/clients/set \
 
 ## Rate Limiting Tiers
 
+Rate limiting tiers are configured per-client via the admin API (see Admin Endpoints above). The available tiers and their limits are:
+
 | Tier | Requests/min | Max Concurrent |
 |------|-------------|----------------|
 | free | 10 | 1 |
 | basic | 100 | 5 |
 | premium | 1,000 | 20 |
 | enterprise | 5,000 | 50 |
-
-## Health Endpoints
-
-| Endpoint | Purpose |
-|----------|---------|
-| `/health` | Basic health check |
-| `/health/live` | Kubernetes liveness probe |
-| `/health/ready` | Kubernetes readiness probe |
-| `/health/detailed` | Detailed health with component status |
-| `/metrics` | Prometheus metrics |
-| `/version` | Build version information |
 
 ## Monitoring
 
