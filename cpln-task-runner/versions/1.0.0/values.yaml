@@ -77,9 +77,8 @@ redis:
   # Redis and sentinel passwords
   redisPassword: "mypassword"
   sentinelPassword: "mypassword"
-  # Redis sentinel master name
-  masterName: "mymaster"
-  # If createSecret is true, do not change. If providing a secret, adjust secret values below to match the secret name and password key
+  # If createSecret is true, do not change
+  # If providing a secret, adjust secret values below to match the secret name and password key.
   admin:
     fromSecret:
       name: "task-runner-secrets"

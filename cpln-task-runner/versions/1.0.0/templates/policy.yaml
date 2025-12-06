@@ -9,4 +9,10 @@ bindings:
       - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-task-runner-identity
 targetKind: secret
 targetLinks:
+{{- if .Values.createSecret }}
   - //secret/{{ .Values.secretName }}
+{{- else }}
+  - //secret/{{ .Values.redis.admin.fromSecret.name }}
+  - //secret/{{ .Values.redis.redis.auth.fromSecret.name }}
+  - //secret/{{ .Values.redis.sentinel.auth.fromSecret.name }}
+{{- end }}

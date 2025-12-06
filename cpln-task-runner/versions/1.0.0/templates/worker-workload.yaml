@@ -10,7 +10,7 @@ spec:
 
   containers:
     - name: worker
-      image: controlplanecorporation/cpln-task-runner:0.3
+      image: controlplanecorporation/cpln-task-runner:0.4
       port: {{ .Values.worker.port }}
 
       cpu: {{ .Values.worker.resources.cpu | quote }}
@@ -23,7 +23,7 @@ spec:
           value: {{ .Values.worker.port | quote }}
         # Redis configuration
         - name: REDIS_MASTER_NAME
-          value: {{ .Values.redis.masterName | quote }}
+          value: mymaster
         - name: REDIS_SENTINEL_ADDR
           value: {{ .Release.Name }}-sentinel.{{ .Values.global.cpln.gvc }}.cpln.local:26379
         # Secrets
