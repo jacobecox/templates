@@ -97,21 +97,6 @@ curl -X POST https://your-api-endpoint/v1/enqueue \
   }'
 ```
 
-### Delayed Task
-
-```bash
-curl -X POST https://your-api-endpoint/v1/enqueue \
-  -H "Content-Type: application/json" \
-  -d '{
-    "client_id": "my-service",
-    "delay": 60,
-    "task": {
-      "url": "https://api.example.com/reminder",
-      "method": "POST"
-    }
-  }'
-```
-
 ### Admin Endpoints
 
 When `ADMIN_API_KEY` is configured, admin endpoints require the `X-Admin-Key` header:
@@ -143,14 +128,13 @@ Rate limiting tiers are configured per-client via the admin API (see Admin Endpo
 | premium | 1,000 | 20 |
 | enterprise | 5,000 | 50 |
 
-## Monitoring
+## OpenTelemetry
 
-The service exposes Prometheus metrics at `/metrics` including:
+To enable Control Plane’s native tracing through OpenTelemetry, specify an `otelEndpoint` in your values for each workload.
 
-- Task processing counts and durations
-- Queue depths by priority
-- Rate limit hits
-- Circuit breaker state changes
-- HTTP request metrics
+In your GVC configuration, ensure the `Tracing Provider` is set to `Control Plane`.
 
-Configure OpenTelemetry tracing by setting `otelEndpoint` for distributed tracing support.
+Once enabled, you can point your service to the default HTTP collector endpoint:
+```
+tracing.controlplane:4318
+```
