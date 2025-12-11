@@ -1,0 +1,22 @@
+{{ include "clickhouse.validateStorage" . }}
+---
+kind: policy
+name: {{ .Release.Name }}-clickhouse-{{ .Values.gvc.name }}-policy
+description: Clickhouse policy
+tags: {{- include "clickhouse.tags" . | nindent 4 }}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-clickhouse-identity
+targetKind: secret
+targetLinks:
+  - //secret/{{ .Release.Name }}-clickhouse-database
+  - //secret/{{ .Release.Name }}-clickhouse-keeper-startup
+  - //secret/{{ .Release.Name }}-clickhouse-server-startup
+  {{- if .Values.aws.enabled }}
+  - //secret/{{ .Release.Name }}-clickhouse-s3-config
+  {{- end }}
+  {{- if .Values.gcp.enabled }}
+  - //secret/{{ .Release.Name }}-clickhouse-gcs-config
+  {{- end }}
