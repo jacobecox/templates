@@ -38,6 +38,9 @@ spec:
         - path: /var/lib/clickhouse_cache
           recoveryPolicy: retain
           uri: scratch://cache-vol
+        - path: /var/lib/clickhouse-tmp
+          recoveryPolicy: retain
+          uri: scratch://tmp-vol
         {{- if .Values.aws.enabled }}
         - path: /etc/clickhouse-server/config.d/storage.xml
           recoveryPolicy: retain

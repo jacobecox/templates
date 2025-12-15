@@ -10,6 +10,8 @@ ClickHouse is a high-performance column-oriented analytical database designed fo
 
 - Volumeset - persistent metadata, state, and system files
 
+**Important**: To minimize network egress costs, deploy all locations in the same cloud provider and keep object storage in the same region(s). Using 1 replica per location for ClickHouse server is sufficient.
+
 ## Configuration
 
 Before installing, update `values.yaml` with the parameters relevant to your environment:
@@ -91,7 +93,9 @@ To configure using the CLI:
 ```BASH
 gcloud config set project YOUR_PROJECT_ID
 
-gsutil mb -l YOUR_REGION gs://YOUR_BUCKET_NAME
+# To specify another dual region, replace NAM4
+gcloud storage buckets create gs://YOUR_BUCKET_NAME \
+  --location=NAM4
 
 gcloud iam service-accounts create clickhouse-storage
 

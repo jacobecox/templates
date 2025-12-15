@@ -4,11 +4,11 @@ gvc:
   # Keeper will always have 3 total replicas (1 per location)
   locations: # Minimum of 3 locations are required
     - name: aws-us-west-2
-      replicas: 2
+      replicas: 1
     - name: aws-us-east-2
-      replicas: 2
-    - name: gcp-us-west1
-      replicas: 2
+      replicas: 1
+    - name: aws-us-east-1
+      replicas: 1
 
 aws:
   enabled: false # Enable to use S3 for storage
