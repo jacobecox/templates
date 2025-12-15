@@ -1,0 +1,19 @@
+{{- if .Values.locations }}
+{{- $current := . }}
+kind: policy
+name: {{ $current.Release.Name }}-sentinel
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      {{ include "calculateWorkloadCounts" $current }}
+      {{- $locationCount := $current.Values.global.locationCount }}
+      {{- range $l := until $locationCount }}
+      {{ $locationName := index $current.Values.locations $l }}
+      - //gvc/{{ $current.Release.Name }}-{{ $locationName }}/identity/{{ $current.Release.Name }}-sentinel
+      {{- end }}      
+targetKind: secret
+targetLinks:
+  - //secret/{{ $current.Release.Name }}-sentinel-config
+{{- else }}
+{{- end }}
