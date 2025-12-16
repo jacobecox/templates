@@ -10,11 +10,11 @@ spec:
   initialCapacity: {{ $root.Values.kafka.volumes.logs.initialCapacity }}
   performanceClass: {{ $root.Values.kafka.volumes.logs.performanceClass }}
   fileSystemType: {{ $root.Values.kafka.volumes.logs.fileSystemType }}
-  {{- if and $root.Values.kafka.volumes.customEncryption $root.Values.kafka.volumes.customEncryption.enabled }}
+  {{- if and $root.Values.kafka.volumes.logs.customEncryption $root.Values.kafka.volumes.logs.customEncryption.enabled }}
   customEncryption:
     regions:
-      {{ $root.Values.kafka.volumes.customEncryption.region }}:
-        keyId: '{{ $root.Values.kafka.volumes.customEncryption.keyId }}'
+      {{ $root.Values.kafka.volumes.logs.customEncryption.region }}:
+        keyId: '{{ $root.Values.kafka.volumes.logs.customEncryption.keyId }}'
   {{- end }}
   autoscaling:
     maxCapacity: {{ $root.Values.kafka.volumes.logs.autoscaling.maxCapacity }}
