@@ -3,11 +3,11 @@ gvc:
   locations:
   # Replica count will only affect storage (tikv) and server workloads
     - name: aws-us-east-2
-      replicas: 2
+      replicas: 1
     - name: aws-eu-central-1
-      replicas: 2
-    - name: gcp-us-west1
-      replicas: 2
+      replicas: 1
+    - name: aws-us-east-1
+      replicas: 1
 
 exposeServer: false # Set to true to expose TIDB status and metrics report
 

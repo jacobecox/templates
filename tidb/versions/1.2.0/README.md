@@ -6,7 +6,7 @@ TiDB is a distributed SQL database that provides horizontal scalability, strong 
 
 To configure your TiDB cluster across multiple locations, update the `gvc.locations` section in the `values.yaml` file:
 
-**Important:** For production deployments, it is recommended to run at least 3 replicas of both Placement Driver (PD) and TiKV, and at least 2 replicas of TiDB Server.
+**Important:** For production deployments, it is recommended to run at least 3 replicas of both Placement Driver (PD) and TiKV, and at least 2 replicas of TiDB Server. The default location values suggest the optimal configuration for high resiliancy and minimal egress costs.
 
 - TiDB’s PD and TiKV components rely on Raft quorum for high availability. To maintain quorum if a location becomes unavailable, deploy the cluster across a minimum of three independent locations (for example, three regions or zones). This ensures the cluster remains healthy and can continue serving requests even if one location fails.
 
