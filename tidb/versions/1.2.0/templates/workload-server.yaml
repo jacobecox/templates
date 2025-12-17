@@ -13,6 +13,7 @@ spec:
       args:
         - "/scripts/server-startup.sh"
       inheritEnv: false
+      {{- if .Values.autoCreateDatabase.enabled }}
       env:
         - name: ROOT_PW
           value: cpln://secret/{{ .Release.Name }}-tidb-user.rootPassword
@@ -22,6 +23,7 @@ spec:
           value: cpln://secret/{{ .Release.Name }}-tidb-user.user
         - name: APP_PW
           value: cpln://secret/{{ .Release.Name }}-tidb-user.password
+      {{- end }}
       memory: {{ .Values.resources.server.memory }}
       ports:
         - number: 10080

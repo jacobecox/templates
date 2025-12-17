@@ -21,12 +21,8 @@ spec:
       env:
        - name: FIRST_LOCATION
          value: {{ (index .Values.gvc.locations 0).name }}
-       - name: SECOND_LOCATION
-         value: {{ (index .Values.gvc.locations 1).name }}
        - name: BOOTSTRAP_FQDN
          value: "replica-0.{{ .Release.Name }}-pd.{{ (index .Values.gvc.locations 0).name }}.{{ .Values.gvc.name }}.cpln.local"
-       - name: SECONDARY_FQDN
-         value: "replica-0.{{ .Release.Name }}-pd.{{ (index .Values.gvc.locations 1).name }}.{{ .Values.gvc.name }}.cpln.local"
       volumes:
         - path: /data
           recoveryPolicy: retain
@@ -38,14 +34,8 @@ spec:
     autoscaling:
       maxConcurrency: 0
       metric: cpu
-      {{ $locs := .Values.gvc.locations }}
-      {{ $numLocs := len $locs }}
-      {{ if eq (mod $numLocs 2) 0 }}
-      maxScale: 2
-      {{ else }}
-      maxScale: 1
-      {{ end }}
-      minScale: 1
+      maxScale: 0
+      minScale: 0
       scaleToZeroDelay: 300
       target: 100
     capacityAI: false
@@ -54,18 +44,30 @@ spec:
     timeoutSeconds: 5
   {{- $locs := .Values.gvc.locations }}
   {{- $numLocs := len $locs }}
-  {{- if eq (mod $numLocs 2) 0 }}
+  {{- $isOdd := eq (mod $numLocs 2) 1 }}
   localOptions:
+  {{- range $i, $loc := $locs }}
+    {{- /*
+        Replica logic:
+        - Odd count  -> first 2 locations get 2 replicas
+        - Even count -> first 1 location gets 2 replicas
+    */ -}}
+    {{- $replicas := 1 }}
+    {{- if and $isOdd (lt $i 2) }}
+      {{- $replicas = 2 }}
+    {{- else if and (not $isOdd) (eq $i 0) }}
+      {{- $replicas = 2 }}
+    {{- end }}
     - autoscaling:
-        maxConcurrency: 0
         metric: cpu
-        minScale: 2
-        maxScale: 2
+        maxConcurrency: 0
+        minScale: {{ $replicas }}
+        maxScale: {{ $replicas }}
         scaleToZeroDelay: 300
         target: 100
       capacityAI: false
       debug: false
-      location: //location/{{ (index $locs 0).name }}
+      location: //location/{{ $loc.name }}
       suspend: false
       timeoutSeconds: 5
   {{- end }}
