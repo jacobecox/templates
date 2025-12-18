@@ -23,6 +23,10 @@ spec:
          value: {{ (index .Values.gvc.locations 0).name }}
        - name: BOOTSTRAP_FQDN
          value: "replica-0.{{ .Release.Name }}-pd.{{ (index .Values.gvc.locations 0).name }}.{{ .Values.gvc.name }}.cpln.local"
+       - name: SECOND_LOCATION
+         value: {{ (index .Values.gvc.locations 1).name }}
+       - name: SECONDARY_FQDN
+         value: "replica-0.{{ .Release.Name }}-pd.{{ (index .Values.gvc.locations 1).name }}.{{ .Values.gvc.name }}.cpln.local"
       volumes:
         - path: /data
           recoveryPolicy: retain
