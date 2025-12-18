@@ -19,9 +19,9 @@ Validation: Ensure minimum 3 locations are defined
 Validation: Ensure pdReplicas is 3, 5, or 7
 */}}
 {{- define "tidb.validatePdReplicas" -}}
-{{- $pdReplicas := .Values.gvc.pdReplicas -}}
+{{- $pdReplicas := int .Values.gvc.pdReplicas -}}
 {{- if not (or (eq $pdReplicas 3) (eq $pdReplicas 5) (eq $pdReplicas 7)) -}}
-{{- fail (printf "pdReplicas must be 3, 5, or 7. Found %d." (int $pdReplicas)) -}}
+{{- fail (printf "pdReplicas must be 3, 5, or 7. Found %d." $pdReplicas) -}}
 {{- end -}}
 {{- end -}}
 
@@ -29,7 +29,7 @@ Validation: Ensure pdReplicas is 3, 5, or 7
 Validation: Ensure pdReplicas=3 requires exactly 3 locations
 */}}
 {{- define "tidb.validatePdReplicasLocations" -}}
-{{- $pdReplicas := .Values.gvc.pdReplicas -}}
+{{- $pdReplicas := int .Values.gvc.pdReplicas -}}
 {{- $numLocs := len .Values.gvc.locations -}}
 {{- if and (eq $pdReplicas 3) (ne $numLocs 3) -}}
 {{- fail (printf "When pdReplicas is 3, exactly 3 locations are required. Found %d location(s)." $numLocs) -}}
