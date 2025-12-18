@@ -95,12 +95,7 @@ spec:
     {{- end }}
   firewallConfig:
     external:
-      {{- if .Values.exposeServer }}
-      inboundAllowCIDR:
-        - "0.0.0.0/0"
-      {{- else }}
       inboundAllowCIDR: []
-      {{- end }}
       inboundBlockedCIDR: []
       outboundAllowCIDR: []
       outboundAllowHostname: []

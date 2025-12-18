@@ -1,3 +1,6 @@
+{{- include "tidb.validateLocations" . -}}
+{{- include "tidb.validatePdReplicas" . -}}
+{{- include "tidb.validatePdReplicasLocations" . -}}
 kind: workload
 name: {{ .Release.Name }}-pd
 description: tidb placement driver
@@ -42,19 +45,21 @@ spec:
     timeoutSeconds: 5
   {{- $locs := .Values.gvc.locations }}
   {{- $numLocs := len $locs }}
-  {{- $isOdd := eq (mod $numLocs 2) 1 }}
+  {{- $pdReplicas := .Values.gvc.pdReplicas }}
+  {{- $baseReplicas := div $pdReplicas $numLocs }}
+  {{- $remainder := mod $pdReplicas $numLocs }}
   localOptions:
   {{- range $i, $loc := $locs }}
     {{- /*
-        Replica logic:
-        - Odd count  -> first 2 locations get 2 replicas
-        - Even count -> first 1 location gets 2 replicas
+        Replica distribution logic:
+        - Distributes pdReplicas evenly across locations
+        - Extra replicas (remainder) go to the first locations
+        Example with 3 locations:
+          pdReplicas=3: 1,1,1  |  pdReplicas=5: 2,2,1  |  pdReplicas=7: 3,2,2
     */ -}}
-    {{- $replicas := 1 }}
-    {{- if and $isOdd (lt $i 2) }}
-      {{- $replicas = 2 }}
-    {{- else if and (not $isOdd) (eq $i 0) }}
-      {{- $replicas = 2 }}
+    {{- $replicas := $baseReplicas }}
+    {{- if lt $i $remainder }}
+      {{- $replicas = add $baseReplicas 1 }}
     {{- end }}
     - autoscaling:
         metric: cpu

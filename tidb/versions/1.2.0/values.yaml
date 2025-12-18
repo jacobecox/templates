@@ -1,15 +1,14 @@
 gvc:
   name: tidb-gvc
   locations:
-  # Replica count will only affect storage (tikv) and server workloads
+  # Location's replica count will only affect storage (tikv) and server workloads
     - name: aws-us-east-2
       replicas: 1
     - name: aws-us-west-2
       replicas: 1
     - name: aws-us-east-1
       replicas: 1
-
-exposeServer: false # Set to true to expose TIDB status and metrics report
+  pdReplicas: 3 # options: 3, 5, 7
 
 resources:
   pd:
@@ -24,7 +23,7 @@ resources:
 
 autoCreateDatabase: # Enable to automatically create the database on initialization 
   enabled: true
-  database:
+  database: # Set database values
     rootPassword: myrootpw
     user: myuser
     password: mypw

@@ -6,9 +6,9 @@ TiDB is a distributed SQL database that provides horizontal scalability, strong 
 
 To configure your TiDB cluster across multiple locations, update the `gvc.locations` section in the `values.yaml` file:
 
-**Important:** For production deployments, it is recommended to run at least 3 replicas of both Placement Driver (PD) and TiKV, and at least 2 replicas of TiDB Server. The default location values suggest the optimal configuration for high resiliancy and minimal egress costs.
+The `pdReplicas` value controls how many Placement Driver replicas are distributed across your locations.
 
-- TiDB’s PD and TiKV components rely on Raft quorum for high availability. To maintain quorum if a location becomes unavailable, deploy the cluster across a minimum of three independent locations (for example, three regions or zones). This ensures the cluster remains healthy and can continue serving requests even if one location fails.
+**Important:** TiDB's PD and TiKV components rely on Raft quorum for high availability. Deploy across a minimum of 3 locations to maintain quorum if one location becomes unavailable.
 
 ### Resource Configuration
 
@@ -21,9 +21,15 @@ The default resource configuration in `values.yaml` is designed for **testing an
 
 ### Database Initialization
 
-To create a database with a user on initialization, configure the `database` section in your `values.yaml` file:
+Enable `autoCreateDatabase` in `values.yaml` to automatically create a database and user when installed. A client workload will be deployed to execute the database creation. Once it is finished, the workload can be destroyed.
 
-This will automatically create the specified database and user when the TiDB cluster is first deployed.
+| Parameter | Description |
+|-----------|-------------|
+| `enabled` | Set to `true` to enable automatic database creation |
+| `database.rootPassword` | Root password for the TiDB cluster |
+| `database.user` | Username for the new database user |
+| `database.password` | Password for the new database user |
+| `database.db` | Name of the database to create |
 
 ### Internal Access Configuration
 
@@ -43,11 +49,6 @@ To connect to your TiDB cluster using a MySQL client, use the following command:
 ```bash
 mysql -h <TIDB_SERVER_WORKLOAD_INTERNAL_NAME> -P 4000 -u <USER> -p
 ```
-
-Replace:
-- `<TIDB_SERVER_WORKLOAD_INTERNAL_NAME>` with the internal name of your TiDB server workload
-- `<USER>` with your database username
-- The `-p` flag will prompt you for the password
 
 **Note:** Depending on the number of replicas and locations configured, TiDB can take up to 5 minutes to become ready for connections.
 
