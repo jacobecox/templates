@@ -73,12 +73,15 @@ spec:
     external:
       inboundAllowCIDR: []
       inboundBlockedCIDR: []
-      outboundAllowCIDR: []
+      outboundAllowCIDR: {{ .Values.external_access.tikv_outboundAllowCIDR }}
       outboundAllowHostname: []
       outboundAllowPort: []
       outboundBlockedCIDR: []
     internal:
-      inboundAllowType: same-gvc
+      inboundAllowType: {{ .Values.internal_access.tikv.type }}
+      {{- if .Values.internal_access.tikv.workloads }}
+      inboundAllowWorkload: {{ .Values.internal_access.tikv.workloads | toYaml | nindent 8 }}
+      {{- end }}
       inboundAllowWorkload: []
   loadBalancer:
     direct:

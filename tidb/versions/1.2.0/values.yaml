@@ -35,8 +35,26 @@ volumeset:
   pd:
     capacity: 10 # initial capacity in GiB (minimum is 10)
 
+exposeServer: false # Set to true to expose TIDB server publicly
+
+external_access: # Set if client is outside the GVC or in another location
+  server_outboundAllowCIDR: []
+  tikv_outboundAllowCIDR: []
+  pd_outboundAllowCIDR: []
+
 internal_access:
-  type: same-org # options: same-gvc, same-org, workload-list
-  workloads:  # Note: can only be used if type is same-gvc or workload-list
-    #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
-    #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+  server:
+    type: same-gvc # options: same-gvc, same-org, workload-list
+    workloads:  # Note: can only be used if type is same-gvc or workload-list
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+  tikv:
+    type: same-gvc # options: same-gvc, same-org, workload-list
+    workloads:  # Note: can only be used if type is same-gvc or workload-list
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+  pd:
+    type: same-gvc # options: same-gvc, same-org, workload-list
+    workloads:  # Note: can only be used if type is same-gvc or workload-list
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+      #- //gvc/GVC_NAME/workload/WORKLOAD_NAME

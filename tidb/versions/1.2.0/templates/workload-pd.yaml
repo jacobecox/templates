@@ -78,12 +78,15 @@ spec:
     external:
       inboundAllowCIDR: []
       inboundBlockedCIDR: []
-      outboundAllowCIDR: []
+      outboundAllowCIDR: {{ .Values.external_access.pd_outboundAllowCIDR }}
       outboundAllowHostname: []
       outboundAllowPort: []
       outboundBlockedCIDR: []
     internal:
-      inboundAllowType: same-gvc
+      inboundAllowType: {{ .Values.internal_access.pd.type }}
+      {{- if .Values.internal_access.pd.workloads }}
+      inboundAllowWorkload: {{ .Values.internal_access.pd.workloads | toYaml | nindent 8 }}
+      {{- end }}
       inboundAllowWorkload: []
   loadBalancer:
     direct:
