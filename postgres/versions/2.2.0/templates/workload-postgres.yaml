@@ -1,6 +1,7 @@
 kind: workload
 name: {{ .Release.Name }}-pg-db
 gvc: {{ .Values.global.cpln.gvc }}
+description: Postgres Database
 tags:
   {{- include "pg.tags" . | nindent 2 }}
 spec:

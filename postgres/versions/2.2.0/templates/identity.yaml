@@ -4,3 +4,21 @@ name: {{ .Release.Name }}-pg-identity
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "pg.tags" . | nindent 4 }}
+{{- if .Values.backup.aws.enabled }}
+aws:
+  cloudAccountLink: //cloudaccount/{{ .Values.backup.aws.s3.cloudAccountName }}
+  policyRefs:
+    - cpln-connector
+      - aws::ReadOnlyAccess
+      - "{{ .Values.backup.aws.s3.policyName }}"
+{{- end }}
+{{- if .Values.backup.gcp.enabled }}
+gcp:
+  cloudAccountLink: //cloudaccount/{{ .Values.backup.gcp.gcs.cloudAccountName }}
+  bindings:
+    - resource: //storage.googleapis.com/projects
+      roles:
+        - roles/storage.objectAdmin
+  scopes:
+    - https://www.googleapis.com/auth/cloud-platform
+{{- end }}

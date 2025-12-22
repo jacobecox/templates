@@ -11,24 +11,24 @@ spec:
       cpu: {{ .Values.backup.resources.cpu }}
       memory: {{ .Values.backup.resources.memory }}
       env:
-        {{- if .Values.backup.aws.enabled }}
-          - name: AWS_REGION
-            value: cpln://secret/{{ .Release.Name }}-pg-backup-config.region
-          - name: BACKUP_PROVIDER
-            value: aws
-          - name: BACKUP_BUCKET
-            value: cpln://secret/{{ .Release.Name }}-pg-backup-config.bucket
-          - name: BACKUP_PREFIX
-            value: cpln://secret/{{ .Release.Name }}-pg-backup-config.prefix
-        {{- end }}
-        {{- if .Values.backup.gcp.enabled }}
-          - name: BACKUP_PROVIDER
-            value: gcp
-          - name: BACKUP_BUCKET
-            value: cpln://secret/{{ .Release.Name }}-pg-backup-config.bucket
-          - name: BACKUP_PREFIX
-            value: cpln://secret/{{ .Release.Name }}-pg-backup-config.prefix
-        {{- end }}
+      {{- if .Values.backup.aws.enabled }}
+        - name: AWS_REGION
+          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.region
+        - name: BACKUP_PROVIDER
+          value: aws
+        - name: BACKUP_BUCKET
+          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.bucket
+        - name: BACKUP_PREFIX
+          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.prefix
+      {{- end }}
+      {{- if .Values.backup.gcp.enabled }}
+        - name: BACKUP_PROVIDER
+          value: gcp
+        - name: BACKUP_BUCKET
+          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.bucket
+        - name: BACKUP_PREFIX
+          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.prefix
+      {{- end }}
         - name: PG_HOST
           value: {{ .Release.Name }}-pg-db.{{ .Values.global.cpln.gvc }}.cpln.local
         - name: PG_PASSWORD

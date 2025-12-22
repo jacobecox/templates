@@ -11,12 +11,12 @@ volumeset:
   capacity: 10 # initial capacity in GiB (minimum is 10)
 
 backup:
-  enabled: false
+  enabled: true
   schedule: "0 2 * * *"   # daily at 2am UTC
 
   resources:
     cpu: 250m
-    memory: 512Mi
+    memory: 256Mi
 
   aws:
     enabled: false
@@ -24,7 +24,7 @@ backup:
       bucket: pg-backup-bucket
       region: us-east-1
       cloudAccountName: pg-backup-cloudaccount
-      policyName: pg-backup-policy 
+      policyName: pg-backup-policy
       prefix: postgres/my-cluster # folder name where your backups will be stored
 
   gcp:
