@@ -14,13 +14,17 @@ backup:
   enabled: false
   schedule: "0 2 * * *"   # daily at 2am UTC
 
+  resources:
+    cpu: 250m
+    memory: 512Mi
+
   aws:
     enabled: false
     s3:
       bucket: pg-backups
       region: us-east-1
       cloudAccountName: pg-backup-cloudaccount
-      policyName: pg-backup-policy
+      policyName: pg-backup-policy 
       prefix: postgres/my-cluster
 
   gcp:

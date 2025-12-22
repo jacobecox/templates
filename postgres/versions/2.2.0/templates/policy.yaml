@@ -10,3 +10,4 @@ bindings:
 targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-pg-config
+  - //secret/{{ .Release.Name }}-pg-backup-config
