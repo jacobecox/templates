@@ -35,13 +35,7 @@ For ClickHouse to have access to a S3 bucket, ensure the following prerequisites
 
 1. Create your bucket. Update the value `bucket` to include its name and `region` to include its region.
 
-2. Run the following CLI command for guidance on setting up required AWS resources and creating a [Cloud Account](https://docs.controlplane.com/guides/create-cloud-account).
-
-**Important**: In the trust policy (step 4), add your role ARN in addition to the `controlplane-driver` entries. 
-
-```SH
-cpln cloudaccount create-aws --org ORG_NAME --how
-```
+2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account).
 
 3. Create a new policy with the following JSON and attach it to the role (replace `YOUR_BUCKET_NAME`)
 
@@ -76,6 +70,8 @@ cpln cloudaccount create-aws --org ORG_NAME --how
 
 For ClickHouse to have access to a GCS bucket, ensure the following prerequisites are completed in your GCP account before installing:
 
+**Note**: ClickHouse requires S3-compatible HMAC authentication. You must provide an interoperability HMAC key. A Cloud Account is not required.
+
 1. Create your bucket. Update the value `bucket` to include its name.
 
 2. Navigate to Settings > Interoperability and click `Create a key for a service account`.
@@ -85,8 +81,6 @@ For ClickHouse to have access to a GCS bucket, ensure the following prerequisite
 4. Under `Permissions`, assign the role `Storage Object Admin` and click `Done`.
 
 5. You will be provided a new HMAC key, update `accessKeyId` and `secretAccessKey` with the values provided.
-
-**Note**: ClickHouse requires S3-compatible HMAC authentication, so even when using a GCP Cloud Account identity, you must provide an interoperability HMAC key.
 
 To configure using the CLI:
 
