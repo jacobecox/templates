@@ -21,15 +21,15 @@ backup:
   aws:
     enabled: false
     s3:
-      bucket: pg-backups
+      bucket: pg-backup-bucket
       region: us-east-1
       cloudAccountName: pg-backup-cloudaccount
       policyName: pg-backup-policy 
-      prefix: postgres/my-cluster
+      prefix: postgres/my-cluster # folder name where your backups will be stored
 
   gcp:
     enabled: false
     gcs:
-      bucket: pg-backups
+      bucket: pg-backup-bucket
       cloudAccountName: pg-backup-cloudaccount
-      prefix: postgres/my-cluster
+      prefix: postgres/my-cluster # folder name where your backups will be stored

@@ -35,9 +35,9 @@ For ClickHouse to have access to a S3 bucket, ensure the following prerequisites
 
 1. Create your bucket. Update the value `bucket` to include its name and `region` to include its region.
 
-2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account).
+2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account). Update the value `cloudAccountName`.
 
-3. Create a new policy with the following JSON and attach it to the role (replace `YOUR_BUCKET_NAME`)
+3. Create a new policy with the following JSON (replace `YOUR_BUCKET_NAME`)
 
 ```JSON
 {
