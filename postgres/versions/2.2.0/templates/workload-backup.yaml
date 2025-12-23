@@ -13,21 +13,21 @@ spec:
       env:
       {{- if .Values.backup.aws.enabled }}
         - name: AWS_REGION
-          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.region
+          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.aws_region
         - name: BACKUP_PROVIDER
           value: aws
         - name: BACKUP_BUCKET
-          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.bucket
+          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.backup_bucket
         - name: BACKUP_PREFIX
-          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.prefix
+          value: {{ .Values.backup.aws.s3.prefix }}
       {{- end }}
       {{- if .Values.backup.gcp.enabled }}
         - name: BACKUP_PROVIDER
           value: gcp
         - name: BACKUP_BUCKET
-          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.bucket
+          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.backup_bucket
         - name: BACKUP_PREFIX
-          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.prefix
+          value: {{ .Values.backup.gcp.gcs.prefix }}
       {{- end }}
         - name: PG_HOST
           value: {{ .Release.Name }}-pg-db.{{ .Values.global.cpln.gvc }}.cpln.local
