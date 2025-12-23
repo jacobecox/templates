@@ -1,0 +1,14 @@
+apiVersion: v2
+name: postgres
+description: PostgreSQL 18 databasefor Control Plane
+
+type: application
+version: 1.0.0
+appVersion: "18"
+
+annotations:
+  created: "2025-12-23"
+  lastModified: "2025-12-23"
+  category: "database"
+  postgresVersion: "18"
+  createsGvc: false
