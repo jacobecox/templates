@@ -37,7 +37,7 @@ spec:
           value: '5432'
         - name: PG_USER
           value: cpln://secret/{{ .Release.Name }}-pg-config.username
-      image: /org/jacob-cox/image/backup-postgres:0.2 # UPDATE ME
+      image: /org/jacob-cox/image/backup-postgres:0.3 # UPDATE ME
       inheritEnv: false
   defaultOptions:
     autoscaling:

@@ -14,11 +14,11 @@ aws:
 {{- end }}
 {{- if .Values.backup.gcp.enabled }}
 gcp:
-  cloudAccountLink: //cloudaccount/{{ .Values.backup.gcp.gcs.cloudAccountName }}
   bindings:
-    - resource: //storage.googleapis.com/projects
+    - resource: //storage.googleapis.com/projects/_/buckets/{{ .Values.backup.gcp.gcs.bucket }}
       roles:
         - roles/storage.objectAdmin
+  cloudAccountLink: //cloudaccount/{{ .Values.backup.gcp.gcs.cloudAccountName }}
   scopes:
     - https://www.googleapis.com/auth/cloud-platform
 {{- end }}
