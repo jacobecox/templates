@@ -1,6 +1,8 @@
 resources:
-  cpu: 500m
-  memory: 1024Mi
+  minCpu: 200m
+  maxCpu: 500m
+  minMemory: 128Mi
+  maxMemory: 256Mi
 
 config:
   username: username
@@ -15,8 +17,8 @@ backup:
   schedule: "0 2 * * *"   # daily at 2am UTC
 
   resources:
-    cpu: 250m
-    memory: 256Mi
+    cpu: 100m
+    memory: 128Mi
 
   aws:
     enabled: false

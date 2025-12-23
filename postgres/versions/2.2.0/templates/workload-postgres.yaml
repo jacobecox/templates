@@ -20,8 +20,10 @@ spec:
           value: 'cpln://secret/{{ .Release.Name }}-pg-config.username'
       image: 'postgres:17'
       inheritEnv: false
-      cpu: {{ .Values.resources.cpu }}
-      memory: {{ .Values.resources.memory }}
+      minCpu: {{ .Values.resources.minCpu }}
+      minMemory: {{ .Values.resources.minMemory }}
+      cpu: {{ .Values.resources.maxCpu }}
+      memory: {{ .Values.resources.maxMemory }}
       ports:
         - number: 5432
           protocol: tcp
