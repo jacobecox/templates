@@ -13,11 +13,11 @@ spec:
       env:
       {{- if .Values.backup.aws.enabled }}
         - name: AWS_REGION
-          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.aws_region
+          value: cpln://secret/{{ .Release.Name }}-pg-config.aws_region
         - name: BACKUP_PROVIDER
           value: aws
         - name: BACKUP_BUCKET
-          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.backup_bucket
+          value: cpln://secret/{{ .Release.Name }}-pg-config.backup_bucket
         - name: BACKUP_PREFIX
           value: {{ .Values.backup.aws.s3.prefix }}
       {{- end }}
@@ -25,7 +25,7 @@ spec:
         - name: BACKUP_PROVIDER
           value: gcp
         - name: BACKUP_BUCKET
-          value: cpln://secret/{{ .Release.Name }}-pg-backup-config.backup_bucket
+          value: cpln://secret/{{ .Release.Name }}-pg-config.backup_bucket
         - name: BACKUP_PREFIX
           value: {{ .Values.backup.gcp.gcs.prefix }}
       {{- end }}
