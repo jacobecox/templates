@@ -1,0 +1,53 @@
+{{ if .Values.autoCreateDatabase.enabled }}
+---
+kind: workload
+name: {{ .Release.Name }}-tidb-db-init
+description: TiDB database initialization
+tags: {{- include "tidb.tags" . | nindent 4 }}
+spec:
+  type: standard
+  containers:
+    - name: tidb-db-init
+      image: mysql:8
+      command: "/bin/bash"
+      args:
+        - /scripts/db-init.sh
+      volumes:
+        - path: /scripts/db-init.sh
+          uri: cpln://secret/{{ .Release.Name }}-tidb-db-init.payload
+      env:
+        - name: TIDB_HOST
+          value: {{ .Release.Name }}-server.{{ .Values.gvc.name }}.cpln.local
+        - name: TIDB_PORT
+          value: "4000"
+        - name: ROOT_PW
+          value: cpln://secret/{{ .Release.Name }}-tidb-user.rootPassword
+        - name: APP_DB
+          value: cpln://secret/{{ .Release.Name }}-tidb-user.db
+        - name: APP_USER
+          value: cpln://secret/{{ .Release.Name }}-tidb-user.user
+        - name: APP_PW
+          value: cpln://secret/{{ .Release.Name }}-tidb-user.password
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-tidb-identity
+  defaultOptions:
+    autoscaling:
+      metric: disabled
+      minScale: 1
+      maxScale: 1
+    timeoutSeconds: 10
+  localOptions:
+{{- range $i, $location := .Values.gvc.locations }}
+  - location: //location/{{ $location.name }}
+    suspend: {{ if eq $i 0 }}false{{ else }}true{{ end }}
+{{- end }}
+  firewallConfig:
+    external:
+      outboundAllowCIDR: []
+    internal:
+      inboundAllowType: same-gvc
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: false
+{{ end }}
