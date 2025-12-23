@@ -1,6 +1,7 @@
 kind: volumeset
 name: {{ .Release.Name }}-pg-vs
 gvc: {{ .Values.global.cpln.gvc }}
+description: Postgres volumeset
 tags:
   {{- include "pg.tags" . | nindent 4 }}
 spec:

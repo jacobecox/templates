@@ -54,3 +54,5 @@ For the cron job to have access to a GCS bucket, ensure the following prerequisi
 1. Create your bucket. Update the value `bucket` to include its name.
 
 2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account). Update the value `cloudAccountName`.
+
+**Important**: You must add the `Storage Admin` role when creating your GCP service account.

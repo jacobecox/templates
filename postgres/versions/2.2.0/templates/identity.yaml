@@ -1,6 +1,7 @@
 {{- include "pg.validateBackupConfig" . -}}
 kind: identity
 name: {{ .Release.Name }}-pg-identity
+description: Postgres identity
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "pg.tags" . | nindent 4 }}
