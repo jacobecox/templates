@@ -9,8 +9,8 @@ aws:
   cloudAccountLink: //cloudaccount/{{ .Values.backup.aws.s3.cloudAccountName }}
   policyRefs:
     - cpln-connector
-      - aws::ReadOnlyAccess
-      - "{{ .Values.backup.aws.s3.policyName }}"
+    - aws::ReadOnlyAccess
+    - "{{ .Values.backup.aws.s3.policyName }}"
 {{- end }}
 {{- if .Values.backup.gcp.enabled }}
 gcp:

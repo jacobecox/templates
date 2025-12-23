@@ -11,7 +11,7 @@ volumeset:
   capacity: 10 # initial capacity in GiB (minimum is 10)
 
 backup:
-  enabled: true
+  enabled: false
   schedule: "0 2 * * *"   # daily at 2am UTC
 
   resources:
