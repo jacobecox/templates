@@ -1,5 +1,6 @@
 kind: policy
-name: {{ include "mysql.name" . }}
+name: {{ .Release.Name }}-mysql-policy
+description: MySQL policy
 tags:
   {{- include "mysql.tags" . | nindent 4 }}
 bindings:

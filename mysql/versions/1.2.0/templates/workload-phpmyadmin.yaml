@@ -1,6 +1,7 @@
 {{- if .Values.enablePhpMyAdmin }}
 kind: workload
-name: {{ include "mysql.name" . }}-phpmyadmin
+name: {{ .Release.Name }}-mysql-phpmyadmin
+description: Admin interface for MySQL database
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "mysql.tags" . | nindent 2 }}

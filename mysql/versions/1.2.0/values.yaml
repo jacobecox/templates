@@ -15,4 +15,4 @@ config:
 volumeset:
   capacity: 10 # initial capacity in GiB (minimum is 10)
 
-enablePhpMyAdmin: false
+enablePhpMyAdmin: false # set to true to enable PhpMyAdmin as an admin interface

@@ -1,5 +1,6 @@
 kind: identity
-name: {{ include "mysql.name" . }}
+name: {{ .Release.Name }}-mysql-identity
+description: MySQL identity
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "mysql.tags" . | nindent 4 }}
