@@ -1,6 +1,6 @@
 apiVersion: v2
 name: postgres
-description: PostgreSQL 18 databasefor Control Plane
+description: PostgreSQL database app for Control Plane
 
 type: application
 version: 1.0.0

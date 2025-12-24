@@ -37,7 +37,7 @@ spec:
           value: '5432'
         - name: PG_USER
           value: cpln://secret/{{ .Release.Name }}-pg-config.username
-      image: controlplanecorporation/pg-backup:1.0
+      image: controlplanecorporation/pg-backup:17.1.0
       inheritEnv: false
   defaultOptions:
     autoscaling:
