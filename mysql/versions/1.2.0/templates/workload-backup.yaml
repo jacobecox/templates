@@ -1,3 +1,4 @@
+{{- include "mysql.validateBackupConfig" . -}}
 {{- if .Values.backup.enabled }}
 kind: workload
 name: {{ .Release.Name }}-mysql-backup
@@ -37,7 +38,7 @@ spec:
           value: '3306'
         - name: MYSQL_USER
           value: cpln://secret/{{ .Release.Name }}-mysql-config.username
-      image: /org/jacob-cox/image/mysql-backup:0.1 # CHANGE ME
+      image: {{ .Values.backup.image }}
       inheritEnv: false
   defaultOptions:
     autoscaling:

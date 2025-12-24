@@ -18,7 +18,7 @@ spec:
           value: 'cpln://secret/{{ .Release.Name }}-mysql-config.rootPassword'
         - name: MYSQL_USER
           value: 'cpln://secret/{{ .Release.Name }}-mysql-config.user'
-      image: 'mysql:9'
+      image: {{ .Values.image }}
       inheritEnv: false
       minCpu: {{ .Values.resources.minCpu }}
       minMemory: {{ .Values.resources.minMemory }}
@@ -28,17 +28,6 @@ spec:
         - number: 3306
           protocol: tcp
       readinessProbe:
-        exec:
-          command:
-            - sh
-            - '-c'
-            - 'mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}'
-        failureThreshold: 10
-        initialDelaySeconds: 17
-        periodSeconds: 5
-        successThreshold: 1
-        timeoutSeconds: 3
-      livenessProbe:
         exec:
           command:
             - sh

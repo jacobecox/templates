@@ -7,7 +7,7 @@ bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "mysql.name" . }}
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-mysql-identity
 targetKind: secret
 targetLinks:
-  - //secret/{{ include "mysql.secretName" . }}
+  - //secret/{{ .Release.Name }}-mysql-config
