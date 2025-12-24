@@ -1,3 +1,5 @@
+image: postgres:18  # versions before postgres:17 are compatible but do not support backup feature
+
 resources:
   minCpu: 200m
   maxCpu: 500m
@@ -12,8 +14,9 @@ config:
 volumeset:
   capacity: 10 # initial capacity in GiB (minimum is 10)
 
-backup:
-  enabled: false
+backup: # compatible with Postgres 17+
+  enabled: true
+  image: controlplanecorporation/pg-backup:18.1.0 # tag 18.1.0 = Postgres 18, 17.1.0 = Postgres 17
   schedule: "0 2 * * *"   # daily at 2am UTC
 
   resources:
@@ -21,7 +24,7 @@ backup:
     memory: 128Mi
 
   aws:
-    enabled: false
+    enabled: true
     s3:
       bucket: pg-backup-bucket
       region: us-east-1
