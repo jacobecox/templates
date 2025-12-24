@@ -47,7 +47,7 @@ spec:
       minScale: 1
       scaleToZeroDelay: 300
       target: 95
-    capacityAI: true
+    capacityAI: false
     debug: false
     suspend: false
     timeoutSeconds: 5
