@@ -41,7 +41,7 @@ spec:
       volumes:
         - path: /var/lib/mysql
           recoveryPolicy: retain
-          uri: 'cpln://volumeset/{{ .Release.Name }}-mysql-volumeset'
+          uri: 'cpln://volumeset/{{ .Release.Name }}-mysql-vs'
   defaultOptions:
     autoscaling:
       metric: disabled

@@ -1,18 +1,18 @@
 image: mysql:9 # versions before mysql:9 are compatible but do not support backup feature
 
 resources:
-  minCpu: 200m
-  maxCpu: 500m
+  minCpu: 100m
+  maxCpu: 400m
   minMemory: 128Mi
-  maxMemory: 256Mi
+  maxMemory: 512Mi
 
 timeoutSeconds: 15
 
 config:
-  db: db
-  rootPassword: root-pw
-  user: user
-  password: pw
+  db: test
+  rootPassword: root-password
+  user: username
+  password: password
 
 internalAccess: # Sets the internal firewall scope - if set to none, replicas will not be able to reach each other
   type: same-gvc # options: none, same-gvc, same-org, workload-list
@@ -26,8 +26,8 @@ volumeset:
 enablePhpMyAdmin: false # set to true to enable PhpMyAdmin as an admin interface
 
 backup: # compatible with MySQL 9+
-  enabled: false
-  image: controlplanecorporation/mysql-backup:0.1 # tag 0.1 = MySQL 9
+  enabled: true
+  image: /org/jacob-cox/image/mysql-backup:0.1 #CHANGE ME # tag 0.1 = MySQL 9 compatible
   schedule: "0 2 * * *"   # daily at 2am UTC
 
   resources:
@@ -37,15 +37,15 @@ backup: # compatible with MySQL 9+
   aws:
     enabled: false
     s3:
-      bucket: pg-backup-bucket
+      bucket: mysql-backup-bucket
       region: us-east-1
-      cloudAccountName: pg-backup-cloudaccount
-      policyName: pg-backup-policy
-      prefix: postgres/my-cluster # folder name where your backups will be stored
+      cloudAccountName: mysql-backup-cloudaccount
+      policyName: mysql-backup-policy
+      prefix: mysql/my-cluster # folder name where your backups will be stored
 
   gcp:
-    enabled: false
+    enabled: true
     gcs:
-      bucket: pg-backup-bucket
-      cloudAccountName: pg-backup-cloudaccount
-      prefix: postgres/my-cluster # folder name where your backups will be stored
+      bucket: mysql-backup-bucket
+      cloudAccountName: mysql-backup-cloudaccount
+      prefix: mysql/my-cluster # folder name where your backups will be stored

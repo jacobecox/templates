@@ -37,7 +37,7 @@ spec:
         - name: MYSQL_PORT
           value: '3306'
         - name: MYSQL_USER
-          value: cpln://secret/{{ .Release.Name }}-mysql-config.username
+          value: cpln://secret/{{ .Release.Name }}-mysql-config.user
       image: {{ .Values.backup.image }}
       inheritEnv: false
   defaultOptions:
