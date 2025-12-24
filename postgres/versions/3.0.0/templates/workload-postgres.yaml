@@ -1,5 +1,5 @@
 kind: workload
-name: {{ .Release.Name }}-pg-db
+name: {{ .Release.Name }}-postgres
 gvc: {{ .Values.global.cpln.gvc }}
 description: Postgres Database
 tags:
@@ -30,6 +30,17 @@ spec:
       volumes:
         - path: /var/lib/postgresql/data
           uri: 'cpln://volumeset/{{ .Release.Name }}-pg-vs'
+      readinessProbe:
+        exec:
+          command:
+            - sh
+            - '-c'
+            - 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'
+        failureThreshold: 10
+        initialDelaySeconds: 17
+        periodSeconds: 5
+        successThreshold: 1
+        timeoutSeconds: 3
   defaultOptions:
     autoscaling:
       metric: disabled
@@ -41,4 +52,8 @@ spec:
       outboundAllowCIDR:
         - 0.0.0.0/0
     internal:
-      inboundAllowType: same-gvc
+      inboundAllowType: {{ .Values.internalAccess.type }}
+      {{- if .Values.internalAccess.workloads }}
+      inboundAllowWorkload: {{ .Values.internalAccess.workloads | toYaml | nindent 8 }}
+      {{- end }}
+      inboundAllowWorkload: []

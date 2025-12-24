@@ -14,6 +14,12 @@ config:
 volumeset:
   capacity: 10 # initial capacity in GiB (minimum is 10)
 
+internalAccess: # Sets the internal firewall scope - if set to none, replicas will not be able to reach each other
+  type: same-gvc # options: none, same-gvc, same-org, workload-list
+  workloads:  # Note: can only be used if type is same-gvc or workload-list
+    #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+    #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+
 backup: # compatible with Postgres 17+
   enabled: false
   image: controlplanecorporation/pg-backup:18.1.0 # tag 18.1.0 = Postgres 18, 17.1.0 = Postgres 17
