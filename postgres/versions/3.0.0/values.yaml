@@ -15,7 +15,7 @@ volumeset:
   capacity: 10 # initial capacity in GiB (minimum is 10)
 
 backup: # compatible with Postgres 17+
-  enabled: true
+  enabled: false
   image: controlplanecorporation/pg-backup:18.1.0 # tag 18.1.0 = Postgres 18, 17.1.0 = Postgres 17
   schedule: "0 2 * * *"   # daily at 2am UTC
 
@@ -24,7 +24,7 @@ backup: # compatible with Postgres 17+
     memory: 128Mi
 
   aws:
-    enabled: true
+    enabled: false
     s3:
       bucket: pg-backup-bucket
       region: us-east-1
