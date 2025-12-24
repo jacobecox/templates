@@ -1,0 +1,67 @@
+kind: workload
+name: {{ include "mysql.name" . }}
+gvc: {{ .Values.global.cpln.gvc }}
+tags:
+  {{- include "mysql.tags" . | nindent 2 }}
+spec:
+  type: stateful
+  identityLink: //identity/{{ include "mysql.name" . }}
+  containers:
+    - name: mysql
+      env:
+        - name: MYSQL_DATABASE
+          value: 'cpln://secret/{{ include "mysql.secretName" . }}.MYSQL_DATABASE'
+        - name: MYSQL_PASSWORD
+          value: 'cpln://secret/{{ include "mysql.secretName" . }}.MYSQL_PASSWORD'
+        - name: MYSQL_ROOT_PASSWORD
+          value: 'cpln://secret/{{ include "mysql.secretName" . }}.MYSQL_ROOT_PASSWORD'
+        - name: MYSQL_USER
+          value: 'cpln://secret/{{ include "mysql.secretName" . }}.MYSQL_USER'
+      image: 'mysql:9'
+      inheritEnv: false
+      minCpu: {{ .Values.resources.minCpu }}
+      minMemory: {{ .Values.resources.minMemory }}
+      cpu: {{ .Values.resources.maxCpu }}
+      memory: {{ .Values.resources.maxMemory }}
+      ports:
+        - number: 3306
+          protocol: tcp
+      readinessProbe:
+        exec:
+          command:
+            - sh
+            - '-c'
+            - 'mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}'
+        failureThreshold: 10
+        initialDelaySeconds: 17
+        periodSeconds: 5
+        successThreshold: 1
+        timeoutSeconds: 3
+      livenessProbe:
+        exec:
+          command:
+            - sh
+            - '-c'
+            - 'mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}'
+        failureThreshold: 10
+        initialDelaySeconds: 17
+        periodSeconds: 5
+        successThreshold: 1
+        timeoutSeconds: 3
+      volumes:
+        - path: /var/lib/mysql
+          recoveryPolicy: retain
+          uri: 'cpln://volumeset/{{ include "mysql.name" . }}'
+  defaultOptions:
+    autoscaling:
+      metric: disabled
+      minScale: 1
+      maxScale: 1
+    capacityAI: false
+    timeoutSeconds: {{ .Values.timeoutSeconds | int }}
+  firewallConfig:
+    external:
+      outboundAllowCIDR:
+        - 0.0.0.0/0
+    internal:
+      inboundAllowType: same-gvc
