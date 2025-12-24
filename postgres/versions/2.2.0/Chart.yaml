@@ -1,6 +1,6 @@
 apiVersion: v2
 name: postgres
-description: PostgreSQL app for Control Plane
+description: PostgreSQL 17 database for Control Plane
 
 type: application
 version: 2.2.0
