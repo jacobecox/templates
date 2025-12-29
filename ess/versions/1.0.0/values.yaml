@@ -1,6 +1,6 @@
 workload:
   name: ess
-  image: ghcr.io/controlplane-com/cpln-build/external-secret-syncer:1.2.3
+  image: ghcr.io/controlplane-com/cpln-build/external-secret-syncer:1.2.4
   resources:
     cpu: 200m
     memory: 256Mi
