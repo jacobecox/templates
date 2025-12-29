@@ -26,8 +26,8 @@ volumeset:
 enablePhpMyAdmin: false # set to true to enable PhpMyAdmin as an admin interface
 
 backup: # compatible with MySQL 9+
-  enabled: true
-  image: /org/jacob-cox/image/mysql-backup:0.1 #CHANGE ME # tag 0.1 = MySQL 9 compatible
+  enabled: false
+  image: controlplanecorporation/mysql-backup:9.1 # tag 9.1 = MySQL 9 compatible
   schedule: "0 2 * * *"   # daily at 2am UTC
 
   resources:
@@ -44,7 +44,7 @@ backup: # compatible with MySQL 9+
       prefix: mysql/my-cluster # folder name where your backups will be stored
 
   gcp:
-    enabled: true
+    enabled: false
     gcs:
       bucket: mysql-backup-bucket
       cloudAccountName: mysql-backup-cloudaccount
