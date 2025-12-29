@@ -1,4 +1,4 @@
-image: mongo:6.0
+image: mongo:8.2.3
 
 resources:
   cpu: 500m
