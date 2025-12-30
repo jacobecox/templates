@@ -30,7 +30,7 @@ spec:
           value: {{ .Values.backup.gcp.gcs.prefix }}
       {{- end }}
         - name: PG_HOST
-          value: {{ .Release.Name }}-pg-db.{{ .Values.global.cpln.gvc }}.cpln.local
+          value: {{ .Release.Name }}-postgres.{{ .Values.global.cpln.gvc }}.cpln.local
         - name: PG_PASSWORD
           value: cpln://secret/{{ .Release.Name }}-pg-config.password
         - name: PG_PORT

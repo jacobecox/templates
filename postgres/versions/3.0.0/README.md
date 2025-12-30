@@ -56,3 +56,17 @@ For the cron job to have access to a GCS bucket, ensure the following prerequisi
 2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account). Update the value `cloudAccountName`.
 
 **Important**: You must add the `Storage Admin` role when creating your GCP service account.
+
+### Restoring Backup
+
+Run the following command with password from a client with access to the bucket (replace `aws s3` with `gsutil` for GCS).
+```SH
+aws s3 cp gs://BUCKET_NAME/PREFIX/BACKUP_FILE.gz - \
+  | gunzip \
+  | sed '/^SET @@GLOBAL.GTID_PURGED/d' \
+  | psql \
+      --host=WORKLOAD_NAME \
+      --port=5432 \
+      --username=USERNAME \
+      --dbname=postgres
+```
