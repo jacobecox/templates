@@ -32,6 +32,8 @@ spec:
       {{- end }}
         - name: MYSQL_HOST
           value: {{ .Release.Name }}-mysql.{{ .Values.global.cpln.gvc }}.cpln.local
+        - name: MYSQL_ROOT_PASSWORD
+          value: cpln://secret/{{ .Release.Name }}-mysql-config.rootPassword
         - name: MYSQL_PASSWORD
           value: cpln://secret/{{ .Release.Name }}-mysql-config.password
         - name: MYSQL_PORT
