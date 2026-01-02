@@ -1,6 +1,6 @@
 buckets:
   cloudAccountName: my-s3-cloud-account
-  policyName: my-s3-policy # Custom policy name to access S3 bucket
+  policyName: manticore-policy  # Custom policy name to access S3 bucket
   awsRegion: us-east-1
   dataset: addresses # Dataset name
   sourceBucket: address-source-csv # S3 bucket where the CSV files are stored

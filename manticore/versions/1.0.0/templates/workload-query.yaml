@@ -15,11 +15,11 @@ spec:
         - name: DELTA_ARTIFACT_PREFIX
           value: {{ .Values.buckets.deltaArtifactPrefix }}
         - name: DELTA_INDEX_VERSION
-          value: 000-000
+          value: 20260102-212229
         - name: MAIN_ARTIFACT_PREFIX
           value: {{ .Values.buckets.mainArtifactPrefix }}
         - name: MAIN_INDEX_VERSION
-          value: 000-000
+          value: 20260102-212229
       image: {{ .Values.query.image }}
       inheritEnv: false
       memory: {{ .Values.query.resources.memory }}
