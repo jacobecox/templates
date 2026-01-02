@@ -1,0 +1,57 @@
+buckets:
+  cloudAccountName: my-s3-cloud-account
+  policyName: manticore-policy  # Custom policy name to access S3 bucket
+  awsRegion: us-east-1
+  dataset: addresses # Dataset name
+  sourceBucket: address-source-csv # S3 bucket where the CSV files are stored
+  artifactBucket: manticore-index-artifacts # S3 bucket where the artifacts will be fetched from
+  deltaArtifactPrefix: builds/delta # Prefix for the delta artifacts in the S3 bucket
+  mainArtifactPrefix: builds/main # Prefix for the main artifacts in the S3 bucket
+
+ingester:
+  main:
+    image: controlplanecorporation/manticore-ingester:1.0
+    csvPath: main/addresses_main.csv # Path to the main CSV file in the S3 bucket
+    resources:
+      cpu: 4
+      memory: 8Gi
+    jobSchedule: 0 0 1 * * # Midnight UTC on the 1st of every month
+  delta:
+    image: controlplanecorporation/manticore-ingester:1.0
+    csvPath: delta/addresses_delta.csv # Path to the delta CSV file in the S3 bucket
+    resources:
+      cpu: 4
+      memory: 8Gi
+    jobSchedule: 0 * * * * # Every hour on the hour
+
+query:
+  image: controlplanecorporation/manticore-query:1.0
+  resources:
+    cpu: 4
+    memory: 8Gi
+  autoscaling:
+    maxScale: 4
+    minScale: 2
+    target: 100
+    scaleToZeroDelay: 300
+    metric: rps
+  rolloutOptions:
+    maxSurgeReplicas: 25%
+    maxUnavailableReplicas: '0'
+    minReadySeconds: 10
+    scalingPolicy: OrderedReady
+    terminationGracePeriodSeconds: 90
+  firewall:
+    external:
+      inboundAllowCIDR: []
+      outboundAllowHostname:
+        - s3.us-east-1.amazonaws.com # S3 endpoints for region us-east-1
+        - s3.amazonaws.com
+      outboundAllowPort:
+        - number: 443
+          protocol: tcp
+    internalAccess: # Sets the internal firewall scope - if set to none, replicas will not be able to reach each other
+      type: same-gvc # options: none, same-gvc, same-org, workload-list
+      workloads:  # Note: can only be used if type is same-gvc or workload-list
+        #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+        #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
