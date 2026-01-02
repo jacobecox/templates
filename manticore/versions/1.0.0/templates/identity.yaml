@@ -3,8 +3,8 @@ name: {{ .Release.Name }}-manticore-identity
 description: Manticore identity
 tags: {{- include "manticore.tags" . | nindent 4 }}
 aws:
-  cloudAccountLink: //cloudaccount/{{ .Values.bucket.cloudAccountName }}
+  cloudAccountLink: //cloudaccount/{{ .Values.buckets.cloudAccountName }}
   policyRefs:
     - aws::ReadOnlyAccess
     - cpln-connector
-    - {{ .Values.bucket.policyName }}
+    - {{ .Values.buckets.policyName }}

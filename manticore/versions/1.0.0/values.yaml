@@ -10,14 +10,14 @@ buckets:
 
 ingester:
   main:
-    image: /org/jacob-cox/image/manticore-ingester:1.6
+    image: controlplanecorporation/manticore-ingester:1.0
     csvPath: main/addresses_main.csv # Path to the main CSV file in the S3 bucket
     resources:
       cpu: 4
       memory: 8Gi
     jobSchedule: 0 0 1 * * # Midnight UTC on the 1st of every month
   delta:
-    image: /org/jacob-cox/image/manticore-ingester:1.6
+    image: controlplanecorporation/manticore-ingester:1.0
     csvPath: delta/addresses_delta.csv # Path to the delta CSV file in the S3 bucket
     resources:
       cpu: 4
@@ -25,7 +25,7 @@ ingester:
     jobSchedule: 0 * * * * # Every hour on the hour
 
 query:
-  image: /org/jacob-cox/image/manticore:0.6
+  image: controlplanecorporation/manticore-query:1.0
   resources:
     cpu: 4
     memory: 8Gi

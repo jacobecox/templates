@@ -6,7 +6,7 @@ spec:
   type: standard
   containers:
     - name: manticore
-      cpu: {{ .Values.query.resources.cpu }}
+      cpu: '{{ .Values.query.resources.cpu }}'
       env:
         - name: ARTIFACT_BUCKET
           value: {{ .Values.buckets.artifactBucket }}
@@ -15,11 +15,11 @@ spec:
         - name: DELTA_ARTIFACT_PREFIX
           value: {{ .Values.buckets.deltaArtifactPrefix }}
         - name: DELTA_INDEX_VERSION
-          value: null
+          value: 000-000
         - name: MAIN_ARTIFACT_PREFIX
           value: {{ .Values.buckets.mainArtifactPrefix }}
         - name: MAIN_INDEX_VERSION
-          value: null
+          value: 000-000
       image: {{ .Values.query.image }}
       inheritEnv: false
       memory: {{ .Values.query.resources.memory }}
@@ -60,8 +60,10 @@ spec:
       outboundAllowHostname: {{ .Values.query.firewall.external.outboundAllowHostname | toYaml | nindent 8 }}
       outboundAllowPort: {{ .Values.query.firewall.external.outboundAllowPort | toYaml | nindent 8 }}
     internal:
-      inboundAllowType: {{ .Values.query.firewall.internal.inboundAllowType }}
-      inboundAllowWorkload: {{ .Values.query.firewall.internal.inboundAllowWorkload | toYaml | nindent 8 }}
+      inboundAllowType: {{ .Values.query.firewall.internalAccess.type }}
+      {{- if .Values.query.firewall.internalAccess.workloads }}
+      inboundAllowWorkload: {{ .Values.query.firewall.internalAccess.workloads | toYaml | nindent 8 }}
+      {{- end }}
   identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-manticore-identity
   loadBalancer:
     direct:
@@ -70,7 +72,7 @@ spec:
     replicaDirect: false
   rolloutOptions:
     maxSurgeReplicas: {{ .Values.query.rolloutOptions.maxSurgeReplicas }}
-    maxUnavailableReplicas: {{ .Values.query.rolloutOptions.maxUnavailableReplicas }}
+    maxUnavailableReplicas: '{{ .Values.query.rolloutOptions.maxUnavailableReplicas }}'
     minReadySeconds: {{ .Values.query.rolloutOptions.minReadySeconds }}
     scalingPolicy: {{ .Values.query.rolloutOptions.scalingPolicy }}
     terminationGracePeriodSeconds: {{ .Values.query.rolloutOptions.terminationGracePeriodSeconds }}

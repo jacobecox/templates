@@ -6,7 +6,7 @@ spec:
   type: cron
   containers:
     - name: manticore-ingester
-      cpu: {{ .Values.ingester.main.resources.cpu }}
+      cpu: '{{ .Values.ingester.main.resources.cpu }}'
       env:
         - name: ARTIFACT_BUCKET
           value: {{ .Values.buckets.artifactBucket }}
