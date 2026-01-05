@@ -10,6 +10,7 @@ bindings:
 targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-manticore-conf
+  - //secret/{{ .Release.Name }}-manticore-startup
 targetQuery:
   kind: secret
   fetch: items

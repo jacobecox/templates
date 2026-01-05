@@ -7,6 +7,7 @@ buckets:
 
 manticore:
   image: manticoresearch/manticore:6.3.2
+  clusterName: manticore
   resources:
     cpu: 4
     memory: 8Gi
@@ -23,7 +24,7 @@ manticore:
     maxUnavailableReplicas: '0'
     minReadySeconds: 10
     scalingPolicy: OrderedReady
-    terminationGracePeriodSeconds: 90
+    terminationGracePeriodSeconds: 180
   firewall:
     external:
       inboundAllowCIDR: []
