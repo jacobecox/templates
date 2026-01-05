@@ -1,6 +1,6 @@
 kind: policy
 name: {{ .Release.Name }}-manticore-config-policy
-description: Configuration policy for ingester and query
+description: Configuration policy for manticore
 tags: {{- include "manticore.tags" . | nindent 4 }}
 bindings:
   - permissions:
@@ -9,25 +9,10 @@ bindings:
       - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-manticore-identity
 targetKind: secret
 targetLinks:
-  - //secret/{{ .Release.Name }}-ingester-conf
-  - //secret/{{ .Release.Name }}-query-conf
+  - //secret/{{ .Release.Name }}-manticore-conf
 targetQuery:
   kind: secret
   fetch: items
   spec:
     match: all
     terms: []
-
----
-kind: policy
-name: {{ .Release.Name }}-manticore-workload-policy
-description: Policy for ingester to update query workload
-tags: {{- include "manticore.tags" . | nindent 4 }}
-bindings:
-  - permissions:
-      - edit
-    principalLinks:
-      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-manticore-identity
-targetKind: workload
-targetLinks:
-  - //gvc/{{ .Values.global.cpln.gvc }}/workload/{{ .Release.Name }}-manticore

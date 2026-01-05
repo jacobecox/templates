@@ -1,0 +1,69 @@
+kind: workload
+name: {{ .Release.Name }}-manticore
+description: Manticore search
+tags: {{- include "manticore.tags" . | nindent 4 }}
+spec:
+  type: standard
+  containers:
+    - name: manticore
+      cpu: '{{ .Values.manticore.resources.cpu }}'
+      env:
+        - name: AWS_REGION
+          value: {{ .Values.buckets.awsRegion }}
+      image: {{ .Values.manticore.image }}
+      inheritEnv: false
+      memory: {{ .Values.manticore.resources.memory }}
+      ports:
+        - number: 9306
+          protocol: tcp
+        - number: 9308
+          protocol: http
+      readinessProbe:
+        failureThreshold: 3
+        initialDelaySeconds: 15
+        periodSeconds: 5
+        successThreshold: 1
+        tcpSocket:
+          port: 9306
+        timeoutSeconds: 1
+      volumes:
+        - path: /var/lib/manticore
+          recoveryPolicy: retain
+          uri: cpln://volumeset/{{ .Release.Name }}-manticore-vs
+        - path: /etc/manticore/manticore.conf
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Release.Name }}-manticore-conf.payload
+  defaultOptions:
+    autoscaling:
+      maxScale: {{ .Values.manticore.autoscaling.maxScale }}
+      metric: {{ .Values.manticore.autoscaling.metric }}
+      minScale: {{ .Values.manticore.autoscaling.minScale }}
+      scaleToZeroDelay: {{ .Values.manticore.autoscaling.scaleToZeroDelay }}
+      target: {{ .Values.manticore.autoscaling.target }}
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR: []
+      outboundAllowHostname: {{ .Values.manticore.firewall.external.outboundAllowHostname | toYaml | nindent 8 }}
+      outboundAllowPort: {{ .Values.manticore.firewall.external.outboundAllowPort | toYaml | nindent 8 }}
+    internal:
+      inboundAllowType: {{ .Values.manticore.firewall.internalAccess.type }}
+      {{- if .Values.manticore.firewall.internalAccess.workloads }}
+      inboundAllowWorkload: {{ .Values.manticore.firewall.internalAccess.workloads | toYaml | nindent 8 }}
+      {{- end }}
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-manticore-identity
+  loadBalancer:
+    direct:
+      enabled: false
+      ports: []
+    replicaDirect: false
+  rolloutOptions:
+    maxSurgeReplicas: {{ .Values.manticore.rolloutOptions.maxSurgeReplicas }}
+    maxUnavailableReplicas: '{{ .Values.manticore.rolloutOptions.maxUnavailableReplicas }}'
+    minReadySeconds: {{ .Values.manticore.rolloutOptions.minReadySeconds }}
+    scalingPolicy: {{ .Values.manticore.rolloutOptions.scalingPolicy }}
+    terminationGracePeriodSeconds: {{ .Values.manticore.rolloutOptions.terminationGracePeriodSeconds }}
+  supportDynamicTags: false

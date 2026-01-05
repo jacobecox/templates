@@ -4,31 +4,14 @@ buckets:
   awsRegion: us-east-1
   dataset: addresses # Dataset name
   sourceBucket: address-source-csv # S3 bucket where the CSV files are stored
-  artifactBucket: manticore-index-artifacts # S3 bucket where the artifacts will be fetched from
-  deltaArtifactPrefix: builds/delta # Prefix for the delta artifacts in the S3 bucket
-  mainArtifactPrefix: builds/main # Prefix for the main artifacts in the S3 bucket
 
-ingester:
-  main:
-    image: controlplanecorporation/manticore-ingester:1.0
-    csvPath: main/addresses_main.csv # Path to the main CSV file in the S3 bucket
-    resources:
-      cpu: 4
-      memory: 8Gi
-    jobSchedule: 0 0 1 * * # Midnight UTC on the 1st of every month
-  delta:
-    image: controlplanecorporation/manticore-ingester:1.0
-    csvPath: delta/addresses_delta.csv # Path to the delta CSV file in the S3 bucket
-    resources:
-      cpu: 4
-      memory: 8Gi
-    jobSchedule: 0 * * * * # Every hour on the hour
-
-query:
-  image: controlplanecorporation/manticore-query:1.0
+manticore:
+  image: manticoresearch/manticore:6.3.2
   resources:
     cpu: 4
     memory: 8Gi
+  volumeset:
+    capacity: 10
   autoscaling:
     maxScale: 4
     minScale: 2
