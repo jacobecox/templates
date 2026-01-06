@@ -10,7 +10,7 @@ spec:
       image: {{ .Values.manticore.image }}
       command: "/bin/bash"
       args:
-        - "/var/lib/manticore/start.sh"
+        - "/usr/local/bin/start.sh"
       inheritEnv: false
       memory: {{ .Values.manticore.resources.memory }}
       ports:
@@ -20,13 +20,15 @@ spec:
           protocol: http
         - number: 9312
           protocol: tcp
+        - number: 9313
+          protocol: tcp
       readinessProbe:
         failureThreshold: 3
         initialDelaySeconds: 15
         periodSeconds: 5
         successThreshold: 1
         tcpSocket:
-          port: 9308
+          port: 9306
         timeoutSeconds: 1
       volumes:
         - path: /var/lib/manticore
@@ -35,7 +37,7 @@ spec:
         - path: /etc/manticore/manticore.conf
           recoveryPolicy: retain
           uri: cpln://secret/{{ .Release.Name }}-manticore-conf.payload
-        - path: /var/lib/manticore/start.sh
+        - path:  /usr/local/bin/start.sh
           recoveryPolicy: retain
           uri: cpln://secret/{{ .Release.Name }}-manticore-startup.payload
   defaultOptions:
