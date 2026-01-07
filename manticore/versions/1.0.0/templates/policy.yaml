@@ -1,16 +1,19 @@
 kind: policy
 name: {{ .Release.Name }}-manticore-config-policy
-description: Configuration policy for manticore
+description: Configuration policy for manticore workloads
 tags: {{- include "manticore.tags" . | nindent 4 }}
 bindings:
   - permissions:
       - reveal
     principalLinks:
-      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-manticore-identity
+      - /org/{{ .Values.global.cpln.org }}/gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-manticore-identity
 targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-manticore-conf
   - //secret/{{ .Release.Name }}-manticore-startup
+  - //secret/{{ .Release.Name }}-manticore-schema
+  - //secret/{{ .Release.Name }}-manticore-custom-ddl
+  - //secret/{{ .Release.Name }}-import-trigger
 targetQuery:
   kind: secret
   fetch: items

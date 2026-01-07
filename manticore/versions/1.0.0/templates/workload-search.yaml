@@ -37,9 +37,18 @@ spec:
         - path: /etc/manticore/manticore.conf
           recoveryPolicy: retain
           uri: cpln://secret/{{ .Release.Name }}-manticore-conf.payload
-        - path:  /usr/local/bin/start.sh
+        - path: /etc/manticore/schema.conf
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Release.Name }}-manticore-schema.payload
+        - path: /etc/manticore/custom-ddl.sql
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Release.Name }}-manticore-custom-ddl.payload
+        - path: /usr/local/bin/start.sh
           recoveryPolicy: retain
           uri: cpln://secret/{{ .Release.Name }}-manticore-startup.payload
+        - path: /mnt/s3
+          uri: s3://{{ .Values.buckets.sourceBucket }}
+          recoveryPolicy: retain
   defaultOptions:
     autoscaling:
       maxScale: {{ .Values.manticore.autoscaling.maxScale }}

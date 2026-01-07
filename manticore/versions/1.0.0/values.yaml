@@ -1,9 +1,32 @@
+# AWS Cloud Account and S3 Configuration
+# See README.md for setup instructions
 buckets:
+  # Name of your Control Plane Cloud Account (must already exist)
+  # The cloud account establishes trust with your AWS account
   cloudAccountName: my-s3-cloud-account
-  policyName: manticore-policy  # Custom policy name to access S3 bucket
+
+  # Name of the IAM policy in AWS that grants S3 read access
+  # This policy must be added to your cloud account's allowed policies
+  policyName: manticore-s3-read-policy
+
+  # AWS region (used for S3 endpoint in firewall rules)
   awsRegion: us-east-1
-  dataset: addresses # Dataset name
-  sourceBucket: address-source-csv # S3 bucket where the CSV files are stored
+
+  # Dataset name used for table naming (e.g., addresses_main, addresses_delta)
+  dataset: addresses
+
+  # S3 bucket name where CSV files are stored (mounted read-only at /mnt/s3)
+  sourceBucket: my-manticore-data-bucket
+
+# Import configuration for S3 plain index import
+import:
+  schedule: "0 * * * *"       # Cron schedule for import checks (every hour by default)
+  csvPath: data/addresses.csv # Path to CSV file within the S3 bucket
+  image: mariadb:10           # Image with mysql-client for trigger workload
+  pollInterval: 10            # Seconds between status checks during import
+  pollTimeout: 600            # Max seconds to wait for all replicas to complete import
+  timeoutSeconds: 900         # Max job timeout for import trigger workload
+  historyLimit: 10            # Number of completed import jobs to retain
 
 manticore:
   image: manticoresearch/manticore:6.3.2
@@ -39,3 +62,11 @@ manticore:
       workloads:  # Note: can only be used if type is same-gvc or workload-list
         #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
         #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+  # Custom DDL statements to run after cluster initialization (optional)
+  # Use this to create additional RT tables, distributed tables, etc.
+  # customDDL: |
+  #   CREATE TABLE IF NOT EXISTS my_custom_rt (
+  #       id BIGINT,
+  #       content TEXT
+  #   ) TYPE='rt';
+  #   ALTER CLUSTER manticore ADD my_custom_rt;
