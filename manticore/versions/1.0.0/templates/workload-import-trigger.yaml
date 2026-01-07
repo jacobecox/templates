@@ -1,0 +1,54 @@
+kind: workload
+name: {{ .Release.Name }}-import-trigger
+description: Cron workload that triggers S3 imports on all replicas
+tags: {{- include "manticore.tags" . | nindent 4 }}
+spec:
+  type: cron
+  containers:
+    - name: trigger
+      cpu: '0.5'
+      memory: 256Mi
+      image: {{ .Values.import.image }}
+      command: /bin/bash
+      args:
+        - /usr/local/bin/trigger-import.sh
+      inheritEnv: false
+      env:
+        - name: CSV_PATH
+          value: {{ .Values.import.csvPath }}
+        - name: REPLICA_COUNT
+          value: "{{ .Values.manticore.autoscaling.minScale }}"
+        - name: CLUSTER_ENDPOINT
+          value: replica-0.{{ .Release.Name }}-manticore.cpln-workload.{{ .Values.global.cpln.gvc }}.cpln.local
+        - name: MYSQL_PORT
+          value: "9306"
+        - name: POLL_INTERVAL
+          value: "{{ .Values.import.pollInterval }}"
+        - name: POLL_TIMEOUT
+          value: "{{ .Values.import.pollTimeout }}"
+      volumes:
+        - path: /usr/local/bin/trigger-import.sh
+          recoveryPolicy: retain
+          uri: cpln://secret/{{ .Release.Name }}-import-trigger.payload
+        - path: /mnt/s3
+          uri: s3://{{ .Values.buckets.sourceBucket }}
+          recoveryPolicy: retain
+  defaultOptions:
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: {{ .Values.import.timeoutSeconds }}
+  firewallConfig:
+    external:
+      inboundAllowCIDR: []
+      outboundAllowHostname: {{ .Values.manticore.firewall.external.outboundAllowHostname | toYaml | nindent 8 }}
+      outboundAllowPort: {{ .Values.manticore.firewall.external.outboundAllowPort | toYaml | nindent 8 }}
+    internal:
+      inboundAllowType: {{ .Values.manticore.firewall.internalAccess.type }}
+  identityLink: /org/{{ .Values.global.cpln.org }}/gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-manticore-identity
+  job:
+    schedule: {{ .Values.import.schedule }}
+    concurrencyPolicy: Forbid
+    restartPolicy: Never
+    historyLimit: {{ .Values.import.historyLimit }}
+  supportDynamicTags: false
