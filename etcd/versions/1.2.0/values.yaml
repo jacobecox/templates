@@ -1,10 +1,10 @@
-replicas: 3
+replicas: 3 # minimum 3, must be odd
 
 resources:
   cpu: 1000m
   memory: 2Gi
 
-multiZone: true
+multiZone: false
 
 volumeset:
   capacity: 10 # initial capacity in GiB (minimum is 10)

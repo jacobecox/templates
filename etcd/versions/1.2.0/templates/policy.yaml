@@ -1,7 +1,7 @@
 ---
 kind: policy
 name: {{ .Release.Name }}-etcd-{{ .Values.global.cpln.gvc }}-policy
-description: {{ .Release.Name }}-etcd-{{ .Values.global.cpln.gvc }}-policy
+description: etcd policy
 tags:
   {{- include "etcd.tags" . | nindent 4 }}
 bindings:

@@ -1,5 +1,6 @@
 kind: volumeset
 name: {{ .Release.Name }}-etcd-vs
+description: etcd volumeset
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "etcd.tags" . | nindent 2 }}

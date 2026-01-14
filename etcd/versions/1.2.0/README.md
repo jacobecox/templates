@@ -15,5 +15,7 @@ Note: Default resources can be lowered for lighter usage. Refer to the [etcd doc
 - **`internal_access.workloads`**: Specific workloads (when using `workload-list` or `same-gvc`)
 - **`multiZone`**: Distributes replicas equally across available zones
 
+Note: Confirm your location supports multi-zone
+
 ### Supported External Services
 - [etcd docs](https://etcd.io/docs/v3.6/)
