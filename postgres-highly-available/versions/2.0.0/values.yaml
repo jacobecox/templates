@@ -9,6 +9,8 @@ postgres:
     password: password
     database: test
 
+multiZone: false
+
 volumeset:
   capacity: 10 # initial capacity in GiB (minimum is 10)
   
@@ -23,6 +25,7 @@ etcd:
   resources:
     cpu: 500m
     memory: 512Mi
+  multiZone: false
   volumeset:
     capacity: 10 # initial capacity in GiB (minimum is 10)
   internal_access:
