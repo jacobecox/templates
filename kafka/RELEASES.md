@@ -1,3 +1,18 @@
+# Release Notes - Version 3.1.1
+
+## What's New
+
+- **Kafka Connect Plugin Downloader Improvements**: Enhanced the plugin download script with JFrog Artifactory support
+  - Added automatic redirect handling for JFrog URLs with embedded credentials (`user:token@*.jfrog.io`)
+  - Two-step download process: extracts pre-signed URL from redirect, then downloads from the resolved location
+  - Fallback to direct download if redirect extraction fails
+  - Improved filename handling using plugin names instead of URL basename (avoids issues with query parameters in signed URLs)
+  - **Backward Compatible**: Non-JFrog URLs continue to work as before
+
+- **Kafka Connect Secret Naming**: Shortened secret names to avoid hitting the 64 character limit
+  - Changed `-distributed-properties` suffix to `-config`
+  - Example: `kafka-connect-my-connector-distributed-properties` → `kafka-connect-my-connector-config`
+
 # Release Notes - Version 3.1.0
 
 ## What's New
