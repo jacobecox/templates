@@ -6,9 +6,11 @@ etcd is a distributed, reliable key-value store for the most critical data of a 
 
 Update the `values.yaml` file with your settings:
 
-- **`replicas`**: Number of etcd instances (default: 3, must be odd)
+- **`replicas`**: Number of etcd instances (default: 3, **must be odd**)
 - **`resources.cpu`**: CPU per instance (default: 1 vCPU)
 - **`resources.memory`**: Memory per instance (default: 2 GB RAM)
+
+Note: Default resources can be lowered for lighter usage. Refer to the [etcd docs](https://etcd.io/docs/v3.6/op-guide/hardware/) for recommended resources.
 - **`internal_access.type`**: Internal firewall access (`same-gvc`, `same-org`, or `workload-list`)
 - **`internal_access.workloads`**: Specific workloads (when using `workload-list` or `same-gvc`)
 - **`multiZone`**: Distributes replicas equally across available zones
