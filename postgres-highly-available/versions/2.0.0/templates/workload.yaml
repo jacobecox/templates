@@ -12,18 +12,20 @@ spec:
         - "/patroni/start.sh"
       cpu: "{{ .Values.resources.cpu }}"
       env:
-        - name: PATRONI_RESTAPI_LISTEN
-          value: 0.0.0.0:8008
-        - name: PATRONI_SCOPE
-          value: production-cluster
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
         - name: PGDATABASE
-          value: .Values.postgres.database
-        - name: PGPASSWORD_SUPERUSER
-          value: cpln://secret/{{ .Release.Name }}-postgres-config.password
-        - name: PGUSER_SUPERUSER
-          value: cpln://secret/{{ .Release.Name }}-postgres-config.username
+          value: {{ .Values.postgres.database | quote }}
+      {{- if .Values.backup.aws.enabled }}
+        - name: WALG_S3_PREFIX
+          value: s3://{{ .Values.backup.aws.s3.bucket }}/{{ .Values.backup.aws.s3.prefix }}
+        - name: AWS_REGION
+          value: {{ .Values.backup.aws.s3.region | quote }}
+      {{- end }}
+      {{- if .Values.backup.gcp.enabled }}
+        - name: WALG_GS_PREFIX
+          value: gs://{{ .Values.backup.gcp.gcs.bucket }}/{{ .Values.backup.gcp.gcs.prefix }}
+      {{- end }}
       image: controlplanecorporation/patroni-postgres:0.6
       inheritEnv: false
       memory: {{ .Values.resources.memory }}
@@ -72,7 +74,6 @@ spec:
       {{- if .Values.internal_access.workloads }}
       inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
       {{- end }}
-      inboundAllowWorkload: []
   loadBalancer:
     direct:
       enabled: false

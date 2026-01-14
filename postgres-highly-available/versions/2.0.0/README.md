@@ -1,6 +1,6 @@
 # PostgreSQL 17 Highly Available with Patroni
 
-This app deploys a highly available PostgreSQL 17 cluster using Patroni for automatic failover and etcd for distributed consensus. The setup provides automatic leader election, health checking, and seamless failover capabilities.
+This app deploys a highly available PostgreSQL 17 cluster using Patroni for automatic failover and etcd for distributed consensus. The setup provides automatic leader election, health checking, and seamless failover capabilities in a single location with multi zone capability.
 
 ## Architecture
 
@@ -79,7 +79,73 @@ When testing, you can connect internally using `psql`. If doing so, use the repl
 - **Resource Allocation**: Ensure adequate CPU and memory resources for both PostgreSQL and etcd workloads
 - **Persistent Storage**: Each replica uses dedicated volume storage for data persistence
 
+## Backing Up
+
+Set your desired backup schedule in the values file and configure your AWS S3 or GCS bucket. You can also set a prefix where your backups will be stored in the bucket.
+
+### AWS S3
+
+For the cron job to have access to a S3 bucket, ensure the following prerequisites are completed in your AWS account before installing:
+
+1. Create your bucket. Update the value `bucket` to include its name and `region` to include its region.
+
+2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account). Update the value `cloudAccountName`.
+
+3. Create a new policy with the following JSON (replace `YOUR_BUCKET_NAME`)
+
+```JSON
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:ListBucket",
+                "s3:GetObjectVersion",
+                "s3:DeleteObjectVersion"
+            ],
+            "Resource": [
+                "arn:aws:s3:::YOUR_BUCKET_NAME",
+                "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+            ]
+        }
+    ]
+}
+```
+
+4. Update `cloudAccountName` in your values file with the name of your Cloud Account.
+
+5. Set `policyName` to match the policy created in step 3.
+
+### GCS
+
+For the cron job to have access to a GCS bucket, ensure the following prerequisites are completed in your GCP account before installing:
+
+1. Create your bucket. Update the value `bucket` to include its name.
+
+2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account). Update the value `cloudAccountName`.
+
+**Important**: You must add the `Storage Admin` role when creating your GCP service account.
+
+### Restoring Backup
+
+Run the following command with password from a client with access to the bucket (replace `aws s3` with `gsutil` for GCS).
+```SH
+aws s3 cp gs://BUCKET_NAME/PREFIX/BACKUP_FILE.gz - \
+  | gunzip \
+  | sed '/^SET @@GLOBAL.GTID_PURGED/d' \
+  | psql \
+      --host=WORKLOAD_NAME \
+      --port=5432 \
+      --username=USERNAME \
+      --dbname=postgres
+```
+
 ## Supported External Services
 
 - [Patroni Documentation](https://patroni.readthedocs.io/)
 - [Postgres Doccumentation](https://www.postgresql.org/docs/)
+- [etcd Documentation](https://etcd.io/docs/v3.6/)

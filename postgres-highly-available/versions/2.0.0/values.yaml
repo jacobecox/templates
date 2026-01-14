@@ -33,3 +33,27 @@ etcd:
     workloads:  # Note: can only be used if type is same-gvc or workload-list
       #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
       #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+
+backup:
+  enabled: false
+  image: controlplanecorporation/pg-ha-backup:17.1.0 # **IMAGE NOT YET CREATED**
+  schedule: "0 2 * * *" # daily at 2am UTC
+  resources:
+    cpu: 100m
+    memory: 128Mi
+
+  aws:
+    enabled: false
+    s3:
+      bucket: pg-ha-backup-bucket
+      region: us-east-1
+      cloudAccountName: my-s3-cloud-account
+      policyName: pg-ha-backup-policy
+      prefix: postgres/my-cluster # folder name where your backups will be stored
+
+  gcp:
+    enabled: false
+    gcs:
+      bucket: pg-ha-backup-bucket
+      cloudAccountName: pg-ha-backup-cloudaccount
+      prefix: postgres/my-cluster # folder name where your backups will be stored
