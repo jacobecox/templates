@@ -64,10 +64,27 @@ spec:
     external:
       inboundAllowCIDR: []
       inboundBlockedCIDR: []
-      outboundAllowCIDR:
-        - 0.0.0.0/0
+      {{- if .Values.backup.enabled }}
+      outboundAllowPort:
+        - number: 443
+          protocol: tcp
+      {{- end }}
+      {{- if .Values.backup.aws.enabled }}
+      outboundAllowHostname:
+        - s3.{{ .Values.backup.aws.s3.region }}.amazonaws.com
+        - s3.amazonaws.com
+      {{- else if .Values.backup.gcp.enabled }}
+      outboundAllowHostname:
+        - storage.googleapis.com
+        {{- if .Values.backup.gcp.needs_oauth }}
+        - oauth2.googleapis.com
+        {{- end }}
+        {{- if .Values.backup.gcp.needs_iamcredentials }}
+        - iamcredentials.googleapis.com
+        {{- end }}
+      {{- else }}
       outboundAllowHostname: []
-      outboundAllowPort: []
+      {{- end }}
       outboundBlockedCIDR: []
     internal:
       inboundAllowType: {{ .Values.internal_access.type }}

@@ -34,6 +34,14 @@ etcd:
       #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
       #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
 
+proxy: # HA Proxy endpoint to write to leader replica
+  enabled: true
+  resources:
+    cpu: 100m
+    memory: 128Mi
+  minReplicas: 2
+  maxReplicas: 2
+
 backup:
   enabled: false
   image: controlplanecorporation/pg-ha-backup:17.1.0 # **IMAGE NOT YET CREATED**

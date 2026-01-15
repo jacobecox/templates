@@ -12,3 +12,6 @@ targetKind: secret
 targetLinks:
   - //secret/{{ .Release.Name }}-patroni-startup
   - //secret/{{ .Release.Name }}-postgres-config
+  {{- if .Values.proxy.enabled }}
+  - //secret/{{ .Release.Name }}-postgres-proxy-startup
+  {{- end }}
