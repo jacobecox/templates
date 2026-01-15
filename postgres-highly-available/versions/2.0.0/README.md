@@ -6,6 +6,7 @@ This app deploys a highly available PostgreSQL 17 cluster using Patroni for auto
 
 - **PostgreSQL with Patroni**: Multi-replica PostgreSQL cluster managed by Patroni
 - **etcd**: Distributed key-value store for consensus and configuration allowing high availability
+- **HA Proxy** (optional): Leader-routing proxy that directs write traffic to the current primary replica
 
 ## Configuration
 
@@ -56,6 +57,26 @@ etcd:
     type: same-gvc  # Access control for etcd cluster
 ```
 
+### HA Proxy (Strongly Recommended)
+
+In a Patroni cluster, only the leader replica accepts writes, other replicas are read-only. The HA Proxy provides a stable endpoint that automatically routes traffic to the current leader, ensuring write operations always reach the correct replica.
+
+```yaml
+proxy:
+  enabled: true  # Enable leader-routing proxy
+  resources:
+    cpu: 100m
+    memory: 128Mi
+  minReplicas: 2
+  maxReplicas: 2
+```
+
+**Required for:**
+- **Backup feature**: The proxy must be enabled for backups to function correctly
+- **External write access**: External clients must connect through the proxy to perform write operations
+
+When enabled, connect to `{workload-name}-postgres-proxy` on port 5432 for write operations.
+
 ## Connecting to PostgreSQL
 
 Connect to the PostgreSQL cluster using the workload name:
@@ -80,6 +101,8 @@ When testing, you can connect internally using `psql`. If doing so, use the repl
 - **Persistent Storage**: Each replica uses dedicated volume storage for data persistence
 
 ## Backing Up
+
+**Note:** The HA Proxy must be enabled (`proxy.enabled: true`) for backups to function correctly.
 
 Set your desired backup schedule in the values file and configure your AWS S3 or GCS bucket. You can also set a prefix where your backups will be stored in the bucket.
 
