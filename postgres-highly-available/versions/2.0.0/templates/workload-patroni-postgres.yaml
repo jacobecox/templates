@@ -14,17 +14,17 @@ spec:
       env:
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
-        - name: PGDATABASE
-          value: {{ .Values.postgres.database | quote }}
-      {{- if .Values.backup.aws.enabled }}
+      {{- if and .Values.backup.enabled (eq .Values.backup.mode "wal-g") }}
+        {{- if .Values.backup.aws.enabled }}
         - name: WALG_S3_PREFIX
           value: s3://{{ .Values.backup.aws.s3.bucket }}/{{ .Values.backup.aws.s3.prefix }}
         - name: AWS_REGION
           value: {{ .Values.backup.aws.s3.region | quote }}
-      {{- end }}
-      {{- if .Values.backup.gcp.enabled }}
+        {{- end }}
+        {{- if .Values.backup.gcp.enabled }}
         - name: WALG_GS_PREFIX
           value: gs://{{ .Values.backup.gcp.gcs.bucket }}/{{ .Values.backup.gcp.gcs.prefix }}
+        {{- end }}
       {{- end }}
       image: controlplanecorporation/patroni-postgres:0.6
       inheritEnv: false
@@ -64,26 +64,26 @@ spec:
     external:
       inboundAllowCIDR: []
       inboundBlockedCIDR: []
-      {{- if .Values.backup.enabled }}
+      {{- if and .Values.backup.enabled (eq .Values.backup.mode "wal-g") }}
       outboundAllowPort:
         - number: 443
           protocol: tcp
       {{- end }}
+      {{- if and .Values.backup.enabled (eq .Values.backup.mode "wal-g") }}
       {{- if .Values.backup.aws.enabled }}
       outboundAllowHostname:
         - s3.{{ .Values.backup.aws.s3.region }}.amazonaws.com
         - s3.amazonaws.com
-      {{- else if .Values.backup.gcp.enabled }}
+      {{- end }}
+      {{- end }}
+      {{- if and .Values.backup.enabled (eq .Values.backup.mode "wal-g") }}
+      {{- if .Values.backup.gcp.enabled }}
       outboundAllowHostname:
         - storage.googleapis.com
         {{- if .Values.backup.gcp.needs_oauth }}
         - oauth2.googleapis.com
         {{- end }}
-        {{- if .Values.backup.gcp.needs_iamcredentials }}
-        - iamcredentials.googleapis.com
-        {{- end }}
-      {{- else }}
-      outboundAllowHostname: []
+      {{- end }}
       {{- end }}
       outboundBlockedCIDR: []
     internal:

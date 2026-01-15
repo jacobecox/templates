@@ -44,7 +44,8 @@ proxy: # HA Proxy endpoint to write to leader replica
 
 backup:
   enabled: false
-  image: controlplanecorporation/pg-ha-backup:17.1.0 # **IMAGE NOT YET CREATED**
+  mode: logical  # logical | wal-g
+  image: controlplanecorporation/pg-backup:17.1.0 # tag 17.1.0 = Postgres 17, no other tags currently supported
   schedule: "0 2 * * *" # daily at 2am UTC
   resources:
     cpu: 100m
