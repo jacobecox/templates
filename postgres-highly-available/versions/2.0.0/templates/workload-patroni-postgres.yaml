@@ -10,25 +10,29 @@ spec:
       command: "/bin/bash"
       args:
         - "/patroni/start.sh"
-      cpu: "{{ .Values.resources.cpu }}"
+      cpu: {{ .Values.resources.cpu | quote }}
       env:
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
       {{- if and .Values.backup.enabled (eq .Values.backup.mode "wal-g") }}
+        - name: WALG_COMPRESSION_METHOD
+          value: gzip
         {{- if .Values.backup.aws.enabled }}
         - name: WALG_S3_PREFIX
           value: s3://{{ .Values.backup.aws.s3.bucket }}/{{ .Values.backup.aws.s3.prefix }}
         - name: AWS_REGION
           value: {{ .Values.backup.aws.s3.region | quote }}
+        - name: AWS_S3_FORCE_PATH_STYLE
+          value: "true"
         {{- end }}
         {{- if .Values.backup.gcp.enabled }}
         - name: WALG_GS_PREFIX
           value: gs://{{ .Values.backup.gcp.gcs.bucket }}/{{ .Values.backup.gcp.gcs.prefix }}
         {{- end }}
       {{- end }}
-      image: controlplanecorporation/patroni-postgres:0.6
+      image: {{ .Values.image }}
       inheritEnv: false
-      memory: {{ .Values.resources.memory }}
+      memory: {{ .Values.resources.memory | quote }}
       ports:
         - number: 8008
           protocol: tcp
@@ -40,6 +44,42 @@ spec:
           uri: cpln://volumeset/{{ .Release.Name }}-postgres-ha-vs
         - path: /patroni/start.sh
           uri: cpln://secret/{{ .Release.Name }}-patroni-startup.payload
+      # WAL-G backup sidecar
+    {{- if and .Values.backup.enabled (eq .Values.backup.mode "wal-g") }}
+    - name: wal-g-backup
+      image: {{ .Values.image }}
+      command: ["/bin/bash", "/walg/backup.sh"]
+      cpu: {{ .Values.backup.resources.cpu | quote }}
+      memory: {{ .Values.backup.resources.memory | quote }}
+      inheritEnv: false
+      env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: PATRONI_API
+          value: http://127.0.0.1:8008
+        - name: WALG_BACKUP_INTERVAL_SECONDS
+          value: {{ .Values.backup.walg.intervalSeconds | quote }}
+        - name: WALG_COMPRESSION_METHOD
+          value: gzip
+        {{- if .Values.backup.aws.enabled }}
+        - name: WALG_S3_PREFIX
+          value: s3://{{ .Values.backup.aws.s3.bucket }}/{{ .Values.backup.aws.s3.prefix }}
+        - name: AWS_REGION
+          value: {{ .Values.backup.aws.s3.region | quote }}
+        - name: AWS_S3_FORCE_PATH_STYLE
+          value: "true"
+        {{- end }}
+        {{- if .Values.backup.gcp.enabled }}
+        - name: WALG_GS_PREFIX
+          value: gs://{{ .Values.backup.gcp.gcs.bucket }}/{{ .Values.backup.gcp.gcs.prefix }}
+        {{- end }}
+      volumes:
+        - path: /var/lib/postgresql/data
+          uri: cpln://volumeset/{{ .Release.Name }}-postgres-ha-vs
+          recoveryPolicy: retain
+        - path: /walg/backup.sh
+          uri: cpln://secret/{{ .Release.Name }}-wal-g-backup-script.payload
+    {{- end }}
   identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-postgres-ha-identity
   defaultOptions:
     autoscaling:
@@ -80,9 +120,6 @@ spec:
       {{- if .Values.backup.gcp.enabled }}
       outboundAllowHostname:
         - storage.googleapis.com
-        {{- if .Values.backup.gcp.needs_oauth }}
-        - oauth2.googleapis.com
-        {{- end }}
       {{- end }}
       {{- end }}
       outboundBlockedCIDR: []

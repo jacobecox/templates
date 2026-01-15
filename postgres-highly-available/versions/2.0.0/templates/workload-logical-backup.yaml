@@ -8,7 +8,7 @@ spec:
   type: cron
   containers:
     - name: backup
-      image: {{ .Values.backup.image }}
+      image: {{ .Values.backup.logical.image }}
       cpu: {{ .Values.backup.resources.cpu | quote }}
       memory: {{ .Values.backup.resources.memory | quote }}
       inheritEnv: false
@@ -55,7 +55,7 @@ spec:
         - storage.googleapis.com
       {{- end }}
   job:
-    schedule: {{ .Values.backup.schedule | quote }}
+    schedule: {{ .Values.backup.logical.schedule | quote }}
     concurrencyPolicy: Forbid
     restartPolicy: Never
     historyLimit: 5

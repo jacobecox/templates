@@ -4,6 +4,8 @@ resources:
   cpu: 1
   memory: 2Gi
 
+image: controlplanecorporation/patroni-postgres:0.7
+
 postgres:
     username: username
     password: password
@@ -36,6 +38,7 @@ etcd:
 
 proxy: # HA Proxy endpoint to write to leader replica
   enabled: true
+  image: haproxy:2.9
   resources:
     cpu: 100m
     memory: 128Mi
@@ -44,13 +47,19 @@ proxy: # HA Proxy endpoint to write to leader replica
 
 backup:
   enabled: false
-  mode: logical  # logical | wal-g
-  image: controlplanecorporation/pg-backup:17.1.0 # tag 17.1.0 = Postgres 17, no other tags currently supported
-  schedule: "0 2 * * *" # daily at 2am UTC
-  resources:
+  mode: wal-g  # logical or wal-g
+  resources: # applies to whichever mode is enabled
     cpu: 100m
     memory: 128Mi
 
+  logical: # logical backup settings
+    image: controlplanecorporation/pg-backup:17.1.0 # tag 17.1.0 = Postgres 17, no other tags currently supported
+    schedule: "0 2 * * *" # cron schedule, default isdaily at 2am UTC
+
+  walg: # wal-g backup settings
+    intervalSeconds: 21600 # interval in seconds between backups, default is every 6 hours
+
+  # storage settings are applied to whichever mode is enabled
   aws:
     enabled: false
     s3:

@@ -8,7 +8,7 @@ spec:
   type: standard
   containers:
     - name: haproxy
-      image: haproxy:2.9
+      image: {{ .Values.proxy.image }}
       inheritEnv: false
       command: /bin/sh
       args:

@@ -15,3 +15,6 @@ targetLinks:
   {{- if .Values.proxy.enabled }}
   - //secret/{{ .Release.Name }}-postgres-proxy-startup
   {{- end }}
+  {{- if and .Values.backup.enabled (eq .Values.backup.mode "wal-g") }}
+  - //secret/{{ .Release.Name }}-wal-g-backup-script
+  {{- end }}
