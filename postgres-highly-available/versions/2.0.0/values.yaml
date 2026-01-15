@@ -64,5 +64,5 @@ backup:
     enabled: false
     gcs:
       bucket: pg-ha-backup-bucket
-      cloudAccountName: pg-ha-backup-cloudaccount
+      cloudAccountName: my-gcs-cloud-account
       prefix: postgres/my-cluster # folder name where your backups will be stored

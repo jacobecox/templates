@@ -153,18 +153,38 @@ For the cron job to have access to a GCS bucket, ensure the following prerequisi
 
 **Important**: You must add the `Storage Admin` role when creating your GCP service account.
 
-### Restoring Backup
+## Restoring Backup
 
-Run the following command with password from a client with access to the bucket (replace `aws s3` with `gsutil` for GCS).
+Run the following command with password from a client with access to the bucket. Set `WORKLOAD_NAME` to match the proxy workload so restores write to the leader.
+
+S3
 ```SH
-aws s3 cp gs://BUCKET_NAME/PREFIX/BACKUP_FILE.gz - \
+export PGPASSWORD="PASSWORD"
+
+aws s3 cp "s3://BUCKET_NAME/PREFIX/BACKUP_FILE.sql.gz" - \
   | gunzip \
-  | sed '/^SET @@GLOBAL.GTID_PURGED/d' \
   | psql \
       --host=WORKLOAD_NAME \
       --port=5432 \
       --username=USERNAME \
       --dbname=postgres
+
+unset PGPASSWORD
+```
+
+GCS
+```SH
+export PGPASSWORD="PASSWORD"
+
+gsutil cp "gs://BUCKET_NAME/PREFIX/BACKUP_FILE.sql.gz" - \
+  | gunzip \
+  | psql \
+      --host=WORKLOAD_NAME \
+      --port=5432 \
+      --username=USERNAME \
+      --dbname=postgres
+
+unset PGPASSWORD
 ```
 
 ## Supported External Services
