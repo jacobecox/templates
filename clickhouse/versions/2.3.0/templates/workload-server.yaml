@@ -8,7 +8,7 @@ spec:
   type: stateful
   containers:
     - name: {{ .Release.Name }}-server
-      cpu: "{{ .Values.server.resources.cpu }}"
+      cpu: {{ .Values.server.resources.cpu | quote }}
       image: clickhouse/clickhouse-server:25.10
       inheritEnv: false
       env:
@@ -18,7 +18,7 @@ spec:
         value: cpln://secret/{{ .Release.Name }}-clickhouse-db-config.password
       - name: CLICKHOUSE_DATABASE
         value: cpln://secret/{{ .Release.Name }}-clickhouse-db-config.db
-      memory: {{ .Values.server.resources.memory }}
+      memory: {{ .Values.server.resources.memory | quote }}
       command: "/bin/bash"
       args:
         - "/scripts/server-startup.sh"
@@ -57,7 +57,7 @@ spec:
       keda: {}
       maxConcurrency: 0
       maxScale: {{ if eq ((index .Values.gvc.locations 0).replicas | int) 0 }}1{{ else }}{{ (index .Values.gvc.locations 0).replicas | int }}{{ end }}
-      metric: cpu
+      metric: disabled
       minScale: 1
       scaleToZeroDelay: 300
       target: 100
