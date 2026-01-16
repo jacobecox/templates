@@ -1,0 +1,14 @@
+---
+kind: policy
+name: {{ .Release.Name }}-cockroach-policy
+description: CockroachDB policy
+tags: {{- include "cockroach.tags" . | nindent 4 }}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-cockroach-identity
+targetKind: secret
+targetLinks:
+  - //secret/{{ .Release.Name }}-cockroach-startup
+  - //secret/{{ .Release.Name }}-cockroach-config
