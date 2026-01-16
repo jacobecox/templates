@@ -47,7 +47,7 @@ proxy: # HA Proxy endpoint to write to leader replica
 
 backup:
   enabled: false
-  mode: wal-g  # logical or wal-g
+  mode: logical  # logical or wal-g
   resources: # applies to whichever mode is enabled
     cpu: 100m
     memory: 128Mi

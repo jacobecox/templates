@@ -1,6 +1,6 @@
 # PostgreSQL 17 Highly Available with Patroni
 
-This app deploys a highly available PostgreSQL 17 cluster using Patroni for automatic failover and etcd for distributed consensus. The setup delivers automatic leader election, health checking, and seamless failover capabilities in a single location with multi zone capability and provides optional backup features.
+This app deploys a highly available PostgreSQL 17 cluster using Patroni for automatic failover and etcd for distributed consensus. The setup delivers automatic leader election, health checking, and seamless failover capabilities in a single location with multi-zone capability and provides optional backup features.
 
 ## Architecture
 
@@ -25,7 +25,7 @@ resources:
 postgres:
   username: username  # PostgreSQL username
   password: password  # PostgreSQL password
-  database: test      # Initial database name
+  database: test      # Auto created database name
 ```
 
 Configure which workloads can access PostgreSQL:
@@ -39,7 +39,7 @@ internal_access:
 ```
 
 - `same-gvc`: Allow access from all workloads in the same GVC
-- `same-org`: Allow access from all workloads in the organization
+- `same-org`: Allow access from all workloads in the org
 - `workload-list`: Allow access only from specified workloads
 
 ### etcd Configuration
@@ -50,7 +50,7 @@ The embedded etcd cluster manages cluster state and consensus:
 etcd:
   replicas: 3  # Number of etcd replicas (must be odd number, minimum 3 for HA)
   
-  resources:
+  resources: # resources specific to etcd
     cpu: 500m
     memory: 512Mi
   
@@ -104,7 +104,7 @@ There are two backup options:
 
 **Note:** The HA Proxy must be enabled (`proxy.enabled: true`) for logical backups to function correctly.
 
-Set your desired backup schedule in the values file and configure your AWS S3 or GCS bucket. You can also set a prefix where your backups will be stored in the bucket.
+Set your desired backup schedule (logical) or interval (WAL-G) in the values file and configure your AWS S3 or GCS bucket. You can also set a prefix where your backups will be stored in the bucket.
 
 ### AWS S3
 
@@ -114,7 +114,7 @@ For the workload to have access to a S3 bucket, ensure the following prerequisit
 
 2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account). Update the value `cloudAccountName`.
 
-3. Create a new policy with the following JSON (replace `YOUR_BUCKET_NAME`)
+3. Create a new AWS IAM policy with the following JSON (replace `YOUR_BUCKET_NAME`)
 
 ```JSON
 {
@@ -151,11 +151,11 @@ For the workload to have access to a GCS bucket, ensure the following prerequisi
 
 2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account). Update the value `cloudAccountName`.
 
-**Important**: You must add the `Storage Admin` role when creating your GCP service account.
+**Important**: You must add the `Storage Admin` role to the created GCP service account.
 
 ## Restoring Backup
 
-### Logical Backup
+### Logical
 
 Run the following command with password from a client with access to the bucket. Set `WORKLOAD_NAME` to match the proxy workload so restores write to the leader.
 
@@ -189,14 +189,14 @@ gsutil cp "gs://BUCKET_NAME/PREFIX/BACKUP_FILE.sql.gz" - \
 unset PGPASSWORD
 ```
 
-### WAL-G Backup
+### WAL-G
 
 Because a point-in-time restore from WAL-G requires an empty data directory, follow the steps below.
 
 1. Run `wal-g backup-list` to get desired backup.
 2. Stop the postgres workload.
 3. Create a new volume set to restore to.
-4. Run a single run restore workload with the new volume set mounted at `/var/lib/postgresql/data` and run the following command:
+4. Run a one-off restore workload with the new volume set mounted at `/var/lib/postgresql/data` and run the following command:
 ```SH
 wal-g backup-fetch /var/lib/postgresql/data/pgdata <backup_name>
 ```

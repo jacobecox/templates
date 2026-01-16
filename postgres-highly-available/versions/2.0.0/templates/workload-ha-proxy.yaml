@@ -1,6 +1,6 @@
 {{- if .Values.proxy.enabled }}
 kind: workload
-name: {{ .Release.Name }}-postgres-proxy
+name: {{ .Release.Name }}-postgres-ha-proxy
 description: HAProxy leader-only endpoint for Patroni Postgres
 tags:
   {{- include "pg-ha.tags" . | nindent 4 }}
@@ -24,10 +24,14 @@ spec:
   identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-postgres-ha-identity
   defaultOptions:
     autoscaling:
-      metric: cpu
+      metric: rps
       minScale: {{ .Values.proxy.minReplicas }}
       maxScale: {{ .Values.proxy.maxReplicas }}
+      maxConcurrency: 0
+      scaleToZeroDelay: 300
       target: 100
+    capacityAI: false
+    debug: false
     multiZone:
       enabled: {{ .Values.multiZone }}
     timeoutSeconds: 5

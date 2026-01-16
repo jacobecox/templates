@@ -102,7 +102,7 @@ spec:
         triggers: []
       maxConcurrency: 0
       maxScale: {{ .Values.replicas }}
-      metric: cpu
+      metric: disabled
       minScale: {{ .Values.replicas }}
       scaleToZeroDelay: 300
       target: 100

@@ -1,6 +1,6 @@
 {{- if and .Values.backup.enabled (eq .Values.backup.mode "logical") }}
 kind: workload
-name: {{ .Release.Name }}-pg-ha-backup
+name: {{ .Release.Name }}-postgres-ha-backup
 description: Scheduled logical backup
 tags:
   {{- include "pg-ha.tags" . | nindent 2 }}
@@ -14,7 +14,7 @@ spec:
       inheritEnv: false
       env:
         - name: PG_HOST
-          value: {{ .Release.Name }}-postgres-proxy.{{ .Values.global.cpln.gvc }}.cpln.local
+          value: {{ .Release.Name }}-postgres-ha-proxy.{{ .Values.global.cpln.gvc }}.cpln.local
         - name: PG_PORT
           value: '5432'
         - name: PG_USER
@@ -38,6 +38,18 @@ spec:
           value: {{ .Values.backup.gcp.gcs.prefix }}
       {{- end }}
   identityLink: //identity/{{ .Release.Name }}-postgres-ha-identity
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 0
+      maxScale: 1
+      metric: disabled
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 95
+    capacityAI: false
+    debug: false
+    multiZone:
+      enabled: false
   firewallConfig:
     external:
       inboundAllowCIDR: []

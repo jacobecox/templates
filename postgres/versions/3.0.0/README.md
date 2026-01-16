@@ -18,7 +18,7 @@ For the cron job to have access to a S3 bucket, ensure the following prerequisit
 
 2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account). Update the value `cloudAccountName`.
 
-3. Create a new policy with the following JSON (replace `YOUR_BUCKET_NAME`)
+3. Create a new AWS IAM policy with the following JSON (replace `YOUR_BUCKET_NAME`)
 
 ```JSON
 {
@@ -55,7 +55,7 @@ For the cron job to have access to a GCS bucket, ensure the following prerequisi
 
 2. If you do not have a Cloud Account set up, refer to the docs to [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account). Update the value `cloudAccountName`.
 
-**Important**: You must add the `Storage Admin` role when creating your GCP service account.
+**Important**: You must add the `Storage Admin` role to the created GCP service account.
 
 ### Restoring Backup
 
