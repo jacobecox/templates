@@ -1,13 +1,12 @@
-# Global Virtual Cluster (gvc) settings
+# Global Virtual Cloud (GVC) settings
 gvc:
   name: airflow
-  locationLinks:
-    - //location/aws-eu-central-1
-
+  locations:
+    - name: aws-eu-central-1
 
 # PostgreSQL database configuration  
 postgres:
-  name: postgres
+  image: postgres:18
   resources:
     cpu: 500m
     memory: 1024Mi
@@ -17,33 +16,27 @@ postgres:
 
 # Redis cache configuration
 redis:
-  name: redis
+  image: redis:7.4
   resources:
     cpu: 250m
     memory: 512Mi
 
 # Apache Airflow configuration   
 airflow:
-  webserverName: airflow
   webserver:
+    image: apache/airflow:3.0.3
     resources:
       cpu: 2000m
       memory: 3Gi
-  celeryWorkerName: airflow-celery-worker
   celeryWorker:
+    image: controlplanecorporation/celery:v1
     resources:
       cpu: 256m
       memory: 512Mi
   webPort: 8080   # Port for accessing the Airflow web interface
 
-volumeset:
-  airflow:
-    capacity: 10 # initial capacity in GiB (minimum is 10)
-  postgres:
-    capacity: 10 # initial capacity in GiB (minimum is 10)
-
   auth:        
-    jwtSecret: P5lsoKdzuWsN7NcZYu4TlwVp9pRKdpHjJ902aiy05K6HvDja7r+1y6tOITuaAQHv # Secret key used to sign JWT tokens, generate in terminal using "openssl rand -base64 48"
+    jwtSecret: 1234567890 # Secret key used to sign JWT tokens, generate in terminal using "openssl rand -base64 48"
     jwtExpirationDelta: 3600  # JWT token expiration time in seconds 
     jwtRefreshThreshold: 300 # Threshold before token expires to allow refresh in seconds
 
@@ -53,6 +46,12 @@ volumeset:
 
   celery:
     workerConcurrency: 1 # Number of tasks each worker can run concurrently when KEDA is enabled.
+
+volumeset:
+  airflow:
+    capacity: 10 # initial capacity in GiB (minimum is 10)
+  postgres:
+    capacity: 10 # initial capacity in GiB (minimum is 10)
 
 # KEDA (Kubernetes Event-driven Autoscaling) configuration 
 # NOT SUPPORTED in gcp/us-central1

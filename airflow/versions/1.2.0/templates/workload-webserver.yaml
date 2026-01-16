@@ -1,12 +1,12 @@
 kind: workload
-name: {{ .Values.airflow.webserverName }}
-description: {{ .Values.airflow.webserverName }}
+name: {{ .Release.Name }}-airflow-webserver
+description: Airflow webserver
 gvc: {{ .Values.gvc.name }}
 tags:
-  {{- include "pg.tags" . | nindent 2 }}
+  {{- include "airflow.tags" . | nindent 2 }}
 spec:
   type: stateful
-  identityLink: //identity/{{ include "pg.name" . }}
+  identityLink: //identity/{{ .Release.Name }}-airflow-identity
   containers:
     - name: airflow
       command: bash
@@ -21,7 +21,7 @@ spec:
           exec airflow api-server
       cpu: {{ .Values.airflow.webserver.resources.cpu }}
       memory: {{ .Values.airflow.webserver.resources.memory }}
-      image: apache/airflow:3.0.3
+      image: {{ .Values.airflow.webserver.image }}
       inheritEnv: false
       lifecycle:
         preStop:
@@ -34,27 +34,27 @@ spec:
         - name: AIRFLOW_HOME
           value: /opt/airflow
         - name: AIRFLOW__API_AUTH__JWT_EXPIRATION_DELTA
-          value: "{{ .Values.airflow.auth.jwtExpirationDelta }}"
+          value: {{ .Values.airflow.auth.jwtExpirationDelta | quote }}
         - name: AIRFLOW__API_AUTH__JWT_REFRESH_THRESHOLD
-          value: "{{ .Values.airflow.auth.jwtRefreshThreshold }}"
+          value: {{ .Values.airflow.auth.jwtRefreshThreshold | quote }}
         - name: POSTGRES_USERNAME
-          value: cpln://secret/{{ include "pg.secretName" . }}.username         
+          value: cpln://secret/{{ .Release.Name }}-airflow-config.username         
         - name: POSTGRES_PASSWORD 
-          value: cpln://secret/{{ include "pg.secretName" . }}.password          
+          value: cpln://secret/{{ .Release.Name }}-airflow-config.password          
         - name: AIRFLOW__API_AUTH__JWT_SECRET
-          value: {{ .Values.airflow.auth.jwtSecret }}
+          value: cpln://secret/{{ .Release.Name }}-airflow-config.jwtSecret
         - name: AIRFLOW__API__BASE_URL
-          value: http://{{ .Values.airflow.webserverName}}:{{ .Values.airflow.webPort }}
+          value: http://{{ .Release.Name }}-airflow-webserver:{{ .Values.airflow.webPort }}
         - name: AIRFLOW__CELERY__BROKER_URL
-          value: redis://{{ .Values.redis.name }}.{{ .Values.gvc.name }}.cpln.local
+          value: redis://{{ .Release.Name }}-airflow-redis.{{ .Values.gvc.name }}.cpln.local
         - name: AIRFLOW__CELERY__RESULT_BACKEND
-          value: db+postgresql://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ .Values.postgres.name }}:5432/test
+          value: db+postgresql://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ .Release.Name }}-airflow-postgres:5432/test
         - name: AIRFLOW__CORE__DAGS_FOLDER
           value: /opt/airflow/dags
         - name: AIRFLOW__CORE__EXECUTOR
           value: CeleryExecutor
         - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-          value: postgresql+psycopg2://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ .Values.postgres.name }}:5432/test
+          value: postgresql+psycopg2://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ .Release.Name }}-airflow-postgres:5432/test
         - name: AIRFLOW__LOGGING__REMOTE_LOGGING
           value: 'False'
         - name: AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL
@@ -71,7 +71,7 @@ spec:
       volumes:
         - path: /opt/airflow
           recoveryPolicy: retain
-          uri: cpln://volumeset/airflow
+          uri: cpln://volumeset/{{ .Release.Name }}-airflow-vs
   firewallConfig:
     external:
       inboundAllowCIDR:
@@ -85,20 +85,16 @@ spec:
     internal:
       inboundAllowType: same-gvc
       inboundAllowWorkload: []
-
   loadBalancer:
     direct:
       enabled: false
       ports: []
     replicaDirect: false
-
   rolloutOptions:
     maxSurgeReplicas: 25%
     minReadySeconds: 0
     scalingPolicy: OrderedReady
     terminationGracePeriodSeconds: 1
-
   securityOptions:
     filesystemGroupId: 50000
-
   supportDynamicTags: false

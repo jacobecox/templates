@@ -1,7 +1,7 @@
 kind: gvc
 name: {{ .Values.gvc.name }}
-description: {{ .Values.gvc.name }}
-tags: {{- include "pg.tags" . | nindent 4 }}
+description: Airflow GVC
+tags: {{- include "airflow.tags" . | nindent 4 }}
 spec:
   endpointNamingFormat: org
   {{- if .Values.keda.enabled }}
@@ -10,6 +10,6 @@ spec:
   {{- end }}
   staticPlacement:
     locationLinks:
-{{- range $location := .Values.gvc.locationLinks }}
-      - {{ $location }}
-{{- end }}
+    {{- range .Values.gvc.locations }}
+      - //location/{{ .name }}
+    {{- end }}

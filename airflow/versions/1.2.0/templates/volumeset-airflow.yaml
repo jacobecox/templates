@@ -1,9 +1,9 @@
 kind: volumeset
-name: {{ .Values.airflow.webserverName }}
-description: {{ .Values.airflow.webserverName }}
+name: {{ .Release.Name }}-airflow-vs
+description: Airflow volumeset
 gvc: {{ .Values.gvc.name }}
 tags:
-  {{- include "pg.tags" . | nindent 4 }}
+  {{- include "airflow.tags" . | nindent 4 }}
 spec:
   fileSystemType: shared
   initialCapacity: {{ .Values.volumeset.airflow.capacity }}
