@@ -1,12 +1,13 @@
 # PostgreSQL 17 Highly Available with Patroni
 
-This app deploys a highly available PostgreSQL 17 cluster using Patroni for automatic failover and etcd for distributed consensus. The setup provides automatic leader election, health checking, and seamless failover capabilities in a single location with multi zone capability.
+This app deploys a highly available PostgreSQL 17 cluster using Patroni for automatic failover and etcd for distributed consensus. The setup delivers automatic leader election, health checking, and seamless failover capabilities in a single location with multi zone capability and provides optional backup features.
 
 ## Architecture
 
 - **PostgreSQL with Patroni**: Multi-replica PostgreSQL cluster managed by Patroni
 - **etcd**: Distributed key-value store for consensus and configuration allowing high availability
 - **HA Proxy** (optional): Leader-routing proxy that directs write traffic to the current primary replica
+- **Backup**: (optional): Logical or native WAL-G backup
 
 ## Configuration
 
@@ -53,8 +54,7 @@ etcd:
     cpu: 500m
     memory: 512Mi
   
-  internal_access:
-    type: same-gvc  # Access control for etcd cluster
+  internal_access: # same behavior as postgres settings
 ```
 
 ### HA Proxy (Strongly Recommended)
@@ -72,43 +72,43 @@ proxy:
 ```
 
 **Required for:**
-- **Backup feature**: The proxy must be enabled for backups to function correctly
 - **External write access**: External clients must connect through the proxy to perform write operations
+- **Backup feature**: The proxy must be enabled for logical backups to function correctly (WAL-G backups work internally - proxy not required)
 
-When enabled, connect to `{workload-name}-postgres-proxy` on port 5432 for write operations.
+When enabled, connect to the proxy workload on port 5432 for write operations.
 
 ## Connecting to PostgreSQL
 
-Connect to the PostgreSQL cluster using the workload name:
+Connect to the PostgreSQL cluster using the proxy workload name:
 
 ```
-Host: {workload-name}
+Host: {proxy-workload-name}
 Port: 5432
 Database: {postgres.database}
 Username: {postgres.username}
 Password: {postgres.password}
 ```
 
-### Internal psql Connection
-
-When testing, you can connect internally using `psql`. If doing so, use the replica-specific hostname.
-
 ## Important Notes
 
 - **Minimum Replicas**: For production use, maintain at least 3 PostgreSQL replicas and 3 etcd replicas
 - **Odd Number for etcd**: Always use an odd number of etcd replicas (3, 5, 7) for proper quorum
 - **Resource Allocation**: Ensure adequate CPU and memory resources for both PostgreSQL and etcd workloads
-- **Persistent Storage**: Each replica uses dedicated volume storage for data persistence
+- **Multi-zone**: Verify your selected location supports multi-zone
 
 ## Backing Up
 
-**Note:** The HA Proxy must be enabled (`proxy.enabled: true`) for backups to function correctly.
+There are two backup options:
+- **Logical backups** create portable SQL dumps ideal for smaller databases and cross-version migrations.
+- **WAL-G backups** provide continuous archiving with point-in-time recovery, suited for larger databases requiring minimal data loss.
+
+**Note:** The HA Proxy must be enabled (`proxy.enabled: true`) for logical backups to function correctly.
 
 Set your desired backup schedule in the values file and configure your AWS S3 or GCS bucket. You can also set a prefix where your backups will be stored in the bucket.
 
 ### AWS S3
 
-For the cron job to have access to a S3 bucket, ensure the following prerequisites are completed in your AWS account before installing:
+For the workload to have access to a S3 bucket, ensure the following prerequisites are completed in your AWS account before installing:
 
 1. Create your bucket. Update the value `bucket` to include its name and `region` to include its region.
 
@@ -145,7 +145,7 @@ For the cron job to have access to a S3 bucket, ensure the following prerequisit
 
 ### GCS
 
-For the cron job to have access to a GCS bucket, ensure the following prerequisites are completed in your GCP account before installing:
+For the workload to have access to a GCS bucket, ensure the following prerequisites are completed in your GCP account before installing:
 
 1. Create your bucket. Update the value `bucket` to include its name.
 
@@ -154,6 +154,8 @@ For the cron job to have access to a GCS bucket, ensure the following prerequisi
 **Important**: You must add the `Storage Admin` role when creating your GCP service account.
 
 ## Restoring Backup
+
+### Logical Backup
 
 Run the following command with password from a client with access to the bucket. Set `WORKLOAD_NAME` to match the proxy workload so restores write to the leader.
 
@@ -186,6 +188,20 @@ gsutil cp "gs://BUCKET_NAME/PREFIX/BACKUP_FILE.sql.gz" - \
 
 unset PGPASSWORD
 ```
+
+### WAL-G Backup
+
+Because a point-in-time restore from WAL-G requires an empty data directory, follow the steps below.
+
+1. Run `wal-g backup-list` to get desired backup.
+2. Stop the postgres workload.
+3. Create a new volume set to restore to.
+4. Run a single run restore workload with the new volume set mounted at `/var/lib/postgresql/data` and run the following command:
+```SH
+wal-g backup-fetch /var/lib/postgresql/data/pgdata <backup_name>
+```
+5. Re-point the postgres workload to the restored volume set and restart the workload.
+6. **After restore**: Change the WAL-G prefix before re-enabling backups to avoid system identifier conflicts.
 
 ## Supported External Services
 

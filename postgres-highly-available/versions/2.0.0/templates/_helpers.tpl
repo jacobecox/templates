@@ -26,9 +26,20 @@ app.cpln.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Validate backup mode - must be "logical" or "wal-g"
+*/}}
+{{- define "pg-ha.validateBackupMode" -}}
+{{- $mode := .Values.backup.mode -}}
+{{- if and .Values.backup.enabled (not (or (eq $mode "logical") (eq $mode "wal-g"))) -}}
+  {{- fail (printf "Invalid backup.mode: '%s'. Must be either 'logical' or 'wal-g'." $mode) -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Validate backup configuration - when backup is enabled, exactly one of aws.enabled or gcp.enabled must be true
 */}}
 {{- define "pg-ha.validateBackupConfig" -}}
+{{- include "pg-ha.validateBackupMode" . -}}
 {{- $awsEnabled := .Values.backup.aws.enabled -}}
 {{- $gcpEnabled := .Values.backup.gcp.enabled -}}
 {{- if .Values.backup.enabled -}}
