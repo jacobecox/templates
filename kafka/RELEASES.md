@@ -1,3 +1,10 @@
+# Release Notes - Version 3.2.0
+
+## What's New
+
+- **Drop Metrics**: Added support to filter metrics on the kafka-exporter and jmx-exporter containers
+  - Include regex patterns that drop all matching metrics
+
 # Release Notes - Version 3.1.1
 
 ## What's New
