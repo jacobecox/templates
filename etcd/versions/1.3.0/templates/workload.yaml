@@ -10,10 +10,10 @@ spec:
       command: "/bin/bash"
       args:
         - "/etcd/start.sh"
-      cpu: {{ .Values.resources.cpu }}
+      cpu: {{ .Values.resources.cpu | quote }}
       image: {{ .Values.image }}
       inheritEnv: false
-      memory: {{ .Values.resources.memory }}
+      memory: {{ .Values.resources.memory | quote }}
       ports:
         - number: 2379
           protocol: tcp
