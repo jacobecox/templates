@@ -1,0 +1,14 @@
+kind: policy
+name: {{ .Release.Name }}-fusionauth-policy
+description: FusionAuth policy
+tags:
+  {{- include "fusionauth.tags" . | nindent 4 }}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-fusionauth-identity
+targetKind: secret
+targetLinks:
+  - //secret/{{ .Release.Name }}-pg-config
+  - //secret/{{ .Release.Name }}-fusionauth-startup
