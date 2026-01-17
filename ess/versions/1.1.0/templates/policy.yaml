@@ -1,0 +1,10 @@
+kind: policy
+name: {{ .Release.Name }}-ess-policy
+description: ESS policy
+bindings:
+  - permissions:
+      - manage
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-ess-identity
+target: all
+targetKind: secret
