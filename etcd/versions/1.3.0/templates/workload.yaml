@@ -1,6 +1,6 @@
 {{- include "etcd.validateReplicas" . -}}
 kind: workload
-name: {{ .Release.Name }}-etcd
+name: {{ include "etcd.name" . }}
 description: etcd
 tags: {{- include "etcd.tags" . | nindent 4 }}
 spec:
@@ -22,10 +22,10 @@ spec:
       volumes:
         - path: /var/lib/etcd
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-etcd-vs
+          uri: cpln://volumeset/{{ include "etcd.volumeName" . }}
         - path: /etcd/start.sh
-          uri: cpln://secret/{{ .Release.Name }}-etcd-startup.payload
-  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-etcd-identity
+          uri: cpln://secret/{{ include "etcd.secretStartupName" . }}
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "etcd.identityName" . }}
   defaultOptions:
     multiZone:
       enabled: {{ .Values.multiZone }}

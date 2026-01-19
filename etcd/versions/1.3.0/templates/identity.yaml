@@ -1,7 +1,7 @@
 ---
 kind: identity
 gvc: {{ .Values.global.cpln.gvc }}
-name: {{ .Release.Name }}-etcd-identity
+name: {{ include "etcd.identityName" . }}
 description: etcd identity
 tags:
   {{- include "etcd.tags" . | nindent 4 }}

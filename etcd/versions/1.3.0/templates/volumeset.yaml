@@ -1,10 +1,10 @@
 kind: volumeset
-name: {{ .Release.Name }}-etcd-vs
+name: {{ include "etcd.volumeName" . }}
 description: etcd volumeset
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "etcd.tags" . | nindent 2 }}
-  workload: {{ .Release.Name }}-etcd
+  workload: {{ include "etcd.name" . }}
 spec:
   fileSystemType: ext4
   initialCapacity: {{ .Values.volumeset.capacity }}
