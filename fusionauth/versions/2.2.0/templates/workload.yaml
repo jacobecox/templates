@@ -1,11 +1,11 @@
 kind: workload
-name: {{ .Release.Name }}-fusionauth
+name: {{ include "fusionauth.name" . }}
 description: FusionAuth
 gvc: {{ .Values.global.cpln.gvc }}
 tags: {{- include "fusionauth.tags" . | nindent 4 }}
 spec:
   type: serverless
-  identityLink: //identity/{{ .Release.Name }}-fusionauth-identity
+  identityLink: //identity/{{ include "fusionauth.identityName" . }}
   containers:
     - name: fusionauth
       cpu: {{ .Values.resources.cpu | quote }}
@@ -14,11 +14,11 @@ spec:
       inheritEnv: false
       env:
         - name: DATABASE_PASSWORD
-          value: 'cpln://secret/{{ .Release.Name }}-pg-config.password'
+          value: 'cpln://secret/{{ include "fusionauth.secretPostgresName" . }}.password'
         - name: DATABASE_URL
-          value: jdbc:postgresql://{{ .Release.Name }}-postgres.{{ .Values.global.cpln.gvc }}.cpln.local:5432/{{ .Values.postgres.config.database }}
+          value: jdbc:postgresql://{{ include "fusionauth.postgresName" . }}.{{ .Values.global.cpln.gvc }}.cpln.local:5432/{{ .Values.postgres.config.database }}
         - name: DATABASE_USERNAME
-          value: 'cpln://secret/{{ .Release.Name }}-pg-config.username'
+          value: 'cpln://secret/{{ include "fusionauth.secretPostgresName" . }}.username'
         - name: fusionauth-app.runtime-mode
           value: 'production'
         - name: fusionauth-app.silent-mode
@@ -34,7 +34,7 @@ spec:
       volumes:
         - path: /opt/fusionauth/start-fusionauth.sh
           recoveryPolicy: retain
-          uri: cpln://secret/{{ .Release.Name }}-fusionauth-startup.payload
+          uri: cpln://secret/{{ include "fusionauth.secretStartupName" . }}
   defaultOptions:
     autoscaling:
       maxConcurrency: 1000

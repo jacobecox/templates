@@ -1,5 +1,5 @@
 kind: identity
-name: {{ .Release.Name }}-fusionauth-identity
+name: {{ include "fusionauth.identityName" . }}
 description: FusionAuth identity
 gvc: {{ .Values.global.cpln.gvc }}
 tags:

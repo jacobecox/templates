@@ -1,3 +1,50 @@
+{{/* Resource Naming */}}
+
+{{/*
+Fusionauth Workload Name
+*/}}
+{{- define "fusionauth.name" -}}
+{{- printf "%s-fusionauth" .Release.Name }}
+{{- end }}
+
+{{/*
+Fusionauth Postgres Workload Name
+*/}}
+{{- define "fusionauth.postgresName" -}}
+{{- printf "%s-postgres" .Release.Name }}
+{{- end }}
+
+{{/*
+Fusionauth Secret Postgres Config Name
+*/}}
+{{- define "fusionauth.secretPostgresName" -}}
+{{- printf "%s-pg-config" .Release.Name }}
+{{- end }}
+
+{{/*
+Fusionauth Secret Startup Name
+*/}}
+{{- define "fusionauth.secretStartupName" -}}
+{{- printf "%s-fusionauth-startup" .Release.Name }}
+{{- end }}
+
+{{/*
+Fusionauth Identity Name
+*/}}
+{{- define "fusionauth.identityName" -}}
+{{- printf "%s-fusionauth-identity" .Release.Name }}
+{{- end }}
+
+{{/*
+Fusionauth Policy Name
+*/}}
+{{- define "fusionauth.policyName" -}}
+{{- printf "%s-fusionauth-policy" .Release.Name }}
+{{- end }}
+
+
+{{/* Labeling */}}
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}
