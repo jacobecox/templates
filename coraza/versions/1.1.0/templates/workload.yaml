@@ -1,5 +1,5 @@
 kind: workload
-name: {{ .Release.Name }}-coraza-waf
+name: {{ include "coraza.name" . }}
 description: Coraza WAF
 tags: {{- include "coraza.tags" . | nindent 4 }}
 spec:
@@ -39,10 +39,10 @@ spec:
       volumes:
         - path: /opt/coraza/rules.d/custom.conf
           recoveryPolicy: retain
-          uri: cpln://secret/{{ .Release.Name }}-coraza-custom-rules.payload
+          uri: cpln://secret/{{ include "coraza.secretRulesName" . }}
         - path: /opt/coraza/startup.sh
           recoveryPolicy: retain
-          uri: cpln://secret/{{ .Release.Name }}-coraza-startup.payload
+          uri: cpln://secret/{{ include "coraza.secretStartupName" . }}
   defaultOptions:
     multiZone:
       enabled: {{ .Values.multiZone }}
@@ -74,7 +74,7 @@ spec:
     internal:
       inboundAllowType: same-gvc
       inboundAllowWorkload: []
-  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-coraza-identity
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "coraza.identityName" . }}
   loadBalancer:
     direct:
       enabled: false
