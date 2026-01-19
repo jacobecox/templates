@@ -1,6 +1,6 @@
 ---
 kind: identity
 gvc: {{ .Values.gvc.name }}
-name: {{ .Release.Name }}-cockroach-identity
+name: {{ include "cockroach.identityName" . }}
 description: CockroachDB identity
 tags: {{- include "cockroach.tags" . | nindent 4 }}

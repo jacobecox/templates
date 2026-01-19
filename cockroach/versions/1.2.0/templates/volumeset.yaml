@@ -1,5 +1,5 @@
 kind: volumeset
-name: {{ .Release.Name }}-cockroach-vs
+name: {{ include "cockroach.volumeName" . }}
 description: CockroachDB volumeset
 gvc: {{ .Values.gvc.name }}
 tags: {{- include "cockroach.tags" . | nindent 4 }}

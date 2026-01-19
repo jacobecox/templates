@@ -1,3 +1,50 @@
+{{/* Resource Naming */}}
+
+{{/*
+Cockroach Workload Name
+*/}}
+{{- define "cockroach.name" -}}
+{{- printf "%s-cockroach" .Release.Name }}
+{{- end }}
+
+{{/*
+Cockroach Secret Database Config Name
+*/}}
+{{- define "cockroach.secretDatabaseName" -}}
+{{- printf "%s-cockroach-config" .Release.Name }}
+{{- end }}
+
+{{/*
+Cockroach Secret Startup Name
+*/}}
+{{- define "cockroach.secretStartupName" -}}
+{{- printf "%s-cockroach-startup" .Release.Name }}
+{{- end }}
+
+{{/*
+Cockroach Identity Name
+*/}}
+{{- define "cockroach.identityName" -}}
+{{- printf "%s-cockroach-identity" .Release.Name }}
+{{- end }}
+
+{{/*
+Cockroach Policy Name
+*/}}
+{{- define "cockroach.policyName" -}}
+{{- printf "%s-cockroach-policy" .Release.Name }}
+{{- end }}
+
+{{/*
+Cockroach Volume Set Name
+*/}}
+{{- define "cockroach.volumeName" -}}
+{{- printf "%s-cockroach-vs" .Release.Name }}
+{{- end }}
+
+
+{{/* Validation */}}
+
 {{/*
 Validate that gvc.locations has at least 2 entries
 */}}
@@ -6,6 +53,9 @@ Validate that gvc.locations has at least 2 entries
 {{- fail "gvc.locations must contain at least 2 locations for CockroachDB multi-region deployment" -}}
 {{- end -}}
 {{- end -}}
+
+
+{{/* Labeling */}}
 
 {{/*
 Create chart name and version as used by the chart label.

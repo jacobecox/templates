@@ -1,7 +1,7 @@
 {{- include "cockroach.validateLocations" . -}}
 ---
 kind: workload
-name: {{ .Release.Name }}-cockroach
+name: {{ include "cockroach.name" . }}
 description: CockroachDB cluster
 tags: {{- include "cockroach.tags" . | nindent 4 }}
 spec:
@@ -17,9 +17,9 @@ spec:
       inheritEnv: false
       env:
         - name: DB_NAME
-          value: cpln://secret/{{ .Release.Name }}-cockroach-config.db
+          value: cpln://secret/{{ include "cockroach.secretDatabaseName" . }}.db
         - name: DB_USER
-          value: cpln://secret/{{ .Release.Name }}-cockroach-config.user
+          value: cpln://secret/{{ include "cockroach.secretDatabaseName" . }}.user
       ports:
         - number: 8080
           protocol: http
@@ -28,9 +28,9 @@ spec:
       volumes:
         - path: /cockroach/cockroach-data
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-cockroach-vs
+          uri: cpln://volumeset/{{ include "cockroach.volumeName" . }}
         - path: /cockroach/start.sh
-          uri: cpln://secret/{{ .Release.Name }}-cockroach-startup.payload
+          uri: cpln://secret/{{ include "cockroach.secretStartupName" . }}
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
@@ -52,7 +52,7 @@ spec:
       {{- if .Values.internal_access.workloads }}
       inboundAllowWorkload: {{ .Values.internal_access.workloads | toYaml | nindent 8 }}
       {{- end }}
-  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-cockroach-identity
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ include "cockroach.identityName" . }}
   loadBalancer:
     replicaDirect: true
   localOptions:
