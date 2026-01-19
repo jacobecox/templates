@@ -1,0 +1,13 @@
+kind: policy
+name: {{ include "mysql.policyName" . }}
+description: MySQL policy
+tags:
+  {{- include "mysql.tags" . | nindent 4 }}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "mysql.identityName" . }}
+targetKind: secret
+targetLinks:
+  - //secret/{{ include "mysql.secretDatabaseName" . }}

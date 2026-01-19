@@ -1,0 +1,51 @@
+image: mysql:9 # versions before mysql:9 are compatible but do not support backup feature
+
+resources:
+  minCpu: 100m
+  maxCpu: 400m
+  minMemory: 128Mi
+  maxMemory: 512Mi
+
+timeoutSeconds: 15
+
+config:
+  db: test
+  rootPassword: root-password
+  user: username
+  password: password
+
+internalAccess: # Sets the internal firewall scope - if set to none, replicas will not be able to reach each other
+  type: same-gvc # options: none, same-gvc, same-org, workload-list
+  workloads:  # Note: can only be used if type is same-gvc or workload-list
+    #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+    #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
+
+volumeset:
+  capacity: 10 # initial capacity in GiB (minimum is 10)
+
+enablePhpMyAdmin: false # set to true to enable PhpMyAdmin as an admin interface
+
+backup: # compatible with MySQL 9+
+  enabled: false
+  image: controlplanecorporation/mysql-backup:9.1 # tag 9.1 = MySQL 9 compatible
+  schedule: "0 2 * * *"   # daily at 2am UTC
+
+  resources:
+    cpu: 100m
+    memory: 128Mi
+
+  aws:
+    enabled: false
+    s3:
+      bucket: mysql-backup-bucket
+      region: us-east-1
+      cloudAccountName: mysql-backup-cloudaccount
+      policyName: mysql-backup-policy
+      prefix: mysql/my-cluster # folder name where your backups will be stored
+
+  gcp:
+    enabled: false
+    gcs:
+      bucket: mysql-backup-bucket
+      cloudAccountName: mysql-backup-cloudaccount
+      prefix: mysql/my-cluster # folder name where your backups will be stored
