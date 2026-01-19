@@ -1,12 +1,12 @@
 {{ include "clickhouse.validateLocations" . }}
 kind: workload
-name: {{ .Release.Name }}-keeper
+name: {{ include "clickhouse.keeperName" . }}
 description: clickhouse keeper
 tags: {{- include "clickhouse.tags" . | nindent 4 }}
 spec:
   type: stateful
   containers:
-    - name: {{ .Release.Name }}-keeper
+    - name: keeper
       cpu: "{{ .Values.keeper.resources.cpu }}"
       image: clickhouse/clickhouse-keeper:25.10
       inheritEnv: false
@@ -25,10 +25,10 @@ spec:
       volumes:
         - path: /var/lib/clickhouse
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-clickhouse-keeper-vs
+          uri: cpln://volumeset/{{ include "clickhouse.volumeKeeperName" . }}
         - path: /scripts/keeper-startup.sh
-          uri: cpln://secret/{{ .Release.Name }}-clickhouse-keeper-startup.payload
-  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ .Release.Name }}-clickhouse-identity
+          uri: cpln://secret/{{ include "clickhouse.secretKeeperName" . }}
+  identityLink: //gvc/{{ .Values.gvc.name }}/identity/{{ include "clickhouse.identityName" . }}
   defaultOptions:
     autoscaling:
       keda: {}

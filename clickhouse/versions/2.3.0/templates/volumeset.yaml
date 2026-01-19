@@ -1,9 +1,9 @@
 kind: volumeset
-name: {{ .Release.Name }}-clickhouse-server-vs
+name: {{ include "clickhouse.volumeServerName" . }}
 description: Clickhouse server volumeset
 tags: 
   {{- include "clickhouse.tags" . | nindent 2 }}
-  workload: {{ .Release.Name }}-server
+  workload: {{ include "clickhouse.serverName" . }}
 spec:
   fileSystemType: ext4
   initialCapacity: {{ .Values.volumeset.server.capacity }}
@@ -14,11 +14,11 @@ spec:
 
 ---
 kind: volumeset
-name: {{ .Release.Name }}-clickhouse-keeper-vs
+name: {{ include "clickhouse.volumeKeeperName" . }}
 description: Clickhouse keeper volumeset
 tags:
   {{- include "clickhouse.tags" . | nindent 2 }}
-  workload: {{ .Release.Name }}-keeper
+  workload: {{ include "clickhouse.keeperName" . }}
 spec:
   fileSystemType: ext4
   initialCapacity: {{ .Values.volumeset.keeper.capacity }}

@@ -2,7 +2,7 @@
 ---
 kind: identity
 gvc: {{ .Values.gvc.name }}
-name: {{ .Release.Name }}-clickhouse-identity
+name: {{ include "clickhouse.identityName" . }}
 description: Clickhouse identity
 tags: {{- include "clickhouse.tags" . | nindent 4 }}
 {{- if .Values.aws.enabled }}
