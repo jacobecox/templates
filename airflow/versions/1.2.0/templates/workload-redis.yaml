@@ -1,5 +1,5 @@
 kind: workload
-name: {{ .Release.Name }}-airflow-redis
+name: {{ include "airflow.redisName" . }}
 description: Airflow Redis
 gvc: {{ .Values.gvc.name }}
 tags:

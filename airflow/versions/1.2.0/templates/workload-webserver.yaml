@@ -1,12 +1,12 @@
 kind: workload
-name: {{ .Release.Name }}-airflow-webserver
+name: {{ include "airflow.webserverName" . }}
 description: Airflow webserver
 gvc: {{ .Values.gvc.name }}
 tags:
   {{- include "airflow.tags" . | nindent 2 }}
 spec:
   type: stateful
-  identityLink: //identity/{{ .Release.Name }}-airflow-identity
+  identityLink: //identity/{{ include "airflow.identityName" . }}
   containers:
     - name: airflow
       command: bash
@@ -38,23 +38,23 @@ spec:
         - name: AIRFLOW__API_AUTH__JWT_REFRESH_THRESHOLD
           value: {{ .Values.airflow.auth.jwtRefreshThreshold | quote }}
         - name: POSTGRES_USERNAME
-          value: cpln://secret/{{ .Release.Name }}-airflow-config.username         
+          value: cpln://secret/{{ include "airflow.secretName" . }}.username         
         - name: POSTGRES_PASSWORD 
-          value: cpln://secret/{{ .Release.Name }}-airflow-config.password          
+          value: cpln://secret/{{ include "airflow.secretName" . }}.password          
         - name: AIRFLOW__API_AUTH__JWT_SECRET
-          value: cpln://secret/{{ .Release.Name }}-airflow-config.jwtSecret
+          value: cpln://secret/{{ include "airflow.secretName" . }}.jwtSecret
         - name: AIRFLOW__API__BASE_URL
-          value: http://{{ .Release.Name }}-airflow-webserver:{{ .Values.airflow.webPort }}
+          value: http://{{ include "airflow.webserverName" . }}:{{ .Values.airflow.webPort }}
         - name: AIRFLOW__CELERY__BROKER_URL
-          value: redis://{{ .Release.Name }}-airflow-redis.{{ .Values.gvc.name }}.cpln.local
+          value: redis://{{ include "airflow.redisName" . }}.{{ .Values.gvc.name }}.cpln.local
         - name: AIRFLOW__CELERY__RESULT_BACKEND
-          value: db+postgresql://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ .Release.Name }}-airflow-postgres:5432/test
+          value: db+postgresql://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ include "airflow.postgresName" . }}:5432/test
         - name: AIRFLOW__CORE__DAGS_FOLDER
           value: /opt/airflow/dags
         - name: AIRFLOW__CORE__EXECUTOR
           value: CeleryExecutor
         - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-          value: postgresql+psycopg2://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ .Release.Name }}-airflow-postgres:5432/test
+          value: postgresql+psycopg2://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ include "airflow.postgresName" . }}:5432/test
         - name: AIRFLOW__LOGGING__REMOTE_LOGGING
           value: 'False'
         - name: AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL
@@ -71,7 +71,7 @@ spec:
       volumes:
         - path: /opt/airflow
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-airflow-vs
+          uri: cpln://volumeset/{{ include "airflow.volumeName" . }}
   firewallConfig:
     external:
       inboundAllowCIDR:

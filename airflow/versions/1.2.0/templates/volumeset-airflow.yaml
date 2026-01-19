@@ -1,6 +1,6 @@
 kind: volumeset
-name: {{ .Release.Name }}-airflow-vs
-description: Airflow volumeset
+name: {{ include "airflow.volumeName" . }}
+description: Airflow volume set
 gvc: {{ .Values.gvc.name }}
 tags:
   {{- include "airflow.tags" . | nindent 4 }}

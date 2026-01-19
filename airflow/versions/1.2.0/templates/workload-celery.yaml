@@ -1,11 +1,11 @@
 kind: workload
-name: {{ .Release.Name }}-airflow-celery-worker
+name: {{ include "airflow.celeryName" . }}
 description: Airflow Celery worker
 gvc: {{ .Values.gvc.name }}
 tags: {{- include "airflow.tags" . | nindent 4 }}
 spec:
   type: stateful
-  identityLink: //identity/{{ .Release.Name }}-airflow-identity
+  identityLink: //identity/{{ include "airflow.identityName" . }}
   containers:
     - name: celery-worker
       cpu: {{ .Values.airflow.celeryWorker.resources.cpu }}
@@ -18,17 +18,17 @@ spec:
         - name: AIRFLOW__API_AUTH__JWT_REFRESH_THRESHOLD
           value: "{{ .Values.airflow.auth.jwtRefreshThreshold }}"
         - name: POSTGRES_USERNAME
-          value: cpln://secret/{{ .Release.Name }}-airflow-config.username         
+          value: cpln://secret/{{ include "airflow.secretName" . }}.username         
         - name: POSTGRES_PASSWORD 
-          value: cpln://secret/{{ .Release.Name }}-airflow-config.password          
+          value: cpln://secret/{{ include "airflow.secretName" . }}.password          
         - name: AIRFLOW__API_AUTH__JWT_SECRET
-          value: cpln://secret/{{ .Release.Name }}-airflow-config.jwtSecret
+          value: cpln://secret/{{ include "airflow.secretName" . }}.jwtSecret
         - name: AIRFLOW__API__BASE_URL
-          value: http://{{ .Release.Name }}-airflow-webserver:{{ .Values.airflow.webPort }}
+          value: http://{{ include "airflow.webserverName" . }}:{{ .Values.airflow.webPort }}
         - name: AIRFLOW__CELERY__BROKER_URL
-          value: redis://{{ .Release.Name }}-airflow-redis.{{ .Values.gvc.name }}.cpln.local
+          value: redis://{{ include "airflow.redisName" . }}.{{ .Values.gvc.name }}.cpln.local
         - name: AIRFLOW__CELERY__RESULT_BACKEND
-          value: db+postgresql://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ .Release.Name }}-airflow-postgres:5432/test
+          value: db+postgresql://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ include "airflow.postgresName" . }}:5432/test
         {{- if .Values.keda.enabled }}
         - name: AIRFLOW__CELERY__WORKER_CONCURRENCY
           value: "{{ .Values.airflow.celery.workerConcurrency }}"
@@ -38,7 +38,7 @@ spec:
         - name: AIRFLOW__CORE__EXECUTOR
           value: CeleryExecutor
         - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-          value: postgresql+psycopg2://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ .Release.Name }}-airflow-postgres:5432/test
+          value: postgresql+psycopg2://$(POSTGRES_USERNAME):$(POSTGRES_PASSWORD)@{{ include "airflow.postgresName" . }}:5432/test
         - name: AIRFLOW__LOGGING__REMOTE_LOGGING
           value: 'False'
       image: {{ .Values.airflow.celeryWorker.image }}
@@ -47,7 +47,7 @@ spec:
       volumes:
         - path: /opt/airflow
           recoveryPolicy: retain
-          uri: cpln://volumeset/{{ .Release.Name }}-airflow-vs
+          uri: cpln://volumeset/{{ include "airflow.volumeName" . }}
   {{- if .Values.keda.enabled }}
   defaultOptions:
       autoscaling:
@@ -59,7 +59,7 @@ spec:
             - name: redis-trigger
               type: redis
               metadata:
-                address: {{ .Release.Name }}-airflow-redis.{{ .Values.gvc.name }}.cpln.local:6379
+                address: {{ include "airflow.redisName" . }}.{{ .Values.gvc.name }}.cpln.local:6379
                 listLength: "{{ .Values.keda.listLength }}"
                 listName: default
         maxConcurrency: 0

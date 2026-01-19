@@ -1,5 +1,5 @@
 kind: volumeset
-name: {{ .Release.Name }}-airflow-postgres-vs
+name: {{ include "airflow.postgresVolumeName" . }}
 description: Postgres volumeset
 gvc: {{ .Values.gvc.name }}
 tags:
