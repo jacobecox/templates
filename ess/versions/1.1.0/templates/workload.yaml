@@ -1,5 +1,5 @@
 kind: workload
-name: {{ .Release.Name }}-ess
+name: {{ include "ess.name" . }}
 description: External Secret Syncer
 tags: {{- include "ess.tags" . | nindent 4 }}
 spec:
@@ -27,7 +27,7 @@ spec:
       volumes:
         - path: /usr/src/app/sync.yaml
           recoveryPolicy: retain
-          uri: cpln://secret/{{ .Release.Name }}-ess-config
+          uri: cpln://secret/{{ include "ess.secretName" . }}
   defaultOptions:
     autoscaling:
       maxConcurrency: 0
@@ -53,7 +53,7 @@ spec:
     internal:
       inboundAllowType: none
       inboundAllowWorkload: []
-  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ .Release.Name }}-ess-identity
+  identityLink: //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "ess.identityName" . }}
   loadBalancer:
     direct:
       enabled: false
