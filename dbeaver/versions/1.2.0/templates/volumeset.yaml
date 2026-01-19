@@ -1,9 +1,9 @@
 kind: volumeset
-name: {{ .Release.Name }}-dbeaver-vs
+name: {{ include "dbeaver.volumesetName" . }}
 gvc: {{ .Values.global.cpln.gvc }}
 tags:
   {{- include "dbeaver.tags" . | nindent 2 }}
-  workload: {{ .Release.Name }}
+  workload: {{ include "dbeaver.name" . }}
 spec:
   fileSystemType: ext4
   initialCapacity: {{ .Values.volumeset.capacity }}

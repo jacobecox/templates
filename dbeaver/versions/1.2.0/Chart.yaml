@@ -8,6 +8,6 @@ appVersion: "25.2.0"
 
 annotations:
   created: "2025-09-17"
-  lastModified: "2026-01-16"
+  lastModified: "2026-01-19"
   category: "database gui"
   createsGvc: false

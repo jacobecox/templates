@@ -1,7 +1,7 @@
 ---
 kind: identity
 gvc: {{ .Values.global.cpln.gvc }}
-name: {{ .Release.Name }}-dbeaver-identity
+name: {{ include "dbeaver.identityName" . }}
 description: DBeaver identity
 tags:
   {{- include "dbeaver.tags" . | nindent 4 }}

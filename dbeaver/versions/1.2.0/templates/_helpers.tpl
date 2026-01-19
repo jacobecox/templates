@@ -1,3 +1,43 @@
+{{/* Resource Naming */}}
+
+{{/*
+DBeaver Workload Name
+*/}}
+{{- define "dbeaver.name" -}}
+{{- printf "%s-dbeaver" .Release.Name }}
+{{- end }}
+
+{{/*
+DBeaver Identity Name
+*/}}
+{{- define "dbeaver.identityName" -}}
+{{- printf "%s-dbeaver-identity" .Release.Name }}
+{{- end }}
+
+{{/*
+DBeaver Policy Name
+*/}}
+{{- define "dbeaver.policyName" -}}
+{{- printf "%s-dbeaver-policy" .Release.Name }}
+{{- end }}
+
+{{/*
+DBeaver Secret Admin Config Name
+*/}}
+{{- define "dbeaver.secretName" -}}
+{{- printf "%s-dbeaver-admin-config" .Release.Name }}
+{{- end }}
+
+{{/*
+DBeaver Volume Set Name
+*/}}
+{{- define "dbeaver.volumesetName" -}}
+{{- printf "%s-dbeaver-vs" .Release.Name }}
+{{- end }}
+
+
+{{/* Labeling */}}
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}
