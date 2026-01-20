@@ -1,0 +1,72 @@
+{{- if .Values.backup.enabled }}
+kind: workload
+name: {{ include "postgres.backupName" . }}
+description: Postgres Backup
+tags: {{- include "pg.tags" . | nindent 4 }}
+spec:
+  type: cron
+  containers:
+    - name: backup-postgres
+      cpu: {{ .Values.backup.resources.cpu | quote }}
+      memory: {{ .Values.backup.resources.memory | quote }}
+      env:
+      {{- if .Values.backup.aws.enabled }}
+        - name: AWS_REGION
+          value: cpln://secret/{{ include "postgres.secretDatabaseName" . }}.aws-region
+        - name: BACKUP_PROVIDER
+          value: aws
+        - name: BACKUP_BUCKET
+          value: cpln://secret/{{ include "postgres.secretDatabaseName" . }}.backup-bucket
+        - name: BACKUP_PREFIX
+          value: {{ .Values.backup.aws.s3.prefix }}
+      {{- end }}
+      {{- if .Values.backup.gcp.enabled }}
+        - name: BACKUP_PROVIDER
+          value: gcp
+        - name: BACKUP_BUCKET
+          value: cpln://secret/{{ include "postgres.secretDatabaseName" . }}.backup-bucket
+        - name: BACKUP_PREFIX
+          value: {{ .Values.backup.gcp.gcs.prefix }}
+      {{- end }}
+        - name: PG_HOST
+          value: {{ include "postgres.name" . }}.{{ .Values.global.cpln.gvc }}.cpln.local
+        - name: PG_PASSWORD
+          value: cpln://secret/{{ include "postgres.secretDatabaseName" . }}.password
+        - name: PG_PORT
+          value: '5432'
+        - name: PG_USER
+          value: cpln://secret/{{ include "postgres.secretDatabaseName" . }}.username
+      image: {{ .Values.backup.image }}
+      inheritEnv: false
+  defaultOptions:
+    autoscaling:
+      maxConcurrency: 0
+      maxScale: 1
+      metric: disabled
+      minScale: 1
+      scaleToZeroDelay: 300
+      target: 95
+    capacityAI: false
+    debug: false
+    suspend: false
+    timeoutSeconds: 5
+  firewallConfig:
+    external:
+      inboundAllowCIDR: []
+      inboundBlockedCIDR: []
+      outboundAllowCIDR:
+        - 0.0.0.0/0
+      outboundAllowHostname: []
+      outboundAllowPort: []
+      outboundBlockedCIDR: []
+    internal:
+      inboundAllowType: none
+      inboundAllowWorkload: []
+  identityLink: //identity/{{ include "postgres.identityName" . }}
+  job:
+    concurrencyPolicy: Forbid
+    historyLimit: 5
+    restartPolicy: Never
+    schedule: {{ .Values.backup.schedule }}
+  supportDynamicTags: false
+{{- end }}
