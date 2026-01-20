@@ -1,0 +1,5 @@
+kind: identity
+name: {{ include "redis.sentinelIdentityName" . }}
+description: Redis Sentinel Identity
+tags: {{- include "redis.tags" . | nindent 4 }}
+gvc: {{ .Values.global.cpln.gvc }}
