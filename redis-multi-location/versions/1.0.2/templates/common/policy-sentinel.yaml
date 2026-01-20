@@ -1,0 +1,13 @@
+# {{- if .Values.locations }}
+# {{- else }}
+# kind: policy
+# name: {{ include "redis.sentinelPolicyName" . }}
+# bindings:
+#   - permissions:
+#       - reveal
+#     principalLinks:
+#       - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "redis.sentinelIdentityName" . }}
+# targetKind: secret
+# targetLinks:
+#   - //secret/{{ include "redis.sentinelSecretConfigName" . }}
+# {{- end }}
