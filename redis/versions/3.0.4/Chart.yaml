@@ -1,0 +1,12 @@
+apiVersion: v2
+name: redis
+description: A master-replica Redis configuration with Redis Sentinel
+type: application
+version: 3.0.4
+appVersion: "custom"
+
+annotations:
+  created: "2026-01-08"
+  lastModified: "2026-01-08"
+  category: "cache"
+  createsGvc: false
