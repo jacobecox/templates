@@ -1,0 +1,9 @@
+kind: volumeset
+name: {{ include "redis-cluster.volumeName" . }}
+description: Redis Cluster Volumeset
+tags: {{- include "redis-cluster.tags" . | nindent 4 }}
+gvc: {{ .Values.global.cpln.gvc }}
+spec:
+  fileSystemType: ext4
+  initialCapacity: {{ .Values.volumeset.capacity }}
+  performanceClass: general-purpose-ssd

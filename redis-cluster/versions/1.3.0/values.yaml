@@ -1,0 +1,14 @@
+replicas: 6 # minimum value is 6
+port: 6379
+memory: 250Mi
+cpu: 200m
+firewallConfig:
+  internal:
+    inboundAllowType: same-org
+
+volumeset:
+  capacity: 10 # initial capacity in GiB (minimum is 10)
+
+# Configure Redis authentication by uncommenting and setting the password field
+redis: {}
+  # password: "your-secure-password-here"
