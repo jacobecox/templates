@@ -1,0 +1,20 @@
+kind: policy
+name: {{ include "pg-ha.policyName" . }}
+description: Postgres Highly Available policy
+tags:
+  {{- include "pg-ha.tags" . | nindent 4 }}
+bindings:
+  - permissions:
+      - reveal
+    principalLinks:
+      - //gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "pg-ha.identityName" . }}
+targetKind: secret
+targetLinks:
+  - //secret/{{ include "pg-ha.secretStartupName" . }}
+  - //secret/{{ include "pg-ha.secretDatabaseName" . }}
+  {{- if .Values.proxy.enabled }}
+  - //secret/{{ include "pg-ha.secretProxyStartupName" . }}
+  {{- end }}
+  {{- if and .Values.backup.enabled (eq .Values.backup.mode "wal-g") }}
+  - //secret/{{ include "pg-ha.secretWALGStartupName" . }}
+  {{- end }}
