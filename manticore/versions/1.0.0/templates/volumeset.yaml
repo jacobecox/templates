@@ -9,7 +9,7 @@
 #
 # Data is preserved across restarts. Snapshots enable point-in-time recovery.
 kind: volumeset
-name: {{ .Release.Name }}-manticore-vs
+name: {{ include "manticore.volumeName" . }}
 description: Persistent storage for Manticore data and cluster state
 tags: {{- include "manticore.tags" . | nindent 4 }}
 spec:

@@ -145,7 +145,7 @@ orchestrator:
   image: ghcr.io/cuppojoe/manticore-cpln-api
   logLevel: debug
   resources:
-    cpu: "0.25"
+    cpu: 0.25
     memory: 256Mi
   # Cron workload settings (for scheduled/manual job execution)
   schedule: "0 * * * *"           # Cron schedule (default: hourly)
@@ -162,7 +162,7 @@ orchestrator:
     image: ghcr.io/cuppojoe/manticore-cpln-api
     logLevel: debug
     resources:
-      cpu: "0.25"
+      cpu: 0.25
       memory: 256Mi
     autoscaling:
       maxScale: 3
@@ -182,8 +182,8 @@ orchestrator:
     # See README.md "Authentication" section for details
     token: "6Gl5uO9KkKAh1u+ymoBW98WCtjTFpljuhpLdKb+tNAA="
     resources:
-      cpu: "1"
-      minCpu: "0.25"
+      cpu: 1
+      minCpu: 0.25
       memory: 2.4Gi
       minMemory: 0.6Gi
     # Import settings (csv-to-manticore tool)
@@ -204,7 +204,7 @@ orchestrator:
   ui:
     image: ghcr.io/cuppojoe/manticore-cpln-ui
     resources:
-      cpu: "0.25"
+      cpu: 0.25
       memory: 0.25Gi
     allowExternalAccess: true     # Set false to restrict to internal GVC access only
     autoscaling:
@@ -236,6 +236,8 @@ manticore:
     memory: 16Gi
   volumeset:
     capacity: 200
+  sharedVolumeset:
+    capacity: 100
   # Autoscaling configuration for the Manticore stateful workload
   # Note: minScale determines the replica count that orchestrator coordinates
   autoscaling:
@@ -255,7 +257,7 @@ manticore:
   firewall:
     internalAccess:
       type: same-gvc          # Required for Galera replication between replicas
-      workloads: []           # Additional workloads to allow (if type is workload-list)
+      workloads: []           # Additional workloads to allow (if type is workload-list or same-gvc)
         #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
   # Custom DDL statements to run after cluster initialization
   # Use for additional RT tables, distributed tables, or custom indexes
@@ -282,7 +284,7 @@ loadTest:
 
   # Container resources
   resources:
-    cpu: "0.5"
+    cpu: 0.5
     memory: 512Mi
 
   # k6 execution parameters

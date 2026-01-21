@@ -9,7 +9,7 @@
 # Manticore workload identity - used by both searchd and agent sidecar
 # Grants S3 read access via AWS IAM policy through Cloud Account
 kind: identity
-name: {{ .Release.Name }}-manticore-identity
+name: {{ include "manticore.identityName" . }}
 description: Manticore workload identity for S3 and secret access
 tags: {{- include "manticore.tags" . | nindent 4 }}
 aws:
@@ -22,20 +22,20 @@ aws:
 # Orchestrator identity - used by orchestrator cron, API, and UI
 # Grants secret access and CPLN API access for workload management
 kind: identity
-name: {{ .Release.Name }}-orchestrator-identity
+name: {{ include "manticore.orchestratorIdentityName" . }}
 description: Orchestrator identity for secrets and CPLN API
 tags: {{- include "manticore.tags" . | nindent 4 }}
 {{- if .Values.loadTest.enabled }}
 ---
 # Load test identity - grants access to k6 script secret
 kind: identity
-name: {{ .Release.Name }}-load-test
+name: {{ include "manticore.loadTestIdentityName" . }}
 description: Load test workload identity for script access
 tags: {{- include "manticore.tags" . | nindent 4 }}
 ---
 # Load test controller identity - grants workload scaling permissions
 kind: identity
-name: {{ .Release.Name }}-load-test-controller
+name: {{ include "manticore.loadTestControllerIdentityName" . }}
 description: Controller identity for scaling load-test workload
 tags: {{- include "manticore.tags" . | nindent 4 }}
 {{- end }}
