@@ -1,6 +1,16 @@
+# =============================================================================
+# Manticore Volumeset
+# =============================================================================
+# Persistent storage for each Manticore replica. Stores:
+#   - /var/lib/manticore/data: Table data and indexes (main_a, main_b, delta)
+#   - /var/lib/manticore/binlog: Transaction logs for cluster replication
+#   - grastate.dat: Galera cluster state (UUID, seqno, safe_to_bootstrap)
+#   - manticore.json: Cluster and table configuration
+#
+# Data is preserved across restarts. Snapshots enable point-in-time recovery.
 kind: volumeset
 name: {{ .Release.Name }}-manticore-vs
-description: Manticore volumeset
+description: Persistent storage for Manticore data and cluster state
 tags: {{- include "manticore.tags" . | nindent 4 }}
 spec:
   fileSystemType: ext4

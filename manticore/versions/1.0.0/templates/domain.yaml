@@ -1,0 +1,42 @@
+# =============================================================================
+# External Domain (Optional)
+# =============================================================================
+# Provisions a custom domain for external access to the UI and API.
+# Routes:
+#   /api/* -> Orchestrator API (port 8080)
+#   /*     -> Web UI (port 3000)
+#
+# Enable by setting domain.enabled: true and domain.name in values.yaml.
+# DNS configuration depends on dnsMode (cname for subdomains, ns for zones).
+{{- if .Values.domain.enabled }}
+kind: domain
+name: {{ .Values.domain.name }}
+description: External domain for Manticore cluster UI and API
+tags: {{- include "manticore.tags" . | nindent 4 }}
+spec:
+  dnsMode: {{ .Values.domain.dnsMode }}
+  gvcLink: /org/{{ .Values.global.cpln.org }}/gvc/{{ .Values.global.cpln.gvc }}
+  acceptAllHosts: false
+  ports:
+    - number: 443
+      protocol: http2
+      cors:
+        allowOrigins:
+          - exact: '*'
+        allowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        allowHeaders:
+          - '*'
+        allowCredentials: true
+      routes:
+        # Orchestrator API - cluster coordination endpoints
+        - prefix: /api/
+          workloadLink: //gvc/{{ .Values.global.cpln.gvc }}/workload/{{ .Release.Name }}-orchestrator-api
+          port: 8080
+        # Web UI - dashboard and management interface
+        - prefix: /
+          workloadLink: //gvc/{{ .Values.global.cpln.gvc }}/workload/{{ .Release.Name }}-ui
+          port: 3000
+{{- end }}
