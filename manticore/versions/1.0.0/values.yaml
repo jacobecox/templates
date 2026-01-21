@@ -145,8 +145,8 @@ orchestrator:
   image: ghcr.io/cuppojoe/manticore-cpln-api
   logLevel: debug
   resources:
-    cpu: 0.25
-    memory: 256Mi
+    cpu: 4
+    memory: 16Gi
   # Cron workload settings (for scheduled/manual job execution)
   schedule: "0 * * * *"           # Cron schedule (default: hourly)
   action: import                  # Action: init, import, health, repair
@@ -182,10 +182,10 @@ orchestrator:
     # See README.md "Authentication" section for details
     token: "6Gl5uO9KkKAh1u+ymoBW98WCtjTFpljuhpLdKb+tNAA="
     resources:
-      cpu: 1
-      minCpu: 0.25
-      memory: 2.4Gi
-      minMemory: 0.6Gi
+      cpu: 100m
+      minCpu: 250m
+      memory: 512Mi
+      minMemory: 128Mi
     # Import settings (csv-to-manticore tool)
     import:
       batchSize: 20000        # Rows per INSERT statement (balance memory vs speed)
@@ -232,8 +232,8 @@ manticore:
   image: manticoresearch/manticore:latest
   clusterName: manticore
   resources:
-    cpu: 3
-    memory: 16Gi
+    cpu: 2
+    memory: 8Gi
   volumeset:
     capacity: 200
   sharedVolumeset:

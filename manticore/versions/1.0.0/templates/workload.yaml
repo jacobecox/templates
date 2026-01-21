@@ -59,7 +59,7 @@ spec:
         successThreshold: 1
         tcpSocket:
           port: 9306
-        timeoutSeconds: 1
+        timeoutSeconds: 10
       volumes:
         - path: /var/lib/manticore
           recoveryPolicy: retain
@@ -137,9 +137,6 @@ spec:
         - path: /etc/manticore/schema.conf
           recoveryPolicy: retain
           uri: cpln://secret/{{ include "manticore.secretSchemaConfigName" . }}.payload
-        - path: /mnt/s3
-          uri: s3://{{ .Values.buckets.sourceBucket }}
-          recoveryPolicy: retain
         - path: /mnt/shared
           recoveryPolicy: retain
           uri: cpln://volumeset/{{ include "manticore.sharedVolumeName" . }}
@@ -231,10 +228,19 @@ spec:
           value: "{{ .Values.orchestrator.logLevel }}"
         - name: IMPORT_MEM_LIMIT
           value: "{{ .Values.orchestrator.importMemLimit }}"
+        - name: INDEXER_WORK_DIR
+          value: "/mnt/s3/indexer-temp"
+        - name: S3_MOUNT
+          value: "/mnt/s3"
+        - name: SHARED_VOLUME_MOUNT
+          value: "/mnt/shared"
       volumes:
         - path: /mnt/shared
           recoveryPolicy: retain
           uri: cpln://volumeset/{{ include "manticore.sharedVolumeName" . }}
+        - path: /mnt/s3
+          uri: s3://{{ .Values.buckets.sourceBucket }}
+          recoveryPolicy: retain
   defaultOptions:
     autoscaling:
       maxScale: 1
