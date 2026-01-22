@@ -1,56 +1,19 @@
 # =============================================================================
 # AWS Cloud Account and S3 Configuration
 # =============================================================================
-# CSV source files are mounted read-only from S3. The workload identity uses
-# AWS IAM policies via a Control Plane Cloud Account for secure access.
 # See README.md for Cloud Account and IAM policy setup instructions.
 buckets:
-  # Name of your Control Plane Cloud Account (must already exist)
-  # The cloud account establishes trust with your AWS account
-  cloudAccountName: kcupp-aws-1
-
-  # AWS IAM policy references for the identity
-  # These policies are attached to the identity that accesses S3
-  # Common options: aws::ReadOnlyAccess, aws::S3ReadOnlyAccess, or custom policy ARNs
-  awsPolicyRefs:
+  cloudAccountName: kcupp-aws-1    # Name of your configured Cloud Account
+  awsPolicyRefs:                   # IAM policies for S3 access
     - aws::AmazonS3ReadOnlyAccess
-
-  # AWS region (used for S3 endpoint in firewall rules)
   awsRegion: us-east-1
-
-  # S3 bucket name where CSV files are stored (mounted read-only at /mnt/s3)
-  sourceBucket: cpln.kcupp.test
+  sourceBucket: cpln.kcupp.test    # S3 bucket containing files to import
 
 # =============================================================================
 # Tables Configuration
 # =============================================================================
-# Each table entry creates a full table set with dual-slot import support:
-#   - {name}_main_a / {name}_main_b  : Plain tables for zero-downtime imports
-#   - {name}_delta                   : RT table for real-time updates
-#   - {name}_dist                    : Distributed table aggregating main + delta
-#
-# Document ID handling:
-#   - If CSV column 1 is numeric, it's used as the document ID (don't declare it)
-#   - If CSV column 1 is not numeric, an ID is auto-generated (include column 1)
-#
-# Per-table config options:
-#   haStrategy      - Distributed table HA strategy (noerrors, nodeadlines, etc.)
-#   agentRetryCount - Retry count for distributed queries to agents
-#   clusterMain     - Whether to replicate main tables across cluster (default: false)
-#   importMethod    - Import method: 'indexer' (build index) or 'sql' (INSERT)
-#
-# Available column types (csv-to-manticore format):
-#   field          - Full-text searchable field
-#   field_string   - Full-text field (string variant)
-#   attr_uint      - Unsigned integer attribute
-#   attr_bigint    - Big integer attribute
-#   attr_float     - Float attribute
-#   attr_bool      - Boolean attribute
-#   attr_string    - String attribute (not full-text indexed)
-#   attr_timestamp - Timestamp attribute
-#   attr_multi     - Multi-value integer attribute
-#   attr_multi_64  - Multi-value 64-bit integer attribute
-#   attr_json      - JSON attribute
+# See README.md for table structure, column types, and config options.
+# Add/remove tables as needed.
 tables:
   - name: addresses
     csvPath: manticore-imports/addresses/data.csv
@@ -117,47 +80,28 @@ tables:
           type: attr_timestamp
         - name: source
           type: attr_string
-  # Add more tables as needed:
-  # - name: products
-  #   csvPath: manticore-imports/products/data.csv
-  #   schema:
-  #     columns:
-  #       - name: name
-  #         type: field
-  #       - name: description
-  #         type: field
-  #       - name: price
-  #         type: attr_float
 
 # =============================================================================
 # Orchestrator Configuration
 # =============================================================================
-# The orchestrator consists of three components:
-#   1. Orchestrator (cron): Executes scheduled/manual actions (import, init, health)
-#   2. Orchestrator API (standard): Continuous REST API for cluster coordination
-#   3. Agent (sidecar): Per-replica API for local Manticore operations
-#
-# The orchestrator API handles cluster-wide decisions (init, import coordination),
-# while agents execute local operations on each replica. Communication uses bearer
-# token authentication defined in orchestrator.agent.token.
 orchestrator:
   version: v0.2.1
   image: ghcr.io/cuppojoe/manticore-cpln-api
-  logLevel: debug
+  logLevel: debug                 # debug, info, warn, error
   resources:
     cpu: 4
     memory: 16Gi
-  # Cron workload settings (for scheduled/manual job execution)
-  schedule: "0 * * * *"           # Cron schedule (default: hourly)
-  action: import                  # Action: init, import, health, repair
-  tableName: addresses            # Target table (must match a name in tables[])
-  suspend: true                   # Start suspended (trigger manually via UI/API)
-  timeoutSeconds: 900             # Container timeout for cron job
-  importMemLimit: 1Gi             # Memory limit for import jobs (agents can override)
-  activeDeadlineSeconds: 14400    # Maximum job runtime before termination
-  # Orchestrator API (standard workload - continuous REST API)
-  # Provides endpoints: /api/init, /api/import, /api/repair, /api/cluster, /api/tables/status
-  # Handles cluster-wide coordination and communicates with agents on each replica
+
+  # Cron job settings
+  schedule: "0 * * * *"           # Cron schedule (default = every hour)
+  action: import                  # init, import, health, repair
+  tableName: addresses            # Must match a name in tables[]
+  suspend: true                   # Start suspended (trigger via UI/API)
+  timeoutSeconds: 900             # Container timeout (seconds)
+  importMemLimit: 1Gi             # Memory limit for import jobs
+  activeDeadlineSeconds: 14400    # Max job runtime (seconds)
+
+  # Orchestrator API
   api:
     image: ghcr.io/cuppojoe/manticore-cpln-api
     logLevel: debug
@@ -167,150 +111,113 @@ orchestrator:
     autoscaling:
       maxScale: 3
       minScale: 2
-      metric: cpu   # Standard workloads only support 'cpu' metric
+      metric: cpu
       target: 80
 
-  # Agent sidecar (runs on each Manticore replica)
-  # Provides per-replica endpoints: /api/health, /api/ready, /api/tables, /api/import/{table}
-  # Handles local Manticore operations: table creation, imports, cluster join/bootstrap
-  # Calls orchestrator /api/init at startup to determine cluster action (bootstrap/join/continue)
+  # Agent sidecar
   agent:
     image: ghcr.io/cuppojoe/manticore-cpln-agent
-    # Bearer token for API authentication (REQUIRED)
-    # Secures all inter-component communication (orchestrator <-> agent <-> UI)
-    # Generate with: openssl rand -base64 32
-    # See README.md "Authentication" section for details
+    # REQUIRED: Generate with `openssl rand -base64 32`
     token: "6Gl5uO9KkKAh1u+ymoBW98WCtjTFpljuhpLdKb+tNAA="
     resources:
       cpu: 100m
       minCpu: 250m
       memory: 512Mi
       minMemory: 128Mi
-    # Import settings (csv-to-manticore tool)
     import:
-      batchSize: 20000        # Rows per INSERT statement (balance memory vs speed)
-    # Recovery settings for cluster state issues (split-brain, network partition)
+      batchSize: 20000            # Rows per INSERT statement
     recovery:
-      maxRetries: 5           # Retry attempts when finding healthy replicas
-      initialBackoffSec: 5    # Initial delay between retries
-      maxBackoffSec: 60       # Maximum backoff delay (exponential backoff)
-  # Web UI (standard workload - dashboard for monitoring and management)
-  # Provides cluster status, table info, import triggers, and repair actions
-  # Communicates with orchestrator API backend
-  #
-  # SECURITY: The UI auto-injects the auth token for API requests. Anyone with
-  # network access to the UI can perform admin operations (imports, repairs).
-  # Set allowExternalAccess: false for production or use authenticated ingress.
+      maxRetries: 5               # Retry attempts for cluster recovery
+      initialBackoffSec: 5        # Initial delay between retries
+      maxBackoffSec: 60           # Max backoff delay (exponential)
+
+  # Web UI - See README.md "Authentication" section for security notes
   ui:
     image: ghcr.io/cuppojoe/manticore-cpln-ui
     resources:
       cpu: 0.25
       memory: 0.25Gi
-    allowExternalAccess: true     # Set false to restrict to internal GVC access only
+    allowExternalAccess: true     # false = internal GVC access only
     autoscaling:
       maxScale: 2
       minScale: 1
-      metric: cpu   # Standard workloads only support 'cpu' metric
+      metric: cpu
       target: 80
 
 # =============================================================================
-# Domain Configuration
+# Domain Configuration (Optional)
 # =============================================================================
-# Optional external domain for accessing UI and API via HTTPS.
 # Routes /api/* to orchestrator-api, everything else to UI.
 domain:
-  enabled: false              # Set to true to provision domain
-  name: ""                    # FQDN, e.g., manticore.example.com
-  dnsMode: cname              # cname (subdomains) or ns (full zone delegation)
+  enabled: false
+  name: ""                        # FQDN, e.g., manticore.example.com
+  dnsMode: cname                  # cname (subdomains) or ns (zone delegation)
 
 # =============================================================================
 # Manticore Search Configuration
 # =============================================================================
-# Stateful workload running Manticore searchd with Galera-based clustering.
-# Each replica has persistent storage and runs with an agent sidecar.
 manticore:
   image: manticoresearch/manticore:latest
-  clusterName: manticore
+  clusterName: manticore          # Galera cluster name
   resources:
     cpu: 2
     memory: 8Gi
   volumeset:
-    capacity: 200
+    capacity: 200                 # GB per replica
   sharedVolumeset:
-    capacity: 100
-  # Autoscaling configuration for the Manticore stateful workload
-  # Note: minScale determines the replica count that orchestrator coordinates
+    capacity: 100                 # GB shared across replicas
+
+  # minScale = replica count used by orchestrator for coordination
   autoscaling:
-    minScale: 3               # Minimum replicas (used by orchestrator for coordination)
-    maxScale: 4               # Maximum replicas
-    metric: rps               # Scale metric (rps for stateful, cpu for standard)
-    target: 100               # Target value for scaling metric
-    scaleToZeroDelay: 300     # Delay before scaling to zero (if minScale=0)
-  # Rollout options for stateful workload updates (OrderedReady for safe cluster operations)
+    minScale: 3
+    maxScale: 4
+    metric: rps                   # rps for stateful, cpu for standard
+    target: 100
+    scaleToZeroDelay: 300
+
   rolloutOptions:
     maxSurgeReplicas: 25%
     maxUnavailableReplicas: '0'
     minReadySeconds: 10
     scalingPolicy: OrderedReady
     terminationGracePeriodSeconds: 60
-  # Firewall configuration - IMPORTANT: same-gvc required for cluster replication
+
+  # IMPORTANT: same-gvc required for Galera replication
   firewall:
     internalAccess:
-      type: same-gvc          # Required for Galera replication between replicas
-      workloads: []           # Additional workloads to allow (if type is workload-list or same-gvc)
-        #- //gvc/GVC_NAME/workload/WORKLOAD_NAME
-  # Custom DDL statements to run after cluster initialization
-  # Use for additional RT tables, distributed tables, or custom indexes
+      type: same-gvc
+      workloads: []
+
+  # Custom DDL executed after cluster init (optional)
   # customDDL: |
-  #   CREATE TABLE IF NOT EXISTS my_custom_rt (
-  #       id BIGINT,
-  #       content TEXT
-  #   ) TYPE='rt';
-  #   ALTER CLUSTER manticore ADD my_custom_rt;
+  #   CREATE TABLE IF NOT EXISTS my_rt (...) TYPE='rt';
+  #   ALTER CLUSTER manticore ADD my_rt;
 
 # =============================================================================
 # Load Testing Configuration (Optional)
 # =============================================================================
-# K6-based load testing for validating search performance.
-# Architecture:
-#   - load-test workload: Runs k6 with configured VUs and duration
-#   - load-test-controller: Cron workload that scales k6 replicas up/down
-# Trigger manually via UI or set controller.schedule for automated tests.
 loadTest:
-  enabled: true                    # Toggle for entire feature
-
-  # k6 image
+  enabled: true
   image: grafana/k6:0.47.0
-
-  # Container resources
   resources:
     cpu: 0.5
     memory: 512Mi
 
-  # k6 execution parameters
-  vus: 10                           # Virtual users
-  duration: "5m"                    # Test duration (e.g., "30s", "5m", "1h")
-  rps: null                         # Target RPS (null = unlimited)
+  vus: 10                         # Virtual users
+  duration: "5m"                  # Test duration (e.g., 30s, 5m, 1h)
+  rps: null                       # Target RPS (null = unlimited)
+  replicas: 1                     # Number of k6 pods to spawn
 
-  # Number of k6 replicas to spawn when running
-  replicas: 1
-
-  # Controller configuration
   controller:
-    image: ubuntu:latest  # Image with curl for API calls
-    # Cron schedule for running load tests
-    # If empty/null, controller starts suspended (manual trigger only)
-    schedule: ""
-    # How long to wait after scaling up before scaling back down
-    testDurationBuffer: 60          # seconds added to duration for safety
+    image: ubuntu:latest
+    schedule: ""                  # Cron expression (empty = manual only)
+    testDurationBuffer: 60        # Seconds added to duration before scale-down
 
-  # Target endpoint
   target:
-    port: 9308                      # Manticore HTTP API port
-    endpoint: search                # "search" or "sql"
+    port: 9308                    # Manticore HTTP API port
+    endpoint: search              # "search" or "sql"
 
-  # Query configuration - full JSON body for /search endpoint
-  # See https://manual.manticoresearch.com/Searching/Full_text_matching/Basic_usage
+  # Full JSON body for /search endpoint
   query:
     index: addresses
     query:
@@ -318,7 +225,6 @@ loadTest:
         "*": "test"
     limit: 10
 
-  # Pass/fail thresholds
   thresholds:
-    p95ResponseTime: 500            # ms
-    errorRate: 0.01                 # 1%
+    p95ResponseTime: 500          # ms
+    errorRate: 0.01               # 1%

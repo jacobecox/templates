@@ -97,35 +97,6 @@ Create an S3 bucket to store your CSV source files.
 
 Follow the [Create a Cloud Account](https://docs.controlplane.com/guides/create-cloud-account) guide to establish trust between Control Plane and your AWS account.
 
-### 3. IAM Policy for S3 Access
-
-Create an IAM policy granting read access to your bucket:
-
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "ManticoreS3Read",
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject",
-                "s3:GetObjectVersion",
-                "s3:ListBucket"
-            ],
-            "Resource": [
-                "arn:aws:s3:::YOUR_BUCKET_NAME",
-                "arn:aws:s3:::YOUR_BUCKET_NAME/*"
-            ]
-        }
-    ]
-}
-```
-
-### 4. Add Policy to Cloud Account
-
-Add the IAM policy to your Control Plane Cloud Account's allowed policies list.
-
 ## Installation
 
 1. **Configure S3 access** in `values.yaml`:
@@ -140,7 +111,7 @@ Add the IAM policy to your Control Plane Cloud Account's allowed policies list.
 2. **Define your tables**:
    ```yaml
    tables:
-     - name: products
+     - name: products # table name
        csvPath: imports/products/data.csv
        config:
          haStrategy: noerrors      # HA strategy for distributed table
@@ -180,7 +151,7 @@ All internal API communication is secured with a shared bearer token configured 
 
 **How it's used:**
 - Stored in the `{release-name}-agent-token` secret
-- Injected into workloads via `cpln://secret/{release-name}-agent-token.payload`
+- Injected into workloads via `cpln://secret/{release-name}-manticore-agent-token.payload`
 - Passed in the `Authorization: Bearer {token}` header for API requests
 
 **Security note:** The UI automatically injects this token when communicating with the Orchestrator API. This means anyone with network access to the UI can perform administrative operations (imports, repairs, etc.). Control access to the UI by:
@@ -226,6 +197,8 @@ Each entry in `tables[]` supports:
 | `attr_bool` | Boolean attribute |
 | `attr_string` | String attribute (not full-text indexed) |
 | `attr_timestamp` | Timestamp attribute |
+| `attr_multi` | Multi-value integer attribute |
+| `attr_multi_64` | Multi-value 64-bit integer attribute |
 | `attr_json` | JSON attribute |
 
 **Note**: If column 1 is numeric, it's used as the document ID (don't declare it). If not numeric, an ID is auto-generated.
@@ -235,7 +208,7 @@ Each entry in `tables[]` supports:
 | Path | Description | Default |
 |------|-------------|---------|
 | `orchestrator.schedule` | Cron schedule for imports | `0 * * * *` |
-| `orchestrator.action` | Action: `init`, `import`, `health` | `import` |
+| `orchestrator.action` | Action: `init`, `import`, `health`, `repair` | `import` |
 | `orchestrator.tableName` | Table to import | - |
 | `orchestrator.suspend` | Start suspended | `true` |
 | `orchestrator.agent.token` | Bearer token for auth | **required** |
@@ -289,13 +262,13 @@ Operations are executed by running the orchestrator cron workload with the `runC
 **Trigger an import:**
 ```bash
 # Run orchestrator cron with ACTION=import (configured in values.yaml)
-cpln workload run-cron {release-name}-orchestrator --gvc {gvc-name}
+cpln workload run-cron {release-name}-orchestrator-job --gvc {gvc-name}
 ```
 
 **Trigger a repair:**
 First update the orchestrator workload's `ACTION` env var to `repair`, then:
 ```bash
-cpln workload run-cron {release-name}-orchestrator --gvc {gvc-name}
+cpln workload run-cron {release-name}-orchestrator-job --gvc {gvc-name}
 ```
 
 Or use the REST API directly:
