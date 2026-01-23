@@ -3,11 +3,11 @@
 # =============================================================================
 # See README.md for Cloud Account and IAM policy setup instructions.
 buckets:
-  cloudAccountName: kcupp-aws-1    # Name of your configured Cloud Account
-  awsPolicyRefs:                   # IAM policies for S3 access
+  cloudAccountName: my-cloud-account    # Name of your configured Cloud Account
+  awsPolicyRefs:                        # IAM policies for S3 access
     - aws::AmazonS3ReadOnlyAccess
-  awsRegion: us-east-1
-  sourceBucket: cpln.kcupp.test    # S3 bucket containing files to import
+  awsRegion: us-east-1                  # Region of your S3 bucket
+  sourceBucket: my-bucket               # S3 bucket containing files to import
 
 # =============================================================================
 # Tables Configuration
@@ -17,6 +17,11 @@ buckets:
 tables:
   - name: addresses
     csvPath: manticore-imports/addresses/data.csv
+    config:
+      haStrategy: noerrors
+      agentRetryCount: 3
+      clusterMain: false
+      importMethod: indexer
     schema:
       columns:
         - name: street_number
@@ -85,25 +90,26 @@ tables:
 # Orchestrator Configuration
 # =============================================================================
 orchestrator:
-  version: v0.2.1
-  image: ghcr.io/cuppojoe/manticore-cpln-api
+  version: v1.0.0
+  image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-api
   logLevel: debug                 # debug, info, warn, error
   resources:
-    cpu: 4
-    memory: 16Gi
+    cpu: 1
+    memory: 2Gi
 
   # Cron job settings
   schedule: "0 * * * *"           # Cron schedule (default = every hour)
   action: import                  # init, import, health, repair
   tableName: addresses            # Must match a name in tables[]
   suspend: true                   # Start suspended (trigger via UI/API)
-  timeoutSeconds: 900             # Container timeout (seconds)
-  importMemLimit: 1Gi             # Memory limit for import jobs
-  activeDeadlineSeconds: 14400    # Max job runtime (seconds)
+  timeoutSeconds: 900             # Container timeout (seconds, default 15 minutes)
+  importMemLimit: 2G              # Memory limit for import jobs
+  activeDeadlineSeconds: 14400    # Max job runtime (seconds, default 4 hours)
 
   # Orchestrator API
   api:
-    image: ghcr.io/cuppojoe/manticore-cpln-api
+    version: v1.0.0
+    image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-api
     logLevel: debug
     resources:
       cpu: 0.25
@@ -116,7 +122,8 @@ orchestrator:
 
   # Agent sidecar
   agent:
-    image: ghcr.io/cuppojoe/manticore-cpln-agent
+    version: v1.0.0
+    image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-agent
     # REQUIRED: Generate with `openssl rand -base64 32`
     token: "6Gl5uO9KkKAh1u+ymoBW98WCtjTFpljuhpLdKb+tNAA="
     resources:
@@ -133,7 +140,8 @@ orchestrator:
 
   # Web UI - See README.md "Authentication" section for security notes
   ui:
-    image: ghcr.io/cuppojoe/manticore-cpln-ui
+    version: v1.0.0
+    image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-ui
     resources:
       cpu: 0.25
       memory: 0.25Gi
@@ -157,7 +165,7 @@ domain:
 # Manticore Search Configuration
 # =============================================================================
 manticore:
-  image: manticoresearch/manticore:latest
+  image: manticoresearch/manticore:6.3.6
   clusterName: manticore          # Galera cluster name
   resources:
     cpu: 2
@@ -165,7 +173,7 @@ manticore:
   volumeset:
     capacity: 200                 # GB per replica
   sharedVolumeset:
-    capacity: 100                 # GB shared across replicas
+    capacity: 100                 # GB shared across replicas and orchestrator
 
   # minScale = replica count used by orchestrator for coordination
   autoscaling:

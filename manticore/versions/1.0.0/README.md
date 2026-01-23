@@ -15,7 +15,7 @@ Deploys a distributed Manticore Search cluster on Control Plane with:
 | Component | Type | Description |
 |-----------|------|-------------|
 | **Manticore Workload** | Stateful | Clustered Manticore searchd instances with agent sidecar |
-| **Agent** | Sidecar | Per-replica HTTP API for local operations (init, import, health) |
+| **Agent** | Sidecar | Per-replica HTTP API for local operations (init, import, health, repair) |
 | **Orchestrator API** | Standard | Continuous REST API for cluster-wide coordination |
 | **Orchestrator** | Cron | On-demand job execution (imports, maintenance) |
 | **UI** | Standard | Web dashboard for cluster monitoring and management |
@@ -132,8 +132,6 @@ Follow the [Create a Cloud Account](https://docs.controlplane.com/guides/create-
    ```
    Set this in `orchestrator.agent.token`. This bearer token secures communication between all orchestrator components (see [Authentication](#authentication) below).
 
-4. **Click Install App**.
-
 ## Authentication
 
 All internal API communication is secured with a shared bearer token configured in `orchestrator.agent.token`. This token authenticates:
@@ -150,7 +148,7 @@ All internal API communication is secured with a shared bearer token configured 
 - Rotating the token requires redeploying all components simultaneously
 
 **How it's used:**
-- Stored in the `{release-name}-agent-token` secret
+- Stored in the `{release-name}-manticore-agent-token` secret
 - Injected into workloads via `cpln://secret/{release-name}-manticore-agent-token.payload`
 - Passed in the `Authorization: Bearer {token}` header for API requests
 
@@ -179,7 +177,7 @@ Each entry in `tables[]` supports:
 |-------|-------------|
 | `name` | Table name (used for `{name}_main_a`, etc.) |
 | `csvPath` | Path to CSV in S3 bucket |
-| `config.haStrategy` | HA strategy: `noerrors`, `nodeadlines`, etc. |
+| `config.haStrategy` | HA strategy: `noerrors`, `nodeads`, etc. |
 | `config.agentRetryCount` | Retry count for distributed queries |
 | `config.clusterMain` | Replicate main tables across cluster |
 | `config.importMethod` | Import method: `indexer` or `sql` |
@@ -212,6 +210,30 @@ Each entry in `tables[]` supports:
 | `orchestrator.tableName` | Table to import | - |
 | `orchestrator.suspend` | Start suspended | `true` |
 | `orchestrator.agent.token` | Bearer token for auth | **required** |
+
+### Custom DDL
+
+You can provide custom SQL statements that execute after Manticore starts (before the agent takes over). This is useful for:
+
+- **Additional RT tables** with custom schema
+- **Distributed tables** spanning multiple data sources
+- **Custom indexes** or table settings
+
+The standard table creation (`{name}_main_a`, `{name}_main_b`, `{name}_delta`, `{name}`) is handled automatically by the agent. Custom DDL runs after cluster initialization but before agent operations.
+
+**Example:**
+```yaml
+manticore:
+  customDDL: |
+    CREATE TABLE IF NOT EXISTS my_custom_rt (
+        id BIGINT,
+        content TEXT,
+        created_at TIMESTAMP
+    ) TYPE='rt';
+    ALTER CLUSTER manticore ADD my_custom_rt;
+```
+
+**Note:** RT tables added to the cluster with `ALTER CLUSTER` will automatically replicate across all replicas.
 
 ## API Endpoints
 
@@ -273,8 +295,8 @@ cpln workload run-cron {release-name}-orchestrator-job --gvc {gvc-name}
 
 Or use the REST API directly:
 ```bash
-curl -X POST "https://api.cpln.io/org/{org}/gvc/{gvc}/workload/{release-name}-orchestrator/-runCronWorkload" \
-  -H "Authorization: Bearer $CPLN_TOKEN"
+curl -X POST "https://api.cpln.io/org/{org}/gvc/{gvc}/workload/{release-name}-orchestrator-job/-runCronWorkload" \
+  -H "Authorization: Bearer $AUTH_TOKEN"
 ```
 
 ### Cluster Repair

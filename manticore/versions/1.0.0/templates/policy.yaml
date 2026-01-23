@@ -1,14 +1,7 @@
 # =============================================================================
 # Access Policies
 # =============================================================================
-# Defines permissions for workload identities to access secrets and workloads.
-# The orchestrator architecture requires:
-#   1. Secret access for configuration files and auth tokens
-#   2. Workload exec permission for triggering cron jobs
-#   3. Workload view permission for reading replica configuration
-
-# Secret access policy - grants reveal permission on configuration secrets
-# Used by both manticore (agent sidecar) and orchestrator workloads
+# Secret access policy - grants reveal on config secrets
 kind: policy
 name: {{ include "manticore.configPolicyName" . }}
 description: Secret access for manticore and orchestrator workloads
@@ -33,8 +26,7 @@ targetQuery:
     match: all
     terms: []
 ---
-# Cron execution policy - allows triggering orchestrator jobs via CPLN API
-# The orchestrator API and agents can trigger import/init/repair actions
+# Cron execution policy - allows triggering orchestrator jobs
 kind: policy
 name: {{ include "manticore.execPolicyName" . }}
 description: Permission to trigger orchestrator cron workload executions
@@ -51,7 +43,6 @@ targetLinks:
   - //gvc/{{ .Values.global.cpln.gvc }}/workload/{{ include "manticore.orchestratorJobName" . }}
 ---
 # Workload view policy - allows orchestrator to read Manticore workload config
-# Used to discover replica count, endpoints, and configuration
 kind: policy
 name: {{ include "manticore.orchestratorPolicyName" . }}
 description: Permission to view Manticore workload configuration
@@ -66,7 +57,7 @@ targetLinks:
   - //gvc/{{ .Values.global.cpln.gvc }}/workload/{{ include "manticore.name" . }}
 {{- if .Values.loadTest.enabled }}
 ---
-# Load test script access - allows k6 workload to read test script
+# Load test script access
 kind: policy
 name: {{ include "manticore.loadTestPolicyName" . }}
 description: K6 workload access to load test script secret
@@ -81,7 +72,7 @@ targetKind: secret
 targetLinks:
   - //secret/{{ include "manticore.secretK6ScriptName" . }}
 ---
-# Load test controller policy - allows scaling the k6 workload
+# Load test controller policy - allows scaling k6 workload
 kind: policy
 name: {{ include "manticore.loadTestControllerPolicyName" . }}
 description: Controller permission to scale load-test workload
