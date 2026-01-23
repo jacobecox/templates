@@ -17,7 +17,6 @@ targetLinks:
   - //secret/{{ include "manticore.secretConfigName" . }}
   - //secret/{{ include "manticore.secretStartupName" . }}
   - //secret/{{ include "manticore.secretSchemaConfigName" . }}
-  - //secret/{{ include "manticore.secretCustomDDLName" . }}
   - //secret/{{ include "manticore.secretAgentTokenName" . }}
 targetQuery:
   kind: secret

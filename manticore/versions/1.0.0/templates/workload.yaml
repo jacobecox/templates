@@ -65,9 +65,6 @@ spec:
         - path: /etc/manticore/schema.conf
           recoveryPolicy: retain
           uri: cpln://secret/{{ include "manticore.secretSchemaConfigName" . }}.payload
-        - path: /etc/manticore/custom-ddl.sql
-          recoveryPolicy: retain
-          uri: cpln://secret/{{ include "manticore.secretCustomDDLName" . }}.payload
         - path: /usr/local/bin/start.sh
           recoveryPolicy: retain
           uri: cpln://secret/{{ include "manticore.secretStartupName" . }}.payload
@@ -115,7 +112,7 @@ spec:
         - name: IMPORT_BATCH_SIZE
           value: "{{ .Values.orchestrator.agent.import.batchSize | default 1000 }}"
         - name: ORCHESTRATOR_API_URL
-          value: "http://{{ include "manticore.orchestratorName" . }}.{{ .Values.cpln.gvc }}.cpln.local:8080"
+          value: "http://{{ include "manticore.orchestratorAPIName" . }}.{{ .Values.cpln.gvc }}.cpln.local:8080"
       readinessProbe:
         failureThreshold: 3
         initialDelaySeconds: 5

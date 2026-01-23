@@ -127,8 +127,8 @@ orchestrator:
     # REQUIRED: Generate with `openssl rand -base64 32`
     token: "6Gl5uO9KkKAh1u+ymoBW98WCtjTFpljuhpLdKb+tNAA="
     resources:
-      cpu: 100m
-      minCpu: 250m
+      cpu: 250m
+      minCpu: 100m
       memory: 512Mi
       minMemory: 128Mi
     import:
@@ -195,11 +195,6 @@ manticore:
     internalAccess:
       type: same-gvc
       workloads: []
-
-  # Custom DDL executed after cluster init (optional)
-  # customDDL: |
-  #   CREATE TABLE IF NOT EXISTS my_rt (...) TYPE='rt';
-  #   ALTER CLUSTER manticore ADD my_rt;
 
 # =============================================================================
 # Load Testing Configuration (Optional)

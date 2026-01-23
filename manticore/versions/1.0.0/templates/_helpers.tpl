@@ -71,13 +71,6 @@ Manticore Secret Agent Token Name
 {{- end }}
 
 {{/*
-Manticore Secret Custom DDL Name
-*/}}
-{{- define "manticore.secretCustomDDLName" -}}
-{{- printf "%s-manticore-custom-ddl" .Release.Name }}
-{{- end }}
-
-{{/*
 Manticore Secret K6 Script Name
 */}}
 {{- define "manticore.secretK6ScriptName" -}}
