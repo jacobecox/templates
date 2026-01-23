@@ -439,6 +439,7 @@ spec:
         - '-c'
         - |
           set -e
+          apt-get update -qq && apt-get install -y -qq curl > /dev/null
           WORKLOAD="{{ include "manticore.loadTestName" . }}"
           REPLICAS="{{ .Values.loadTest.replicas }}"
 
