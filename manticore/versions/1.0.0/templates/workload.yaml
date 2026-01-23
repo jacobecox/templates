@@ -149,8 +149,7 @@ spec:
   firewallConfig:
     external:
       inboundAllowCIDR: []
-      outboundAllowCIDR:
-        - 0.0.0.0/0
+      outboundAllowHostname: []
     internal:
       inboundAllowType: {{ .Values.manticore.firewall.internalAccess.type }}
       {{- if .Values.manticore.firewall.internalAccess.workloads }}
@@ -238,8 +237,9 @@ spec:
   firewallConfig:
     external:
       inboundAllowCIDR: []
-      outboundAllowCIDR:
-        - 0.0.0.0/0
+      outboundAllowHostname:
+        - s3.{{ .Values.buckets.awsRegion }}.amazonaws.com
+        - s3.amazonaws.com
     internal:
       inboundAllowType: none
   identityLink: /org/{{ .Values.global.cpln.org }}/gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "manticore.orchestratorIdentityName" . }}
