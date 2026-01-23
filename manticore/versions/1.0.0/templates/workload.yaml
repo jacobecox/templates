@@ -68,9 +68,6 @@ spec:
         - path: /usr/local/bin/start.sh
           recoveryPolicy: retain
           uri: cpln://secret/{{ include "manticore.secretStartupName" . }}.payload
-        - path: /mnt/s3
-          uri: s3://{{ .Values.buckets.sourceBucket }}
-          recoveryPolicy: retain
     - name: agent
       cpu: {{ .Values.orchestrator.agent.resources.cpu | quote }}
       minCpu: {{ .Values.orchestrator.agent.resources.minCpu | default .Values.orchestrator.agent.resources.cpu | quote }}
@@ -173,7 +170,7 @@ spec:
 # Starts suspended by default (trigger via UI/API)
 kind: workload
 name: {{ include "manticore.orchestratorJobName" . }}
-description: Orchestrator for scheduled/manual cluster operations
+description: Manticore orchestrator for scheduled/manual cluster operations
 tags: {{- include "manticore.tags" . | nindent 4 }}
 spec:
   type: cron
@@ -237,6 +234,7 @@ spec:
       outboundAllowHostname:
         - s3.{{ .Values.buckets.awsRegion }}.amazonaws.com
         - s3.amazonaws.com
+        - "*.amazonaws.com"
     internal:
       inboundAllowType: none
   identityLink: /org/{{ .Values.global.cpln.org }}/gvc/{{ .Values.global.cpln.gvc }}/identity/{{ include "manticore.orchestratorIdentityName" . }}
@@ -254,7 +252,7 @@ spec:
 # Backend for UI dashboard, communicates with agents via bearer token
 kind: workload
 name: {{ include "manticore.orchestratorAPIName" . }}
-description: Orchestrator REST API for cluster coordination
+description: Manticore orchestrator REST API for cluster coordination
 tags: {{- include "manticore.tags" . | nindent 4 }}
 spec:
   type: standard

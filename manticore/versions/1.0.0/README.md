@@ -211,30 +211,6 @@ Each entry in `tables[]` supports:
 | `orchestrator.suspend` | Start suspended | `true` |
 | `orchestrator.agent.token` | Bearer token for auth | **required** |
 
-### Custom DDL
-
-You can provide custom SQL statements that execute after Manticore starts (before the agent takes over). This is useful for:
-
-- **Additional RT tables** with custom schema
-- **Distributed tables** spanning multiple data sources
-- **Custom indexes** or table settings
-
-The standard table creation (`{name}_main_a`, `{name}_main_b`, `{name}_delta`, `{name}`) is handled automatically by the agent. Custom DDL runs after cluster initialization but before agent operations.
-
-**Example:**
-```yaml
-manticore:
-  customDDL: |
-    CREATE TABLE IF NOT EXISTS my_custom_rt (
-        id BIGINT,
-        content TEXT,
-        created_at TIMESTAMP
-    ) TYPE='rt';
-    ALTER CLUSTER manticore ADD my_custom_rt;
-```
-
-**Note:** RT tables added to the cluster with `ALTER CLUSTER` will automatically replicate across all replicas.
-
 ## API Endpoints
 
 All API endpoints (except health/ready probes) require authentication via the bearer token configured in `orchestrator.agent.token`:

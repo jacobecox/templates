@@ -111,6 +111,8 @@ orchestrator:
     version: v1.0.0
     image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-api
     logLevel: debug
+    importPollInterval: 30s
+    importPollTimeout: 2h
     resources:
       cpu: 0.25
       memory: 256Mi
@@ -165,7 +167,7 @@ domain:
 # Manticore Search Configuration
 # =============================================================================
 manticore:
-  image: manticoresearch/manticore:6.3.6
+  image: manticoresearch/manticore:15.1.0
   clusterName: manticore          # Galera cluster name
   resources:
     cpu: 2

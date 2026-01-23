@@ -4,6 +4,7 @@
 # Shared storage across replicas and orchestrator
 kind: volumeset
 name: {{ include "manticore.sharedVolumeName" . }}
+description: Shared storage across Manticore replicas and orchestrator
 tags: {{- include "manticore.tags" . | nindent 4 }}
 spec:
   fileSystemType: shared
