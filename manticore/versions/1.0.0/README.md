@@ -132,6 +132,8 @@ Follow the [Create a Cloud Account](https://docs.controlplane.com/guides/create-
    ```
    Set this in `orchestrator.agent.token`. This bearer token secures communication between all orchestrator components (see [Authentication](#authentication) below).
 
+**Note:** After installation, Manticore will show as healthy and the cluster will be initialized, but tables will be empty until you run an import job. See [Operations](#operations) below to trigger your first import either manually or via schedule.
+
 ## Authentication
 
 All internal API communication is secured with a shared bearer token configured in `orchestrator.agent.token`. This token authenticates:
@@ -262,6 +264,8 @@ Operations are executed by running the orchestrator cron workload with the `runC
 # Run orchestrator cron with ACTION=import (configured in values.yaml)
 cpln workload run-cron {release-name}-orchestrator-job --gvc {gvc-name}
 ```
+
+**Important:** If you plan to scale Manticore replicas, run imports with the maximum number of replicas active. This ensures all replicas have the imported data when new replicas are added during autoscaling. The orchestrator coordinates imports across all active replicas, so scaling up after an import may leave new replicas without the main table data.
 
 **Trigger a repair:**
 First update the orchestrator workload's `ACTION` env var to `repair`, then:

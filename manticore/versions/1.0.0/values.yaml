@@ -90,7 +90,7 @@ tables:
 # Orchestrator Configuration
 # =============================================================================
 orchestrator:
-  version: v1.0.0
+  version: v1.2.0
   image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-api
   logLevel: debug                 # debug, info, warn, error
   resources:
@@ -108,7 +108,7 @@ orchestrator:
 
   # Orchestrator API
   api:
-    version: v1.0.0
+    version: v1.2.0
     image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-api
     logLevel: debug
     importPollInterval: 30s
@@ -124,7 +124,7 @@ orchestrator:
 
   # Agent sidecar
   agent:
-    version: v1.0.0
+    version: v1.2.0
     image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-agent
     # REQUIRED: Generate with `openssl rand -base64 32`
     token: "6Gl5uO9KkKAh1u+ymoBW98WCtjTFpljuhpLdKb+tNAA="
@@ -142,7 +142,7 @@ orchestrator:
 
   # Web UI - See README.md "Authentication" section for security notes
   ui:
-    version: v1.0.0
+    version: v1.2.0
     image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-ui
     resources:
       cpu: 0.25
@@ -214,7 +214,7 @@ loadTest:
   replicas: 1                     # Number of k6 pods to spawn
 
   controller:
-    image: ubuntu:latest
+    image: alpine/curl            # Alpine image with curl pre-installed
     schedule: ""                  # Cron expression (empty = manual only)
     testDurationBuffer: 60        # Seconds added to duration before scale-down
 
@@ -224,7 +224,7 @@ loadTest:
 
   # Full JSON body for /search endpoint
   query:
-    index: addresses
+    index: addresses_full
     query:
       match:
         "*": "test"
