@@ -1,10 +1,34 @@
+# =============================================================================
+# Workload Identities
+# =============================================================================
+# Manticore identity - S3 access via AWS Cloud Account
 kind: identity
-name: {{ .Release.Name }}-manticore-identity
-description: Manticore identity
+name: {{ include "manticore.identityName" . }}
+description: Manticore workload identity for S3 and secret access
+tags: {{- include "manticore.tags" . | nindent 4 }}
+---
+# Orchestrator identity - secret access + CPLN API for cluster operations
+kind: identity
+name: {{ include "manticore.orchestratorIdentityName" . }}
+description: Orchestrator identity for secrets and CPLN API
 tags: {{- include "manticore.tags" . | nindent 4 }}
 aws:
   cloudAccountLink: //cloudaccount/{{ .Values.buckets.cloudAccountName }}
   policyRefs:
-    - aws::ReadOnlyAccess
-    - cpln-connector
-    - {{ .Values.buckets.policyName }}
+    {{- range .Values.buckets.awsPolicyRefs }}
+    - {{ . }}
+    {{- end }}
+{{- if .Values.loadTest.enabled }}
+---
+# Load test identity - access to k6 script secret
+kind: identity
+name: {{ include "manticore.loadTestIdentityName" . }}
+description: Load test workload identity for script access
+tags: {{- include "manticore.tags" . | nindent 4 }}
+---
+# Load test controller identity - workload scaling permissions
+kind: identity
+name: {{ include "manticore.loadTestControllerIdentityName" . }}
+description: Controller identity for scaling load-test workload
+tags: {{- include "manticore.tags" . | nindent 4 }}
+{{- end }}
