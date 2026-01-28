@@ -29,6 +29,13 @@ Manticore UI Workload Name
 {{- end }}
 
 {{/*
+Manticore Backup Workload Name
+*/}}
+{{- define "manticore.backupName" -}}
+{{- printf "%s-manticore-backup" .Release.Name }}
+{{- end }}
+
+{{/*
 Manticore Load Test Workload Name
 */}}
 {{- define "manticore.loadTestName" -}}
@@ -103,6 +110,13 @@ Manticore Load Test Controller Identity Name
 */}}
 {{- define "manticore.loadTestControllerIdentityName" -}}
 {{- printf "%s-manticore-load-test-controller-identity" .Release.Name }}
+{{- end }}
+
+{{/*
+Manticore Backup Identity Name
+*/}}
+{{- define "manticore.backupIdentityName" -}}
+{{- printf "%s-manticore-backup-identity" .Release.Name }}
 {{- end }}
 
 {{/*
