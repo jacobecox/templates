@@ -354,3 +354,133 @@ loadTest:
   cpln workload run-cron {release-name}-load-test-controller --gvc {gvc-name}
   ```
 - **On a schedule**: Set `loadTest.controller.schedule` to a cron expression (e.g., `"0 2 * * *"` for daily at 2am)
+
+## Backup & Restore
+
+The orchestrator provides cloud storage backup and restore for **delta tables** (real-time data that accumulates between imports).
+
+### How It Works
+
+**Backup:**
+1. Triggers a cron workload that connects to a Manticore replica
+2. Exports delta table data via `mysqldump` (INSERT statements only)
+3. Compresses and uploads to S3 with timestamped filename: `{dataset}_delta-{timestamp}.sql.gz`
+
+**Restore:**
+1. Downloads the selected backup file from S3
+2. Clears existing delta table data
+3. Replays the SQL inserts with cluster prefix for proper replication
+
+> **Note:** Backups only include delta table data. Main table data is re-imported from S3 source files via the import process.
+
+### Prerequisites
+
+#### 1. S3 Bucket for Backups
+
+Create a dedicated S3 bucket (or use a prefix in an existing bucket) for storing backups.
+
+#### 2. IAM Policy
+
+Create a new AWS IAM policy with the following JSON (replace `YOUR_BUCKET_NAME`):
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:ListBucket",
+                "s3:GetObjectVersion",
+                "s3:DeleteObjectVersion"
+            ],
+            "Resource": [
+                "arn:aws:s3:::YOUR_BUCKET_NAME",
+                "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+            ]
+        }
+    ]
+}
+```
+
+Reference this policy in `orchestrator.backup.s3Policy`.
+
+#### 3. Cloud Account
+
+The backup workload needs a Cloud Account with the above policy attached. This can be the same account used for source data or a separate one.
+
+### Configuration
+
+Enable backups in `values.yaml`:
+
+```yaml
+orchestrator:
+  backup:
+    enabled: true
+    cloudAccountName: my-backup-cloud-account  # Cloud Account with S3 write access
+    s3Bucket: my-backup-bucket
+    s3Policy:
+      - my-backup-policy    # IAM policy name from above
+    s3Region: us-east-1
+    dataSet: products       # Dataset name (table name without _delta suffix)
+    prefix: manticore-backups
+    schedule: "0 2 * * *"   # Daily at 2am (optional)
+    startSuspended: false
+```
+
+### Usage
+
+#### Via Orchestrator UI
+
+1. Navigate to the **Dashboard**
+2. **Backup**: Click "Backup Table" with a selected table to trigger a backup
+3. **Restore**: Click "Restore Table", select a backup file from the list, and confirm
+
+#### Via API
+
+**Trigger a backup:**
+```bash
+curl -X POST "https://{orchestrator-api-url}/api/backup" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"tableName": "products"}'
+```
+
+**List available backups:**
+```bash
+curl "https://{orchestrator-api-url}/api/backups/files?tableName=products" \
+  -H "Authorization: Bearer {token}"
+```
+
+**Restore from backup:**
+```bash
+curl -X POST "https://{orchestrator-api-url}/api/restore" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"tableName": "products", "filename": "products_delta-2024-01-28T22-50-49Z.sql.gz"}'
+```
+
+### API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/backups` | Get active backup operations |
+| GET | `/api/backups/files?tableName={name}` | List backup files for a table |
+| POST | `/api/backup` | Trigger backup for a table's delta |
+| POST | `/api/restore` | Restore a table from backup |
+
+### Clustered Table Considerations
+
+Manticore clustered tables require special handling that the backup/restore process manages automatically:
+
+- **Cluster prefix**: All write operations use `cluster:tablename` format for proper replication
+- **No DROP/CREATE**: Clustered tables cannot be dropped; backups contain only INSERT statements
+- **No TRUNCATE**: Data is cleared via `DELETE FROM table WHERE id > 0`
+- **Single-node writes**: Writes target one replica; data replicates automatically to all nodes
+
+## Supported External Services
+- [Manticore Search Docs](https://manual.manticoresearch.com/)
+- [Orchestrator, Agent, UI and Backup source code](https://github.com/controlplane-com/manticore-orchestrator)
