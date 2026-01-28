@@ -99,6 +99,13 @@ Manticore Orchestrator Identity Name
 {{- end }}
 
 {{/*
+Manticore Orchestrator Job Identity Name
+*/}}
+{{- define "manticore.orchestratorJobIdentityName" -}}
+{{- printf "%s-manticore-orchestrator-job-identity" .Release.Name }}
+{{- end }}
+
+{{/*
 Manticore Load Test Identity Name
 */}}
 {{- define "manticore.loadTestIdentityName" -}}
