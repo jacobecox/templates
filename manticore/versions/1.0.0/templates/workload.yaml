@@ -407,13 +407,18 @@ spec:
           value: "{{ include "manticore.name" . }}"
         - name: MANTICORE_PORT
           value: "9306"
+        - name: AUTH_TOKEN
+          value: "cpln://secret/{{ include "manticore.secretAgentTokenName" . }}.payload"
       image: {{ .Values.orchestrator.backup.image }}:{{ .Values.orchestrator.backup.version }}
       inheritEnv: false
       memory: {{ .Values.orchestrator.backup.resources.memory | quote }}
       ports:
         - number: 8080
           protocol: http
-      volumes: []
+      volumes:
+        - path: /mnt/shared
+          recoveryPolicy: retain
+          uri: cpln://volumeset/{{ include "manticore.sharedVolumeName" . }}
   defaultOptions:
     autoscaling:
       maxScale: 1
