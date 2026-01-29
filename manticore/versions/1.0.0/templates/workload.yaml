@@ -393,6 +393,8 @@ spec:
       env:
         - name: ACTION
           value: backup
+        - name: TYPE
+          value: delta
         - name: BACKUP_BUCKET
           value: {{ .Values.orchestrator.backup.s3Bucket }}
         - name: BACKUP_PREFIX
