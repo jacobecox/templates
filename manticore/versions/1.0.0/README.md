@@ -56,8 +56,8 @@ Each table configured in `values.yaml` creates:
 
 | Table | Type | Replicated | Purpose |
 |-------|------|------------|---------|
-| `{name}_main_a` | Plain | Optional* | Primary data slot (indexed from CSV) |
-| `{name}_main_b` | Plain | Optional* | Secondary data slot (for zero-downtime swap) |
+| `{name}_main_a` | RT | Optional* | Primary data slot (indexed from CSV) |
+| `{name}_main_b` | RT | Optional* | Secondary data slot (for zero-downtime swap) |
 | `{name}_delta` | RT | Yes | Real-time updates between imports |
 | `{name}` | Distributed | No | Query aggregator across main + delta |
 

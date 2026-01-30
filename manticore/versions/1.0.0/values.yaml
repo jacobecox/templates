@@ -125,7 +125,7 @@ manticore:
 # Orchestrator Configuration
 # =============================================================================
 orchestrator:
-  version: v2.2.0
+  version: v2.7.0
   image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-api
   logLevel: debug                 # debug, info, warn, error
   resources:
@@ -143,7 +143,7 @@ orchestrator:
 
   # Orchestrator API
   api:
-    version: v2.2.0
+    version: v2.7.0
     image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-api
     logLevel: debug
     importPollInterval: 30s
@@ -159,7 +159,7 @@ orchestrator:
 
   # Agent sidecar
   agent:
-    version: v2.2.0
+    version: v2.7.0
     image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-agent
     # REQUIRED: Generate with `openssl rand -base64 32`
     token: "6Gl5uO9KkKAh1u+ymoBW98WCtjTFpljuhpLdKb+tNAA="
@@ -177,7 +177,7 @@ orchestrator:
 
   # Web UI - See README.md "Authentication" section for security notes
   ui:
-    version: v2.2.0
+    version: v2.7.0
     image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-ui
     resources:
       cpu: 0.25
@@ -192,7 +192,7 @@ orchestrator:
   # Backup Configuration (Optional) - Cron job runs logical backup on delta table to S3 bucket.
   backup:
     enabled: true
-    version: v2.2.0
+    version: v2.7.0
     image: ghcr.io/controlplane-com/manticore-orchestrator/manticore-cpln-backup
     cloudAccountName: test-backup
     s3Bucket: cpln-backup-bucket    # S3 bucket for backups
@@ -201,10 +201,13 @@ orchestrator:
     s3Region: us-east-1
     dataSet: addresses_full       # Data set to back up (must be delta)
     prefix: manticore-backups     # S3 prefix/folder for backups
-    schedule: "0 2 * * *"         # Daily at 2am
-    startSuspended: false         # Start cron job suspended (manual trigger via UI/API)
+    schedules: [
+      {"table":"addresses","type":"delta","schedule":"0 2 * * *"},     # Daily at 2am UTC
+      {"table":"addresses","type":"main","schedule":"0 2 1 * *"}       # Monthly full backup on 1st at 2am UTC
+      ]
+    activeDeadlineSeconds: 14400  # Max job runtime (seconds, default 4 hours)
     resources:
-      cpu: 500m
+      cpu: 1
       memory: 1Gi
 
 # =============================================================================

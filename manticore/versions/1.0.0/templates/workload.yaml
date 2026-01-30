@@ -297,6 +297,8 @@ spec:
         - name: IMPORT_POLL_TIMEOUT
           value: "{{ .Values.orchestrator.api.importPollTimeout | default "2h" }}"
         {{- if .Values.orchestrator.backup.enabled }}
+        - name: BACKUP_SCHEDULES
+          value: '{{ .Values.orchestrator.backup.schedules | toJson }}'
         - name: BACKUP_BUCKET
           value: {{ .Values.orchestrator.backup.s3Bucket }}
         - name: BACKUP_PREFIX
@@ -430,7 +432,7 @@ spec:
     debug: false
     multiZone:
       enabled: false
-    suspend: false
+    suspend: true
     timeoutSeconds: 5
   firewallConfig:
     external:
@@ -450,8 +452,8 @@ spec:
     concurrencyPolicy: Forbid
     historyLimit: 5
     restartPolicy: Never
-    schedule: '{{ .Values.orchestrator.backup.schedule }}'
-    activeDeadlineSeconds: 3600
+    schedule: '0 2 * * *'
+    activeDeadlineSeconds: {{ .Values.orchestrator.backup.activeDeadlineSeconds }}
   localOptions: []
   supportDynamicTags: false
 {{- end }}
