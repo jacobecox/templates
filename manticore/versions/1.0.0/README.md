@@ -231,6 +231,10 @@ Authorization: Bearer {token}
 | `/api/repair` | POST | Yes | Repair cluster state |
 | `/api/cluster` | GET | Yes | Cluster topology info |
 | `/api/tables/status` | GET | Yes | Table status across replicas |
+| `/api/backup` | POST | Yes | Trigger backup (delta or main) |
+| `/api/restore` | POST | Yes | Restore from backup |
+| `/api/backups/files` | GET | Yes | List backup files for a table |
+| `/api/rotate-main` | POST | Yes | Rotate active main table slot |
 
 ### Agent API (per-replica, port 8080)
 
@@ -357,21 +361,55 @@ loadTest:
 
 ## Backup & Restore
 
-The orchestrator provides cloud storage backup and restore for **delta tables** (real-time data that accumulates between imports).
+The orchestrator provides cloud storage backup and restore for both **delta** and **main** tables using Manticore's physical backup tool (`manticore-backup`). Backups are stored as compressed tar.gz archives in S3.
 
 ### How It Works
 
-**Backup:**
-1. Triggers a cron workload that connects to a Manticore replica
-2. Exports delta table data via `mysqldump` (INSERT statements only)
-3. Compresses and uploads to S3 with timestamped filename: `{dataset}_delta-{timestamp}.sql.gz`
+**Backup types:**
 
-**Restore:**
-1. Downloads the selected backup file from S3
-2. Clears existing delta table data
-3. Replays the SQL inserts with cluster prefix for proper replication
+| Type | What's Backed Up | Use Case |
+|------|-----------------|----------|
+| **Delta** | `{table}_delta` RT table | Real-time data accumulated between imports |
+| **Main** | `{table}_main_a` or `{table}_main_b` (active slot) | Full indexed dataset |
 
-> **Note:** Backups only include delta table data. Main table data is re-imported from S3 source files via the import process.
+**Backup process:**
+1. The orchestrator API triggers the backup cron workload via CPLN API
+2. `manticore-backup` creates a physical snapshot of the target table(s)
+3. The archive is compressed and uploaded to S3: `{prefix}/{table}_{type}-{timestamp}.tar.gz`
+
+**Restore process (delta):**
+1. Downloads the backup archive from S3
+2. Truncates the existing delta table
+3. Restores data from the physical backup with cluster replication
+
+**Restore process (main):**
+1. Downloads the backup archive from S3
+2. Restores data into the **inactive** main slot (blue-green)
+3. Rotates the distributed table to point to the restored slot
+4. The previous active slot remains available until the next operation
+
+### Scheduling
+
+Backup schedules are defined in `values.yaml` and managed by the orchestrator API's built-in cron scheduler. The API server evaluates schedules and triggers the backup cron workload automatically.
+
+```yaml
+orchestrator:
+  backup:
+    schedules: [
+      {"table": "addresses", "type": "delta", "schedule": "0 2 * * *"},
+      {"table": "addresses", "type": "main", "schedule": "0 2 1 * *"}
+    ]
+```
+
+Each schedule entry requires:
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `table` | Table name (must match a name in `tables[]`) | `addresses` |
+| `type` | Backup type: `delta` or `main` | `delta` |
+| `schedule` | Cron expression (UTC) | `0 2 * * *` |
+
+The schedules are passed to the API server as the `BACKUP_SCHEDULES` environment variable. When a schedule fires, the API triggers the backup cron workload with the appropriate `TABLE`, `TYPE`, and `ACTION` parameters.
 
 ### Prerequisites
 
@@ -425,10 +463,16 @@ orchestrator:
     s3Policy:
       - my-backup-policy    # IAM policy name from above
     s3Region: us-east-1
-    dataSet: products       # Dataset name (table name without _delta suffix)
-    prefix: manticore-backups
-    schedule: "0 2 * * *"   # Daily at 2am (optional)
-    startSuspended: false
+    dataSet: products             # Default dataset for the backup workload
+    prefix: manticore-backups     # S3 prefix/folder
+    schedules: [                  # Automated backup schedules (optional)
+      {"table": "products", "type": "delta", "schedule": "0 2 * * *"},
+      {"table": "products", "type": "main", "schedule": "0 3 * * 0"}
+    ]
+    activeDeadlineSeconds: 14400  # Max job runtime (default 4 hours)
+    resources:
+      cpu: 1
+      memory: 1Gi
 ```
 
 ### Usage
@@ -436,17 +480,26 @@ orchestrator:
 #### Via Orchestrator UI
 
 1. Navigate to the **Dashboard**
-2. **Backup**: Click "Backup Table" with a selected table to trigger a backup
-3. **Restore**: Click "Restore Table", select a backup file from the list, and confirm
+2. **Backup**: Select a type (delta/main) and click "Backup" to trigger a backup
+3. **Restore**: Select a type (delta/main), click "Restore", choose a backup file from the list, and confirm
+4. **Rotate Main**: After a main restore, use "Rotate Main" to swap the active slot
 
 #### Via API
 
-**Trigger a backup:**
+**Trigger a delta backup:**
 ```bash
 curl -X POST "https://{orchestrator-api-url}/api/backup" \
   -H "Authorization: Bearer {token}" \
   -H "Content-Type: application/json" \
-  -d '{"tableName": "products"}'
+  -d '{"tableName": "products", "type": "delta"}'
+```
+
+**Trigger a main backup:**
+```bash
+curl -X POST "https://{orchestrator-api-url}/api/backup" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"tableName": "products", "type": "main"}'
 ```
 
 **List available backups:**
@@ -460,26 +513,36 @@ curl "https://{orchestrator-api-url}/api/backups/files?tableName=products" \
 curl -X POST "https://{orchestrator-api-url}/api/restore" \
   -H "Authorization: Bearer {token}" \
   -H "Content-Type: application/json" \
-  -d '{"tableName": "products", "filename": "products_delta-2024-01-28T22-50-49Z.sql.gz"}'
+  -d '{"tableName": "products", "type": "delta", "filename": "products_delta-2024-01-28T22-50-49Z.tar.gz"}'
 ```
 
-### API Reference
+**Rotate main table slot (after main restore):**
+```bash
+curl -X POST "https://{orchestrator-api-url}/api/rotate-main" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"tableName": "products"}'
+```
+
+### Backup API Reference
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/backups` | Get active backup operations |
 | GET | `/api/backups/files?tableName={name}` | List backup files for a table |
-| POST | `/api/backup` | Trigger backup for a table's delta |
-| POST | `/api/restore` | Restore a table from backup |
+| POST | `/api/backup` | Trigger backup (`tableName`, `type`: delta/main) |
+| POST | `/api/restore` | Restore from backup (`tableName`, `type`, `filename`) |
+| POST | `/api/rotate-main` | Rotate active main slot after a main restore |
 
-### Clustered Table Considerations
+### Main Table Restore & Slot Rotation
 
-Manticore clustered tables require special handling that the backup/restore process manages automatically:
+Main table restores use the same blue-green slot system as imports:
 
-- **Cluster prefix**: All write operations use `cluster:tablename` format for proper replication
-- **No DROP/CREATE**: Clustered tables cannot be dropped; backups contain only INSERT statements
-- **No TRUNCATE**: Data is cleared via `DELETE FROM table WHERE id > 0`
-- **Single-node writes**: Writes target one replica; data replicates automatically to all nodes
+1. The orchestrator identifies which slot is **inactive** (`main_a` or `main_b`)
+2. The backup is restored into the inactive slot
+3. A call to `/api/rotate-main` updates the distributed table to point to the newly restored slot
+4. Queries are served from the new slot with no downtime
+
+This ensures the cluster remains available during restore operations.
 
 ## Supported External Services
 - [Manticore Search Docs](https://manual.manticoresearch.com/)
